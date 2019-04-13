@@ -4,9 +4,27 @@
 
 ## 常识
 
-Javascript 包括 ECMAScript、DOM、BOM
+Javascript 包括 ECMAScript(核心)、DOM(文档对象模型)、BOM(浏览器对象模型)
+
+ECMAScript 包括 语法、类型、语句、关键字、保留字、操作符及对象等
+
+
 
 API 是应用程序编程接口 (Application Programming Interface) 的缩写。他是包含属性和方法的库，用于操作HTML DOM元素。
+
+
+
+ES6泛指5.1版后的JS的下一代标准，涵盖ES2015/ES2016/ES2017等
+
+
+
+`@bable/polyfill` 由于Bable 是 ES6转码器，但只转换新的 JavaScript 句法，不转换新的 API。如Interator、Genarator、Set、Map、Promise 等
+
+**执行环境**
+
+> 定义了变量或函数有权访问的其他数据，均存在一个变量对象(代码无法访问，但解析器会使用到)中，某个执行环境中所有代码执行完，环境即销毁，内部的变量与定义也销毁
+>
+> 每个函数都有自己的执行环境，执行流进入一个函数时，函数的环境会被推入到下一个环境栈中
 
 
 
@@ -72,6 +90,18 @@ b = ++a  //b=6 a=6
 3. 声明变量是它所在上下文环境的不可配置属性（non-configurable property）（无法被删除），非声明变量是可配置的（例如非声明变量可以被删除）。 
 
 ES5 只有两种声明变量的方法：`var`命令和`function`命令。ES6 除了添加`let`和`const`命令，还有另外两种声明变量的方法：`import`命令和`class`命令。所以，ES6 一共有 6 种声明变量的方法。
+
+`var`
+
+`function`
+
+`let`
+
+`const`
+
+`import`
+
+`class`
 
 
 
@@ -164,6 +194,24 @@ function example() {
 
 
 
+原始值：存在栈（较小的内存区）中，即存在变量访问的位置
+
+undefined、null、boolean、number、string
+
+引用值：存在堆中的对象，即存在变量处是一个指针，指向内存处。因为引用值大小改变，放在栈中会降低查询速度
+
+object
+
+基本类型值不是对象，逻辑上不应有方法，但后台会在读取时做以下处理：
+
+1. 创建 String/Number/Boolean 类型的一个实例
+2. 在实例上调用指定的方法
+3. 销毁这个实例
+
+使用 new 创建的实例在执行流离开当前作用域前一直保存在内存中，而上述自动创建的对象只存在于代码的执行瞬间，然后即被销毁。所以不能为基本类型的值添加属性与方法。
+
+
+
 ###JavaScript 中的假值
 
 1. false
@@ -249,6 +297,11 @@ JavaScript 中数字是双精度64位二进制格式，不区分整数浮点数
 
 
 `isNaN(x)/Number.isNaN(x)`  会尝试将值转换为数字再判断,因此对于被强制转换成功的非数字参数无法判断
+
+对于对象值，首先会调用`valueof()`方法确定返回值是否可以转为数值，若不能，再基于返回值调用`toString()`再测试返回值
+
+
+
 `isFinite()/Number.isFinite()`判断是否为有效数字
 
 上述Number方法与全局方法相比，不会强制将非数值参数转换为数值，只有参数是数值且满足条件才会返回 true
@@ -286,7 +339,7 @@ ES6将全局方法`parseInt/parseFloat`移植到`Number`上，即`Number.parseIn
 
 ####转换规则
 
-**Number()**
+**Number()** 
 
 true\false -- 1\0
 null -- 0
@@ -299,11 +352,13 @@ undefined --NaN
 第一个为数字会继续解析下一个直到结束或遇到非数字字符
 如 '22.5' 会转换为22，因为小数点不是有效的数字字符
 
+若第一个字符非数字或负号即返回NaN
+
 **parseFloat()**
 
 在解析过程中遇到正负号、数字、小数点及 e/E 外的字符会忽略该字符及其以后的所有字符，返回当前已经解析的浮点数,第一个字符不能被解析为数字则返回 NaN
 
-parseInt可以用第二个参数解析其他进制，parseFloat只能解析十进制
+parseInt可以用第二个参数解析其他进制，parseFloat**只能解析十进制**
 
 
 
@@ -416,26 +471,26 @@ Array(3) // [, , ,]
 
 
 
-| 语法                                                     | 描述                                                         |
-| -------------------------------------------------------- | ------------------------------------------------------------ |
-| `array.length`                                           | 数组长度                                                     |
-| `array.slice(begin,end)`                                 | 返回浅拷贝的新数组                                           |
-| ` array[i]`                                              | 下标访问                                                     |
-| `array.push()`                                           | 末尾添加一个或多个元素并返回长度                             |
-| `arr.unshift()`                                          | 头部添加一个或多个元素并返回长度                             |
-| `array.pop()`                                            | 末尾删除最后一个元素并返回该元素                             |
-| `arr.shift()`                                            | 头部删除第一个元素并返回该元素                               |
-| `arr.includes(value[,fromIndex])`                        | 判断一个数组是否包含指定的值                                 |
-| `arr.sort([fun]) / arr.reverse()`                        | 排序与翻转                                                   |
-| `arr.indexof(value[,fromIndex])/lastIndexof()`           | 索引返回索引值,不存在则返回-1                                |
-| `arr.concat(...arr)`                                     | 连接两个以上数组返回新数组，不改变现有数组                   |
-| `arr.join([separator])`                                  | 连接数组元素形成字符串，不改变数组，separator默认`','`       |
-| `arr.splice(index,howmany,items)`                        | 从数组中添加/删除项目并返回被删除的项目（index：添加/删除项目的起始位置；howmany:要删除的项目数量，若为0，则不删除；item1，…… 添加的新项目，可选。返回删除元素形成的数组 |
-| `arr.toString()`                                         | 返回一个包含数组中所有元素的字符串，每个元素通过逗号分隔。   |
-| `arr.toLocalString()`                                    | 根据区域设置，返回一个包含数组中所有元素各自用`toLocalString`转换的字符串，每个元素通过逗号分隔。 |
-| `arr.find(callback[, thisArg])`                          | 返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined。 |
-| `arr.findIndex(callback[, thisArg])`                     | 返回数组中满足提供的测试函数的第一个元素的索引。否则返回-1。 |
-| `arr.fill(val,startPos,endPos)`                          | 用给定值填充数组中指定的起始位置到结束位置间的位置           |
+| 语法                                           | 描述                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| `array.length`                                 | 数组长度                                                     |
+| `array.slice(begin,end)`                       | 返回浅拷贝的**新数组**                                       |
+| ` array[i]`                                    | 下标访问                                                     |
+| `array.push()`                                 | 末尾添加一个或多个元素并返回长度                             |
+| `arr.unshift()`                                | 头部添加一个或多个元素并返回长度                             |
+| `array.pop()`                                  | 末尾删除最后一个元素并返回该元素                             |
+| `arr.shift()`                                  | 头部删除第一个元素并返回该元素                               |
+| `arr.includes(value[,fromIndex])`              | 判断一个数组是否包含指定的值                                 |
+| `arr.sort([fun]) / arr.reverse()`              | 排序与翻转                                                   |
+| `arr.indexof(value[,fromIndex])/lastIndexof()` | 索引返回索引值,不存在则返回-1                                |
+| `arr.concat(...arr)`                           | 连接两个以上数组返回**新数组**，不改变现有数组               |
+| `arr.join([separator])`                        | 连接数组元素形成字符串，不改变数组，separator默认`','`       |
+| `arr.splice(index,howmany,items)`              | 从数组中添加/删除项目并返回被删除的项目（index：添加/删除项目的起始位置；howmany:要删除的项目数量，若为0，则不删除；item1，…… 添加的新项目，可选。返回删除元素形成的数组 |
+| `arr.toString()`                               | 返回一个包含数组中所有元素的字符串，每个元素通过逗号分隔。   |
+| `arr.toLocalString()`                          | 根据区域设置，返回一个包含数组中所有元素各自用`toLocalString`转换的字符串，每个元素通过逗号分隔。 |
+| `arr.find(callback[, thisArg])`                | 返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined。 |
+| `arr.findIndex(callback[, thisArg])`           | 返回数组中满足提供的测试函数的第一个元素的索引。否则返回-1。 |
+| `arr.fill(val,startPos,endPos)`                | 用给定值填充数组中指定的起始位置到结束位置间的位置           |
 | `arr.flat(n)`                                            | 将嵌套的数组拉平'n'层<br/>n可以取`Infinity`作为参数表示不管有多少层嵌套都可以拉平
 数组中有空位（空位不是 undefined，ubdefined 还是有值的）会被 flat 跳过 |
 | `arr.copyWithin(目标索引[, [源开始索引], [结束源索引]])` | 浅复制数组的一部分到同一数组中的另一个位置，并返回它，改变数组但不修改其大小。 |
@@ -508,7 +563,7 @@ ES6则将空位转为 undefined
 
 `array.join()`当某一项为null或undefined时，返回的结果中那项以空字符串显示。
 
-
+`array.join(undefined)`也以`','`作为分隔符
 
 `reverse()`会改变原来的数组，而不会创建新的数组。
 `sort`排序不一定是稳定的。默认排序顺序是根据字符串Unicode码点。数字会先被转换为字符串，所以 "80" 比 "9" 要靠前。
@@ -627,7 +682,16 @@ arguments除了长度之外没有任何数组属性
 **注意事项：**
 
 `x.toString()`转换字符串
-`String(x)` 相比tostring，对 null 和 undefined值强制类型转换可以生成字符串而不引发错误
+
+`toString(num)` 可以带一个参数表示输出数值的基数
+
+`String(x)` 相比tostring，对 null 和 undefined值强制类型转换可以生成字符串而不引发错误，他的转换过程是：
+
+若值有`toString()`方法，则调用此方法
+
+若为 null， 则返回 `'null'`
+
+若为 undefined， 则返回`'undefined'`
 
 
 
@@ -661,7 +725,7 @@ string 也存在` concat` 方法，且不影响原字符串，但性能不如用
 
 > 如果省略 indexEnd，substring 提取字符一直到字符串末尾。
 
-> 如果任一参数小于 0 或为 NaN，则被当作 0。
+> 如果任一参数小于 0 或为 NaN，则被当作 0。两个均为0则返回空字符串
 
 > 如果任一参数大于 `stringName.length`，则被当作 `stringName.length`。
 
@@ -711,6 +775,11 @@ s = 'eric,你好'
 
 `var obj = {}` 
 对象字面量法（同样也有数组字面量）
+
+`var obj = new object()`
+
+构造函数
+
 相对 `new Object`，前者可以立即求值，后者本质是方法调用，需要去原型链遍历寻找
  创建方法还有`new Object()`,` Object.create() `
 
@@ -942,7 +1011,308 @@ Object.defineProperty(o, "conflict", {
 
 
 
+### Symbol
+
+> 表示独一无二的值
+
+对象属性名可以是字符串，也可以是 symbol 类型(不与其他属性名冲突)
+
+`let s = Symbol`
+
+不能用`new`命名，因为 Symbol 是原始类型的值，不是对象，也不能添加属性
+
+
+
+`Symbol('foo')` 接收字符串作为参数用于在控制台显示对`Symbol`实例的描述
+
+若参数是一个对象，会调用 `toString` 方法转为字符串，且参数仅用于描述，两个相同参数的 symbol 也不相等，因为**独一无二！！**
+
+
+
+symbol 值不能与其他类型值进行运算，会报错
+
+可以转为字符串、布尔值，但不可以转为数值
+
+symbol 作为对象属性名时，不能用点运算符，因此定义属性时应该放在方括号内，该属性是公开属性，不是私有属性
+
+`obj = {[s]: function() {}}`
+
+
+
+symbol 作为属性名时，不会出现在`for..in`和`for..of`循环中，也不会被`Object.keys` 、`JSON.stringify()`、`Object.getOwnPropertyNames()`返回
+
+可以用`Object.getOwnPropertySymbols`返回数组、对象的所有 symbol 属性名
+
+也可以用`Reflect.keys`返回所有类型的键名，包括常规键名和 symbol
+
+
+
+`Symbol.for(string)`	搜索有无以该参数为名称的`Symbol`值，有就返回这个值，没有就新建值。且这个生成的新值会被登记在全局(包括 iframe、service worker三类)环境中供搜索
+
+
+
+`Symbol.keyFor()`	返回一个**已登记**的S ymbol 类型的值(即`Symbol.for`生成的)
+
+
+
+**ES6内置 Symbol 值**
+
+1. `Symbol.hasInstance`
+
+   判断该对象是否为某个构造函数的实例，当其他对象使用`instanceof`判断是否为对象实例时，会调用此方法
+
+   ```js
+   foo instanceof Foo => Foo[Symbol.hasInstance](foo)
+   ```
+
+   
+
+2. `Symbol.isConcatSpreadable`
+
+   返回一个布尔值，对象此属性表示用于 concat() 方法时能够展开
+
+   数组的值默认展开(undefined)，为 true 也展开
+
+   对象默认不展开，为 true 才可以展开
+
+   ```js
+   let arr1 = ['c', 'd'];
+   ['a', 'b'].concat(arr1, 'e') // ['a', 'b', 'c', 'd', 'e']
+   
+   let arr2 = ['c', 'd'];
+   arr2[Symbol.isConcatSpreadable] = false;
+   ['a', 'b'].concat(arr2, 'e') // ['a', 'b', ['c','d'], 'e']
+   ```
+
+   
+
+3. `Symbol.species`
+
+   属性指向用来创建派生类对象的构造函数，即：`this.constructor[Symbol.species]`属性存在就会使用这个属性创建对象实例。
+
+   ```js
+   // 扩展 Array 的构造函数
+   class MyArray extends Array {
+     static get [Symbol.species]() { return Array; }
+   }
+   var a = new MyArray(1,2,3);
+   var mapped = a.map(x => x * x);
+   
+   console.log(mapped instanceof MyArray); // false
+   console.log(mapped instanceof Array);   // true
+   ```
+
+   
+
+4. `Symbol.match`
+
+   指向返回匹配字符串的方法
+
+   ```js
+   regexp[Symbol.match](this)
+   // 等价于
+   String.prototype.match(regexp)
+   ```
+
+   
+
+5. `Symbol.replace`
+
+   `Symbol.replace`属性指向替换字符串中子字符串的方法。`String.prototype.replace()`就是调用此方法。
+
+   ```js
+   String.prototype.replace(searchValue, replaceValue)
+   // 等价于
+   searchValue[Symbol.replace](this, replaceValue)
+   ```
+
+   
+
+6. `Symbol.search`
+
+   指向查找子字符串在字符串中位置的方法。`String.prototype.search()`就是调用此方法。
+
+7. `Symbol.split`
+
+   指向字符串分隔的方法。`String.prototype.split()`就是调用此方法。
+
+   ```js
+   String.prototype.split(separator, limit)
+   // 等价于
+   separator[Symbol.split](this, limit)
+   ```
+
+   
+
+8. `Symbol.iterator`
+
+   指向默认的使用的迭代器。即：对象`for...of`循环使用的迭代器。
+
+9. `Symbol.toPrimitive`
+
+   指向将对象转换为原始值时所使用的方法。
+
+   ```js
+   // 对象不使用 Symbol.toPrimitive 属性
+   var obj1 = {};
+   console.log(+obj1);     // NaN
+   console.log(`${obj1}`); // "[object Object]"
+   console.log(obj1 + ""); // "[object Object]"
+   
+   // 对象使用 Symbol.toPrimitive 属性
+   var obj2 = {
+     [Symbol.toPrimitive](hint) {
+       if (hint == "number") {
+         return 10;
+       }
+       if (hint == "string") {
+         return "hello";
+       }
+       return true;
+     }
+   };
+   console.log(+obj2);     // 10      -- hint is "number"
+   console.log(`${obj2}`); // "hello" -- hint is "string"
+   console.log(obj2 + ""); // "true"  -- hint is "default"
+   
+   ```
+
+   
+
+10. `Symbol.toStringTag`
+
+    指向返回对象的描述的字符串值时所使用的方法，即：`Object.prototype.toString()`所使用的方法。
+
+11. `Symbol.unscopables`
+
+    返回一个对象，该对象表示是否会被`with`环境排除的属性。
+
+**魔术字符串**
+
+> 在代码之中多次出现，与代码形成强耦合的某一个具体的字符串或者数值
+
+风格良好的代码应当消除此类，改由含义清晰的变量，比如 symbol
+
+
+
+
+
+
+
+### JSON
+
+简单值： 字符串、数值、布尔值、null(不支持 undefined)
+
+对象
+
+数组
+
+序列化时，值为 undefined 的属性会被跳过并省略
+
+`JSON.stringify(obj, 过滤器, 缩进值)`序列化顺序：
+
+1. 若存在 `toJSON()` 且可获得有效值则调用，否则按默认顺序执行序列化
+2. 若提供第二个参数则传入过滤器的值是第一步返回的值
+3. 对第二步返回的每个值序列化
+4. 若有第三个参数，执行响应格式化
+
 ##运算
+
+### 操作符
+
+**一元操作符**
+
+递增(++)	递减(--)
+
+不仅适用数字，也适用字符、布尔、对象(先转为数值，否则返回NaN)
+
+
+
+**位操作符**
+
+内存中64位的值转为32位，执行操作，再返回64位，前31位表示数值，后1位符号为，0为正，1为负
+
+| 代号           | 符号  | 含义                                   |
+| -------------- | ----- | -------------------------------------- |
+| 按或非操作符   | `~`   | 返回数值反码(操作值负数 - 1)           |
+| 按位与操作符   | `&`   | 将每一位对齐，有0返0，无0返1           |
+| 按位或操作符   | `|`   | 将每一位对齐，有1返1，无1返0           |
+| 按位异或操作符 | `^`   | 将每一个对齐，只有1个1返回1，其余返回0 |
+| 左移           | `<<`  | 不动符号位                             |
+| 右移           | `>>`  | 保留符号位                             |
+| 无符号右移     | `>>>` |                                        |
+
+
+
+**布尔操作符**
+
+非`!`
+
+与`&&`
+
+或`||`
+
+
+
+**乘性操作符**
+
+乘法`*`	
+
+特例： NaN * x = NaN	Infinity * 0 = NaN	Infinity * x = +/- Infinity	Infinity * Infinity = Infinity
+
+除法`/`	
+
+特例：有NaN返回NaN，In/In = NaN，0/0 = NaN，非0/0 = +/- In，Infi /x = +/- In
+
+求余`%`
+
+
+
+**加性操作符**
+
+加法`+`
+
+有NaN返回NaN,In + In = In,In + (-In) = NaN, (+0) + (-0) = +0, (+0) + (+0) = +0,(-0)+(-0) = -0
+
+减法`-`
+
+In - In = NaN, -In-(-In) = NaN, In-(-In) = In,
+
+-In-In=-In,+0 - (+0) = +0, +0 - (-0) = -0, -0 - (-0) = +0
+
+
+
+**关系操作符**
+
+大于小于、大于等于。。。
+
+字符串比较字符编码
+
+大写字母字符编码均小于小写字母
+
+数字与非数字字符(转为NaN)比较，均返回 false
+
+
+
+**相等操作符**
+
+**条件操作符**
+
+function() ? x1 : x2
+
+**赋值操作符**
+
++=、-=、*=、/=、>>=、<<=、>>>=
+
+**逗号操作符**
+
+负数的二进制补码格式存储方式：
+
+1. 转为绝对值二进制
+2. 反码， 0 -> 1, 1 -> 0
+3. 反码 + 1
+
+
 
 ### 算数运算
 
@@ -1296,13 +1666,37 @@ arguments是一个类数组对象，是说它有一个索引编号和Length属�
 
 > JavaScript允许函数嵌套，并且内部函数可以访问定义在外部函数中的所有变量和函数，以及外部函数能访问的所有变量和函数。但是，外部函数却不能够访问定义在内部函数中的变量和函数。这给内部函数的变量提供了一定的安全性。而且，当内部函数生存周期大于外部函数时，由于内部函数可以访问外部函数的作用域，定义在外部函数的变量和函数的生存周期就会大于外部函数本身。当内部函数以某一种方式被任何一个外部函数作用域访问时，一个闭包就产生了。
 
+(内部函数会将外部函数的活动对象添加到它的作用域链中，当返回内部函数时，其作用域链包括外部函数的活动对象和全局变量对象，所以返回函数可以访问外部函数定义的变量，且外部函数执行后它执行环境中的作用域链已销毁，但其活动对象不会销毁，因为返回函数作用域链仍在引用这个活动对象)
+
+**作用**
+
+> 保存自己的私有变量，通过提高的接口方法提供给外部使用，但外部不能直接访问该变量
+
 **原理**
+
+作用域问题
+
+JS垃圾回收机制
 
 > Js 执行函数时会创建一个作用域对象（每次函数执行时都会创建新的特定的作用域对象，且无法被访问），用来保存函数所创建的局部变量。它和被传入的变量一起被初始化。那么当闭包返回一个内部函数时，Js 的垃圾回收器会回收外部函数所创建的作用域对象，但是返回的内部函数却保留一个指向该作用域对象的引用。所以该作用域对象不会被回收，直到指向的引用计数为零。作用域对象组成了一个名为作用域链。闭包就是一个函数和被创建的函数中的作用域对象的组合。
 >
 > JavaScript的函数在查找变量时从自身函数定义开始，从“内”向“外”查找。如果内部函数定义了与外部函数重名的变量，则内部函数的变量将“屏蔽”外部函数的变量。
 
 
+
+内存泄露
+
+因为内部函数始终保存外部函数的活动对象的引用，只要内部函数不被销毁，就不会减少元素的引用数，则其内存永不回收。
+
+
+
+### 作用域链
+
+当某一环境执行时，会创建变量对象的作用域链，以保证对执行环境有权访问的所有变量和函数的有序访问。
+
+作用域链的前端始终是当前执行代码所在环境的变量对象，即 arguments 对象。作用域链中下一个变量对象来自包含环境(上一级外部)，在下一个则来自下一个外部，一直延伸到全局执行环境。
+
+try-catch语句中的 catch 块和 with 语句可延长作用域链
 
 ### 原型链
 
@@ -1584,6 +1978,33 @@ catch (ex) {
 
 ###window 对象
 
+顶层对象：浏览器指 window，Node中指global 对象。
+
+ES5中顶层对象 = 全局变量
+
+全局变量不等于 window 对象。window 对象扮演 ECMAScript 中 Global 对象，全局变量会变成 window 对象的属性。
+
+全局变量不能通过 delete 操作符删除，而直接在 window 上定义的属性可以
+
+直接访问未声明的变量会抛出错误，而查询 window 的属性则不会
+
+`var a = b //抛出错误`	`var a = window.b`
+
+因为用`var`添加的属性有一个`[[configurable]]`特性，默认 false
+
+
+
+但`let`/`const`/`class`等声明的变量不属于顶层对象的属性
+
+```js
+let b = 1;
+window.b //undefined
+```
+
+
+
+
+
 ![看看](http://img.mukewang.com/535483720001a54506670563.jpg)
 `confirm(str)` 弹出对话框（包括str和一个确定按钮和取消按钮，返回bool值
 
@@ -1673,6 +2094,47 @@ prompt("文本","默认值") --  提示框
 
 严格地讲，我们这里的DOM节点是指Element，但是DOM节点实际上是Node，在HTML中，Node包括Element、Comment、CDATA_SECTION等很多种，以及根节点Document类型，但是，绝大多数时候我们只关心Element，也就是实际控制页面结构的Node，其他类型的Node忽略即可。根节点Document已经自动绑定为全局变量document。
 
+
+
+**DOM 0级时间处理程序**
+
+> 将函数赋值给一个事件处理程序属性
+
+`btn.onclick = function() {}`
+
+这是一种元素的方法，所以是在元素作用域中进行
+
+
+
+**DOM 2级事件处理程序**
+
+> 为所有DOM节点定义 addEventListener()/removeEventListener()
+
+相比DOM 0 级好处是可以添加多个事件处理程序
+
+IE中有 attachEvent、detachEvent，只支持冒泡，且 attachEvent()会在全局作用域中运行，为同一对象添加不同事件，会以相反顺序被触发
+
+
+
+**DOM级别**
+
+**DOM1级**
+
++ DOM核心	规定如何映射XML的文档结构，以便访问操作
++ DOM HTML     在此基础上扩展添加针对HTML的方法
+
+**DOM2级**
+
+扩充鼠标、用户界面事件、范围等细节模块，增加对 CSS 的支持
+
+还定义DOM视图、DOM事件、DOM样式、DOM遍历和范围的接口
+
+**DOM3级**
+
+支持XML 1.0规范，引入以同一方式加载保存文档的方法
+
+
+
 ### 查找元素
 
 使用 `document.querySelector(选择器)`
@@ -1686,6 +2148,8 @@ prompt("文本","默认值") --  提示框
 返回的是一个`NodeList`,类似数组的对象
 
 
+
+`querySelectorall`返回的是一组元素快照，而非动态查询，而 getElementByClass 不是，因为若要循环并添加删除时用前者
 
 ### 操作元素（创建，删除，修改）
 
@@ -1708,6 +2172,10 @@ pwd.remove()
 pwd.parentElement.removeChild(pwd)
 
 ```
+
+在创建DOM节点时， innerTHML 比 appendChild 在较大的更改中快速的多
+
+因为 innerHTML 会在后台创建HTML解析器，再用内部DOM调用来创建，而内部方法是用 C+之类方法编译好的，而不是 JavaScript 解释执行
 
 ### 添加事件
 
@@ -1909,6 +2377,9 @@ textInput和keypress稍有不同，任何可获得焦点元素都可以触发key
 （var 的作用域是函数！不是 if 之类的语句块）
 
 let（const）将不会提升变量到代码块的顶部。
+
+`let`不允许在相同作用域内，重复声明同一个变量。
+
 ```javascript
 for(let i = 0; i < 3; l; i++) {
    log(i)
@@ -1941,12 +2412,55 @@ for (let i = 1; i <= 5; i++) {
 
 
 
+**暂时性死区（temporal dead zone，简称 TDZ）**
+
+> 只要块级作用域内存在`let`命令，它所声明的变量就“绑定”（binding）这个区域，不再受外部的影响。
+
+ES6 明确规定，如果区块中存在`let`和`const`命令，这个区块对这些命令声明的变量，从一开始就形成了封闭作用域。凡是在声明之前就使用这些变量，就会报错。
+
+
+
+代码块内，使用`let`声明变量前，该变量都是不可用的，即使之前有重名的全局变量
+
+**本质：**只要一进入当前作用域，所要使用的变量就已经存在了，但是不可获取，只有等到声明变量的那一行代码出现，才可以获取和使用该变量。
+
+```js
+var a = 123;
+if(true) {
+  a = '123'; //Reference Error
+  let a
+}
+
+typeof x; // ReferenceError
+let x;
+//在let命令声明变量a之前，都属于变量a的“死区”。
+
+function bar(x = y, y = 2) {
+  return [x, y];
+}
+
+bar(); // 报错
+//参数x默认值等于另一个参数y，而此时y还没有声明，属于“死区”。如果y的默认值是x，就不会报错，因为此时x已经声明了。
+```
+
+
+
 ### const
 
 > 用来声明一个不可赋值的变量
 > 变量的值只能在声明的时候赋予
 > 当常量是一个对象时，对象的属性并不在保护的范围内，可以修改属性值，但不可以修改 key
 > 当常量是一个数组时，可以继续填充数据
+
+**本质**
+
+`const`实际上保证的，并不是变量的值不得改动，而是变量指向的那个内存地址所保存的数据不得改动。对于简单类型的数据（数值、字符串、布尔值），值就保存在变量指向的那个内存地址，因此等同于常量。但对于复合类型的数据（主要是对象和数组），变量指向的内存地址，保存的只是一个指向实际数据的指针，`const`只能保证这个指针是固定的（即总是指向另一个固定的地址）
+
+
+
+const 不能只声明不赋值，会报错
+
+const 也存在暂时性死区
 
 ```javascript
 const a = 1
@@ -2130,6 +2644,19 @@ obj.getAge(); // 25
 `super `关键字用于调用一个对象的父对象上的函数。
 
 Class声明不可以提升
+
+静态方法与非静态方法可以重名
+
+
+
+表达式
+
+```js
+const A = class B {}
+//其中B只在 class 内部有定义，A在外部引用
+```
+
+
 
 ```javascript
 super([arguments]); 
@@ -2328,6 +2855,72 @@ foo(1, 2, 3, 4)
 
 
 
+如果要将一个已经声明的变量用于解构赋值，必须非常小心。
+
+```js
+// 错误的写法
+let x;
+{x} = {x: 1};
+// SyntaxError: syntax error
+//因为 JavaScript 引擎会将{x}理解成一个代码块，从而发生语法错误。只有不将大括号写在行首，避免 JavaScript 将其解释为代码块，才能解决这个问题。
+({x} = {x: 1});
+```
+
+
+
+解构赋值允许指定默认值
+
+不过ES6用`'==='`来判断位置是否有值，因此要求数组成员**严格等于**undefined，默认值才会生效
+
+```js
+let [x, y = 'b'] = ['a', undefined] //[a,b]
+let [x = 1] = [null] //x 为 null
+```
+
+
+
+数组解构按次序排列，取值由位置决定
+
+对象不存在次序，因此变量必须与属性名同名才能取值
+
+
+
+对象赋值实际：
+
+```js
+let {foo: foo; bar:bar} = {'foo': 'aaa', bar: 'bbb'}
+//第一个 foo 为 匹配模式， 第二个 foo 是变量
+//赋值的是变量，而不是匹配模式
+
+let {foo: baz} = {foo: 'aaa'}
+//baz => 'aaa'
+//foo => is not defined
+```
+
+
+
+字符串也可以解构赋值
+
+```js
+const [a, b, c, d, e] = 'hello';
+a // "h"
+b // "e"
+c // "l"
+let {length : len} = 'hello';
+len // 5
+```
+
+
+
+数值和布尔值，则会先转为对象。
+
+解构赋值的规则是，只要等号右边的值不是对象或数组，就先将其转为对象。由于`undefined`和`null`无法转为对象，所以对它们进行解构赋值，都会报错。
+
+```javascript
+let { prop: x } = undefined; // TypeError
+let { prop: y } = null; // TypeError
+```
+
 ### export & import
 
 从给定的文件 (或模块) 中导出函数，对象或原语。
@@ -2372,6 +2965,337 @@ class Module {
 
 
 
+### Proxy
+
+> 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。
+
+```js
+var proxy = new Proxy(target, handler)
+handler: {
+  get(target, propKey, receiver) //拦截读取
+  set(target, propKey, value, receiver)	//设置值
+  has(target, propKey) //拦截 propKey in proxy 返回布尔值
+  deleteProperty(target, propKey)	//拦截 delete ，返回布尔值
+  ...
+}
+//receiver，指的是原始的操作行为所在的那个对象，一般情况下是proxy实例本身
+```
+
+
+
+### Reflect
+
+> 用于操作对象
+
+`Reflect`对象的设计目的：
+
+1. 将`Object`对象的一些明显属于语言内部的方法（比如`Object.defineProperty`），放到`Reflect`对象上。现阶段，某些方法同时在`Object`和`Reflect`对象上部署，未来的新方法将只部署在`Reflect`对象上。也就是说，从`Reflect`对象上可以拿到语言内部的方法。
+2.  修改某些`Object`方法的返回结果，让其变得更合理。比如，`Object.defineProperty(obj, name, desc)`在无法定义属性时，会抛出一个错误，而`Reflect.defineProperty(obj, name, desc)`则会返回`false`。
+3. 让`Object`操作都变成函数行为。某些`Object`操作是命令式，比如`name in obj`和`delete obj[name]`，而`Reflect.has(obj, name)`和`Reflect.deleteProperty(obj, name)`让它们变成了函数行为。
+4. `Reflect`对象的方法与`Proxy`对象的方法一一对应，只要是`Proxy`对象的方法，就能在`Reflect`对象上找到对应的方法。这就让`Proxy`对象可以方便地调用对应的`Reflect`方法，完成默认行为，作为修改行为的基础。也就是说，不管`Proxy`怎么修改默认行为，你总可以在`Reflect`上获取默认行为。
+
+
+
+### Promise
+
+获取异步操作的消息
+
+特点：
+
+1. 对象的状态不受外界影响，三种状态：pending、fulfilled、rejected。只有异步操作的结果才可以决定当前是哪种状态
+2. 一旦状态改变，就不会再改变。只有两种可能。由 pending 转变为 fulfilled 或者 rejected。等情况发生，状态就凝固(resolved)，不会再发生变化，且一直保持这个结果，任何时候都可以读取
+
+```js
+const promise = new Promise(function(resolve, reject) {
+  if() {resolve(value)} else {reject(error)}
+})
+//resolve 函数作用：将 promise 对象状态从 pending 改为 resolved，并将结果作为参数传递
+//reject 作用：从 pending 改为 rejected，并将错误传递出去
+```
+
+
+
+```js
+promise.then(function(val) {...}, function(err) {...})
+
+```
+
+then接收两个参数，前者为 resolved 下调用，后者在 rejected 下调用，且可选
+then 指定的回调函数将在当前脚本**所有同步任务**执行完才会执行
+
+then返回的是一个新promise实例
+
+调用 resolve 或 rejected 并不会终结函数的执行，除非 return resolve()
+
+
+
+`catch`是`.then(null, rejection)`的别名
+
+`finally()`无论状态如何都会执行(ES2018引入)
+
+
+
+`Promise.all([p1,p2,p3])`
+
+ 将多个 promise 实例包装成新实例
+
+参数可以不是数组，但必须具有Iterator接口，返回每个成员均为 promise 实例
+
+当p1,p2,p3均为 fulfilled 时，P才会变成 fulfilled
+
+当有一个 rejected，P就会变成 rejected，且第一个被 rejected 的实例的返回值会传给P的回调函数
+
+若参数里的实例定义了 catch 方法，那么 rejected 后并不会触发`all()`的 catch 方法。因为实例的 catch 方法返回的是新 promise 实例，该实例执行完 catch 也会变成 resolved，因此 `promise.all`实例都会 resolved，不会触发 all 的 catch 方法
+
+
+
+`Promise.race([p1, p2, p3])`
+
+P1,P2,P3有一个率先改变状态，P就会立即发生改变，并将率先改变的实例的返回值传给回调
+
+
+
+`Promise.resolve()`	将对象转为 promise 对象
+
+`Promise.reject()`	生成返回状态为 rejected 的 promise 实例
+
+
+
+### Iterator
+
+> 为各种数据结构提供一个统一、简便的访问接口，使数据结构成员能按某种次序排列，供`for..of`消费
+
+(对象没有 iterator 接口，就在于对象遍历时顺序是不一定的)
+
+创建一个指针对象(本质)，指向当前数据结构起始位置
+
+不断调用 next 方法，指向数据结构的下一个成员，直到结束位置
+
+
+
+结构具有Symbol.iterator属性，会返回带 next 方法的遍历器对象
+
++ Array
+
++ Map
+
++ Set
+
++ String
+
++ TypedArray
+
++ 函数 arguments 对象
+
++ NodeList 对象
+
+  `let iter = arr[Symbol.iterator]()`	
+
+  `iter.next()`
+
+扩展运算符`…`会调用默认的Iterator接口
+
+也就是说，只要结构部署了Iterator接口，即可用`…`转为数组
+
+
+
+### Generator
+
+> 一个状态机，封装了多个内部状态，会返回一个遍历器对象
+
+形式上，Generator 函数是一个普通函数，但是有两个特征。一是，`function`关键字与函数名之间有一个星号；二是，函数体内部使用`yield`表达式，定义不同的内部状态
+
+```javascript
+function* ge() {
+  yield 'test';
+  return '88';
+}
+
+var hw = ge();
+```
+
+调用 generator 函数后，并不立即执行，仅返回一个指向内部状态的指针对象，通过调用对象的 next 方法，使指针指向下一个状态
+
+**分段执行**。`yield`是暂停执行的标记，而`next`是恢复执行的标记
+
+执行结束以后可以继续调用`next()`。不过始终返回`{value: undefined, done: true}`。若函数没有 return 语句，则最后返回的 value 也为 undefined
+
+
+
+Generator 函数也不能跟`new`命令一起用，会报错。因为他不是构造函数
+
+**注意**
+
+`yield`不能再普通函数中使用
+
+`yield`若在另一个表达式中，必须放在圆括号内
+
+```javascript
+function* demo() {
+  console.log('Hello' + yield); // SyntaxError
+  console.log('Hello' + yield 123); // SyntaxError
+
+  console.log('Hello' + (yield)); // OK
+  console.log('Hello' + (yield 123)); // OK
+}
+```
+
+`yield`表达式后面的表达式，只有当调用`next`方法、内部指针指向该语句时才会执行。**惰性求值**
+
+```js
+function* gen() {
+  yield  123 + 456;
+  //表达式123 + 456，不会立即求值，只会在next方法将指针移到这一句时，才会求值。
+}
+```
+
+
+
+`yield`表达式本身没有返回值(总返回 undefined)
+
+`next()`方法可以带一个参数，用于当做上一个 yield 表达式的返回值。可以用于调整函数行为。不过第一次使用 next 方法时传参无效
+
+```javascript
+function* foo(x) {
+  var y = 2 * (yield (x + 1));
+  var z = yield (y / 3);
+  return (x + y + z);
+}
+
+var a = foo(5);
+a.next() // Object{value:6, done:false}
+a.next() // Object{value:NaN, done:false}
+a.next() // Object{value:NaN, done:true}
+
+var b = foo(5);
+b.next() // { value:6, done:false }
+b.next(12) // { value:8, done:false }
+b.next(13) // { value:42, done:true }
+```
+
+`yield`表达式与`return`语句既有相似之处，也有区别。相似之处在于，都能返回紧跟在语句后面的那个表达式的值。区别在于每次遇到`yield`，函数暂停执行，下一次再从该位置继续向后执行，而`return`语句不具备位置记忆的功能。一个函数里面，只能执行一次（或者说一个）`return`语句，但是可以执行多次（或者说多个）`yield`表达式。正常函数只能返回一个值，因为只能执行一次`return`；Generator 函数可以返回一系列的值，因为可以有任意多个`yield`。
+
+
+
+使用`for..of`循环Generator函数时，一旦 next 返回对象的 done 属性为 true，循环就会终止，且不包含该返回对象，所以最后的 return 的返回值不包括在循环之中
+
+```javascript
+function* foo() {
+  yield 1;
+  yield 2;
+  return 3;
+}
+
+for (let v of foo()) {
+  console.log(v);
+}
+// 1 2 
+```
+
+
+
+`generator.return(val)`可以返回一个给定的 value 值，并终结Generator函数，无 val 参数则为 undefined
+
+
+
+`generator.throw()`抛出一个错误
+
+`next()`、`throw()`、`return()`这三个方法本质上是同一件事，可以放在一起理解。它们的作用都是让 Generator 函数恢复执行，并且使用不同的语句替换`yield`表达式。
+
+
+
+`yield*`表达式用于在Generator函数内部调用另一个Generator函数
+
+```javascript
+function* foo() {
+  yield 'a';
+  yield 'b';
+}
+
+function* bar() {
+  yield 'x';
+  foo();	//无效
+  yield 'y';
+}
+
+function* bar() {
+  yield 'x';
+  yield* foo();
+  yield 'y';
+}
+
+// 等同于
+function* bar() {
+  yield 'x';
+  yield 'a';
+  yield 'b';
+  yield 'y';
+}
+// 等同于
+function* bar() {
+  yield 'x';
+  for (let v of foo()) {
+    yield v;
+  }
+  yield 'y';
+}
+```
+
+
+
+Generator 函数总是返回一个遍历器，ES6 规定这个遍历器是 Generator 函数的实例，也继承了 Generator 函数的`prototype`对象上的方法。
+
+```javascript
+function* g() {}
+
+g.prototype.hello = function () {
+  return 'hi!';
+};
+
+let obj = g();
+
+obj instanceof g // true
+obj.hello() // 'hi!'
+//Generator 函数g返回的遍历器obj，是g的实例，而且继承了g.prototype。但是，如果把g当作普通的构造函数，并不会生效，因为g返回的总是遍历器对象，而不是this对象。
+```
+
+
+
+### async
+
+> Generator 函数的语法糖。
+
+特点：
+
+内置执行器，无需调用 next，自动执行
+
+语义更好，适用性广
+
+返回值是 promise，可用 then 指定下一步操作，而G返回的是Iterator对象
+
+
+
+`async`函数返回一个 Promise 对象，可以使用`then`方法添加回调函数。当函数执行的时候，一旦遇到`await`就会先返回，等到异步操作完成，再接着执行函数体内后面的语句。只有`async`函数内部的异步操作执行完，才会执行`then`方法指定的回调函数。
+
+
+
+任何一个 await 语句后 promise 对象变成 reject 状态，整个 async 函数会中断执行，所以最好把 await 放在`try..catch`中
+
+```javascript
+async function f() {
+  await Promise.reject('出错了');
+  await Promise.resolve('hello world'); // 不会执行
+}
+
+async function f() {
+  try {
+    await Promise.reject('出错了');
+  } catch(e) {
+  }
+  return await Promise.resolve('hello world');
+}
+```
+
 ##this 作用域
 
 this是一个动态作用域，总是指向调用该方法的对象。改变其指向的方法有：
@@ -2412,6 +3336,16 @@ bind要调用和传参数，需要额外加括号 log.bind(console)(1,2,3  )
 ```
 
 
+
+构造函数中的 this，和普通函数一样指向 window
+
+函数作为对象的属性，且作为对象的属性调用时，指向对象
+
+上述函数被赋值给另一个变量，则 this 指向 window
+
+bind，apply，call
+
+在原型链的每个阶段的 prototype 中。this 也指向当前值
 
 ## 内存分配
 
@@ -2592,6 +3526,56 @@ Second Autoprefixer control comment was ignored. Autoprefixer applies control co
 
 
 
+### 尾调用
+
+> 函数**最后一步**是调用另一个函数
+
+```js
+function A {
+	let y = g(x);
+	return y
+}
+function B {
+  return g(x) + 1
+}
+function C {
+	g(x)
+}
+//这三个均不属于尾调用，function c 相当于 return undefined
+```
+
+尾调用优化
+
+函数调用会在内存形成**调用帧**，保存调用位置和内部变量等，若A调用B，在A的调用帧上回形成B的调用帧，直到B运行结束，将结果返回A，B的调用帧才会结束。
+
+而尾调用由于是最后一步，所以不需要保留外层函数的调用帧，因为调用位置、内部变量均**不再用到**。因此只要用内部函数调用帧取代外层函数调用帧即可。这种做法可节省内存
+
+
+
+### 函数节流
+
+某些代码不可以在没有间断的情况连接重复执行
+
+第一次调用函数时创建一个定时器，在指定时间间隔后运行代码。当第二次调用时，清除前一次的定时器，并设置另一个
+
+常见情况：可以防止 resize 事件高频发生更改
+
+```js
+var process = {
+  timeoutId: null,
+  function A: {},
+    function B: {
+      clearTimeout(this.timeoutId);
+      let that = this;
+      this.timeoutId = setTimeout(function() {
+        that.function A();
+      }, 100)
+    }
+}
+```
+
+
+
 ### 上下文
 
 >  JavaScript 代码运行时，会产生一个全局的上下文环境（context，又称运行环境），包含了当前所有的变量和对象。然后，执行函数（或块级代码）的时候，又会在当前上下文环境的上层，产生一个函数运行的上下文，变成当前（active）的上下文，由此形成一个上下文环境的堆栈（context stack）。
@@ -2694,6 +3678,42 @@ encodeURIComponent()
 为了避免服务器收到不可预知的请求，对任何用户输入的作为URI部分的内容你都需要用encodeURIComponent进行转义。比如，一个用户可能会输入`Thyme &time=again`作为comment变量的一部分。如果不使用encodeURIComponent对此内容进行转义，服务器得到的将是comment=Thyme%20&time=again`。请注意，"&"符号和"="符号产生了一个新的键值对，所以服务器得到两个键值对（一个键值对是comment=Thyme，另一个则是time=again），而不是一个键值对。所以，对于 application/x-www-form-urlencoded (POST) 这种数据方式，空格需要被替换成 '+'，所以通常使用 encodeURIComponent 的时候还会把 "%20" 替换为 "+"。
 
 
+
+### 跨域
+
+**JsonP**
+
+**CORS** Access-Control-Allow-origin
+
+**FLASH**
+
+
+
+### cookies
+
+由服务器端生成的为辨别用户身份进行追踪、发送给浏览器并储存在用户本地终端上的数据，有一定的生存周期
+
+Set cookie
+
+Name: value
+
+Expires 失效时间
+
+Domain 域
+
+path 路径
+
+secure 安全标志， 只能在 https 下发送 cookie
+
+**浏览器内核**
+
+webkit
+
+Trident	(IE)
+
+Gecko	(firefox)
+
+Presto (opera)
 
 ##模块
 
@@ -2996,3 +4016,247 @@ CommonJS 的一个模块，就是一个脚本文件。require命令第一次加�
 }
 ```
 一旦出现某个模块被"循环加载"，就只输出已经执行的部分，还未执行的部分不会输出。
+
+
+
+## 页面优化
+
++ 合并 js, css
++ 用 css sprites
++ 压缩文本图片等
++ 延迟显示可见区域外内容，懒加载
++ 让部分图片按钮等关键信息优先加载
++ 精简代码
++ ajax 异步更新
++ 缓存
+
+
+
+## 框架
+
+### MVVM
+
+View
+
+Model
+
+View Model
+
+双向绑定
+
+### MVC
+
+View 视图
+
+Model 模型
+
+Controller 控制器
+
+###MCP
+
+View
+
+Model
+
+Presenter
+
+
+
+
+
+## Js设计模式
+
+单例模式
+
+> 产生一个类的唯一实例，用来划分命名空间并将属性、方法组织在一起的对象，用一个变量标识是否被实例化
+
+
+
+观察者模式(发布者-订阅者模式)
+
+>对象间一对多的关系，让多个观察者可以同时监听某一个对象，当对象发生改变时，所有依赖于他的对象都可以得到通知
+
+
+
+模块模式
+
+> 为单体模式添加私有变量，私有方法来减少全局变量的使用
+
+
+
+代理模式
+
+> 本体注重自身代码的实现，而代理负责控制对本体对象的访问，控制以及实例化
+
+### 创建对象
+
+1. 工厂模式
+
+   根据接收的参数构建一个包含信息的对象，可创建多个相似对象，但无法识别对象类型
+
+   ```js
+   function createP(name, age, job) {
+     var o = new Object();
+     o.name = name;
+     o.job = job;
+     return o
+   }
+   ```
+
+2. 构造函数模式
+
+   ```js
+   function P(name) {
+     this.name = name;
+   }
+   let b = new P();
+   ```
+
+   缺点：构造函数中的每个方法，都需要在实例中重建一遍，则会产生不同的F unction 实例，导致不同作用域链与标识符解析
+
+3. 原型模式
+
+   由于 prototype 属性指向包含所有实例共享的属性与方法，因此直接将信息添加到原型对象中
+
+   ```js
+   function P() {
+     person.prototype.sayName = function() {...}
+   }
+     //this.name 与 prototype.name 不同
+     //前者是建立每个实例的 name 属性，后者使所有实例都访问同一个属性
+   ```
+
+   构造函数不等于原型对象
+
+   构造函数P	原型对象P.prototype	实例P1,P2
+
+   P.prototype指向原型对象 P.prototype，而原型对象的 constructor 指向P
+
+   而P1,P2内部属性均执行P.prototype，与P无直接关系
+
+   原型模式的缺点在于共享，在一个实例中修改属性也会影响另一个实例，而且当包含引用类型时也会有问题
+
+4. 组合使用构造函数与原型模式
+
+   构造函数用于定义实例属性，原型模式用于定义方法与共享属性
+
+5. 动态原型模式
+
+   将原型模式用if 语句应用到构造函数中
+
+   ```js
+   function P(name, job) {
+   	this.name = name;
+     ...
+     if(typeof this.sayName != 'function') {
+       P.prototype.sayName = function() {..};
+     }
+     //仅在初次调用构造函数时才会执行
+   }
+   ```
+
+6. 寄生构造函数模式
+
+   在构造函数中应用工厂模式，可用于创建一个具有额外方式的数组
+
+   此类返回的对象与构造函数及原型无关系
+
+   ```js
+   function P(name,..) {
+     let o = new Object();
+     o.name = name;
+     return o
+   }
+   ```
+
+7. 稳妥构造函数模式
+
+### 继承
+
+依据原型链
+
+1. 借用构造函数
+
+   在子类构造函数内部用 apply、call 调用超类构造函数
+
+   ```js
+   function sub() {
+     sup.call(this, val)
+   }
+   ```
+
+   缺点：超类方法对于子类未知，且方法均在构造函数中定义，函数无法复用
+
+2. 组合继承
+
+   原型链实现对原型属性、方法的继承，构造函数实现对实例属性的继承
+
+   ```js
+   function SuperType(name){
+       this.name = name;
+       this.colors = ['red','blue','green'];    
+   }
+   
+   SuperType.prototype.sayName = function(){
+       alert(this.name);
+   }
+   
+   function SubType(name,age){   
+       SuperType.call(this,name);     //第二次调用SuperType() 
+       this.age = age;
+   }
+   SubType.prototype = new SuperType();    //第一次调用SuperType()
+   SubType.prototype.constructor = SubType;  
+   SubType.prototype.sayAge=function(){
+        alert(this.age);
+   };
+   
+   var instance = new SubType('Greg',39);     //调用SubType构造函数，重写原型属性
+   instance.colors.push('black');      //重写原型属性
+   ```
+
+3. 原型式继承
+
+   创建临时性构造函数，将传入对象 o 作为原型，最后返回新实例，相当于对o的浅复制
+
+   ```js
+   function object(o) {
+     function F() {}
+     F.prototype = o;
+     return new F()
+   }
+   ```
+
+4. 寄生式继承
+
+   创建一个封装继承过程的函数。
+
+   ```js
+   function create(o) {
+     var clone = object(o);
+     clone.attr = function() {}
+     return clone
+   }
+   //基于 o 创建新对象，不仅有 o 的属性方法，也有自己的 attr 方法
+   ```
+
+5. 寄生组合式继承
+
+   借用构造函数继承属性，通过原型链的形式继承方法
+
+   ```js
+   function inheritPrototype(subType,superType){
+       var prototype = object(superType.prototype);    //创建对象
+       prototype.constructor = subType;    //增强对象
+       subType.prototype = prototype;    //指定对象
+   }
+   此函数接收两个参数，子类构造函数和超类构造函数。函数内部，第一步创建超类原型对象的一个副本，第二步为副本添加constructor属性，使其指向subType，弥补因为重写原型而失去默认的constructor属性。最后一步，将副本赋值给子类型的原型。整个过程说的简单点，就是将超类原型对象的一个副本复制给子类的原型对象。这样一来就可以避免继承超类的实例属性，也就是避免了在子类原型对象上创建多余的属性了。
+   ```
+
+   
+
+## 编码相关
+
+**ASCII码**
+
+**Unicode**

@@ -430,6 +430,26 @@ class选择器   .class{}
 
 
 
+标签选择器
+
+id/class选择器
+
+多元素选择器
+
+后代选择器
+
+子元素选择器
+
+毗邻选择器
+
+属性选择器
+
+伪类选择器
+
+伪元素选择器
+
+
+
 ##元素定位 Position
 
 position: static;fixed;relative;absolute
@@ -463,6 +483,12 @@ padding和margin在设置时，采用上右下左（top,right,bottom,left）
 
 
 
+Box-sizing: content-box; border-box
+
+元素宽度是否包含边框及内边距
+
+
+
 ##布局模型：
 1、流动模型（Flow） 即普通的状态，块元素自上而下分布，各占一行；内联元素都会在所处的包含元素内从左到右水平分布
 
@@ -483,7 +509,7 @@ padding和margin在设置时，采用上右下左（top,right,bottom,left）
 
    ```css
    .clearfix:after {
-   	content: ".";
+   	content: " ";
    	height: 0;
    	visibility: hidden;
      display: block;
@@ -518,18 +544,36 @@ BFC能清理浮动主要运用的是它的布局规则：
 
 ##伪类
 
+引入伪类和伪元素概念是为了格式化文档树以外的信息。也就是说，伪类和伪元素是用来修饰不在文档树中的部分
+
 ###锚伪类
 :link | :visited | :hover | :active
+
+伪类用于当已有元素处于的某个状态时，为其添加对应的样式，这个状态是根据用户行为而动态变化的。
+
+
+
 在 CSS 定义中，a:hover 必须位于 a:link 和 a:visited 之后，，a:active 必须位于 a:hover 之后这样才能生效！
+
+
 
  **:first-child 伪类**
  **:lang 伪类**
 
 ###伪元素
+
+伪元素用于创建一些不在文档树中的元素，并为其添加样式。
+
+规范中的要求使用双冒号(::)表示伪元素
+
+
+
 **:first-line** 向文本的首行设置特殊样式，只能用于块级元素。
 **:first-letter** 向文本的首字母设置特殊样式
 **:before | :after**
+
 在元素的内容前面插入新内容。内容
+
 ```css
 h1:before {
   content:url(logo.gif);
@@ -820,11 +864,14 @@ rotate3d(x,y,z,angle)   以下均有rotateX()同类
 translate3d(x,y,z)
 scale3d(x,y,z)
 
+
+
 **动画/过渡**
 
 过渡：改变的属性+时间
 transition:  width 2s, height 2s, transform 2s;
 具体属性：
+
 transition-property 属性的名称
 transition-duration 过渡完成时长(必须用，默认0则无效果)
 transition-timing-function  效果的速度曲线（比如匀速等）
@@ -891,6 +938,14 @@ DOM的appendChild()方法可以将一个选项框中的选项从父节点中移�
 
 
 
+**渐变**
+
+渐变 gradient
+
+线性 linear
+
+径向 radial
+
 ### 常用方法
 
 `font-weight:bold` 粗体
@@ -948,3 +1003,73 @@ retina 屏，相应倍率@2x，@3x
 
 }
 ```
+
+
+
+## CSS hack
+
+不同浏览器对 css 支持解析不同，为获得统一的页面效果，针对不同浏览器写特定的样式
+
+优雅降级：一开始构建完整功能，再针对低版本浏览器进行兼容
+
+渐进增强：针对低版本先构建页面，再针对高级浏览器追加效果
+
+
+
+**条件注释法**
+
+`<!-- [if IE]> content <![endif -->`
+
+`[if IE 6]`	`[if !IE8]` IE8不生效
+
+`[if gte IE6]` `<![endif]—>`	只在IE6以上版本生效
+
+
+
+**属性前缀法**
+
+*color
+
++color
+
+-color
+
+_color
+
+color: red \0
+
+\9 : IE6 - IE10都支持
+
+-和_：仅IE6支持
+
+*：IE6 IE7支持
+
+\0：IE8 IE9支持
+
+\9\0：IE8部分支持，IE9支持
+
+
+
+
+
+**选择器前缀法**
+
+*html  仅IE6
+
+*+html 仅IE7
+
+@media screen\9{...}只对IE6/7生效
+@media \0screen {body { background: red; }}只对IE8有效
+@media \0screen\,screen\9{body { background: blue; }}只对IE6/7/8有效
+@media screen\0 {body { background: green; }} 只对IE8/9/10有效
+@media screen and (min-width:0\0) {body { background: gray; }} 只对IE9/10有效
+
+**link和@import区别**
+
+1. link 是 XHTML标签，除了加载 css 外，还可以定义其他事务
+
+@import 只能加载 css
+
+2. link 在页面载入时同时加载，@import 需页面网页完全载入后再加载
+3. link 是XHTML标签，无兼容问题，@import 低版本不支持
+4. link 支持 JavaScript 控制DOM改变样式，@import 不支持
