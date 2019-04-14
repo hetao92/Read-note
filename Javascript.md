@@ -4036,13 +4036,13 @@ CommonJS 的一个模块，就是一个脚本文件。require命令第一次加�
 
 ### MVVM
 
-View
+View	视图
 
-Model
+Model	模型
 
-View Model
+View Model	视图模型
 
-双向绑定
+*视图模型*是暴露公共属性和命令的视图的抽象。MVVM没有MVC模式的控制器，也没有MVP模式的presenter，有的是一个*绑定器*。在视图模型中，绑定器在视图和[数据绑定器](https://zh.wikipedia.org/w/index.php?title=%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A%E5%99%A8&action=edit&redlink=1)之间进行通信。
 
 ### MVC
 
@@ -4058,9 +4058,9 @@ View
 
 Model
 
-Presenter
+Presenter	
 
-
+包含着组件的事件处理，负责检索 Model 获取数据，和将获取的数据经过格式转换与 View 进行沟通。
 
 
 
