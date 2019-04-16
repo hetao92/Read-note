@@ -582,6 +582,8 @@ h1:before {
 
 
 
+Text-transform:capitalize 首字母大写
+
 ## 居中对齐
 
 **块状元素**
@@ -803,6 +805,16 @@ h1:before {
 
 
 ## 文本省略
+
+text-overflow: ellipsis;
+
+1. 块级元素
+2. overflow: hidden; // 也有说非visible
+3. width: 具体值，非auto
+4. white-space: nowrap;
+5. overflow确实是`非visible`，但是，是计算值，并不是设定值。因为CSS里有个叫`inherit`的关键字。
+6. 元素宽度，而不是width，比如，max-width，以及厉害的flex布局也是可以的。
+7. white-space: pre; 也是可以的，这个属性的设定主要是为了`不折行`，`pre`也是可以达到目的。
 
 ```css
 /*底部 padding必须为 0 ，否则多余字会露出来*/
