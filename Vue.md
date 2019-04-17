@@ -225,6 +225,42 @@ new Vue({
 
 
 
+## 生命周期
+
+**beforeCreate**
+
+**created**
+
+> 完成数据观测、属性和方法的运算，初始化事件，$el属性还未显示出来
+
+**beforeMount**
+
+> 编译模板，把data 里面的数据和模板生成 html，但尚未挂载
+
+**mounted**
+
+> 用编译好的 HTML 内容替换 el 属性指向的DOM对象，完成渲染，并进行 ajax 交互
+
+**beforeUpdate**
+
+> 数据更新前调用，发生在虚拟 dom重新渲染和打补丁之前，可以在狗子中进一步更改状态，不会触发附加的重渲染过程
+
+**updated**
+
+> 在数据更改导致的虚拟DOM重新渲染后调用，调用时，组件DOM已经更新，应尽量避免在此期间更改状态，可能会导致在服务器端渲染器件不被调用
+
+**beforeDestroy**
+
+> 在市里销毁之前调用，实例仍然可用
+
+**destroyed**
+
+> 在实例销毁后调用，所有的事件监听器会被移除，子实例也会被销毁
+
+生命周期中的事件钩子，能在控制Vue实例的过程中形成更好的逻辑
+
+
+
 ##条件渲染
 `v-if`
 条件渲染，应用在单一元素或`<template>`包装元素上来切换内部多个元素
@@ -1062,11 +1098,22 @@ Vue.directive('focus', {
 
 ## 响应式原理
 
-> 当把 JavaScript 对象传给实例的`data`选项时，vue 将遍历此对象所有属性，使用`Object.defineProperty`把他们转为`getter/setter`(这个方法ES5无法转换，所以不支持IE8及以下版本)
+> **数据劫持结合发布者-订阅者模式**
 >
-> 这些`getter/setter`在内部让 vue 追踪依赖。在属性被访问或修改时通知变化
->
-> 而每个组件实例都有相应的**watcher**实例对象，会在组件渲染过程中把属性记录为依赖，当依赖项的 setter 被调用时，会通知 watcher 重新计算，并更新关联组件
+> MVVM作为数据绑定的入口，整合Observer、Compile和Watcher三者，通过Observer来监听自己的model数据变化，通过Compile来解析编译模板指令，最终利用Watcher搭起Observer和Compile之间的通信桥梁，达到数据变化 -> 视图更新；视图交互变化(input) -> 数据model变更的双向绑定效果。
+
+为了实现双向绑定，需要实现几点：
+
+1. 实现数据监听器Observer，能对数据对象的所有属性进行监听，如有变动可拿到最新值并通知订阅者
+2. 实现指令解析器Compile，对每个元素节点的指令进行扫描和解析，根据指令模板替换数据，并绑定响应的更新函数
+3. 实现 watcher，连接Observer和Compile，能够订阅并受到每个属性变动的通知，执行指令绑定的回调函数，从而更新视图。
+4. mvvm 入口函数整合以上三点
+
+Observer核心方法就是`Object.defineProperty`，vue会将实例的`data`选项所有属性遍历，把他们转为`getter/setter`，这就是数据劫持。同时，在 get 函数中添加了各个属性的订阅者 watcher，当给对象某值赋值时就会触发 setter，就可以监听到数据变化。watcher在实例化生成时也会将自己添加到订阅器中。
+
+然后 vue 会有一个消息订阅器 dep，用来收集订阅者(watcher) ，数据变动触发 notify，同时调用对应订阅者的update 方法
+
+compile解析模板指令，将模板中变量替换成数据，然后初始化渲染页面视图，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据变动，触发dep.notice()通知时，watcher 能调用自身的 update 方法，触发 compile 中的回调方法。收到通知，更新视图。
 
 ![data](https://cn.vuejs.org/images/data.png)
 
