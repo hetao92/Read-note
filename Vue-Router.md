@@ -3,6 +3,8 @@
 # Vue-Router
 
 > Vue Router 是 Vue 官方的路由管理器。
+>
+> 监听URL变化，然后匹配路由规则，显示相应页面 
 
 功能点：
 
@@ -173,7 +175,7 @@ props: true 	`route.params`会被设置为组件属性
 
 **hash 模式**
 
-> 使用 URL 的 hash 来模拟一个完整的 URL，于是当 URL 改变时，页面不会重新加载。
+> 使用 URL 的 hash 来模拟一个完整的 URL，于是当 URL 改变时，不会向服务器请求数据，利用 hashchange 事件监听到URL变化，从而跳转页面
 
 **history 模式**
 

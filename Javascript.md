@@ -114,7 +114,7 @@ JavaScript编译器会对const进行优化，所以多使用const，有利于提
 + `var ` 声明会被提升至作用域顶部，但它们的赋值不会提升，`const`  和 `let` 不会提升
 + 匿名函数表达式的变量名会被提升，但函数内容不会
 + 命名的函数表达式的变量名会被提升，但函数名和函数函数内容并不会。
-+ 函数声明的名称和函数体都会被提升。
++ 函数声明的名称和函数体都会被提升。**函数优先于变量提升**
 
 ```javascript
 var x = y, y = 'A';
@@ -253,7 +253,7 @@ typeof window.length;// "number"
 
 //容易混淆
 typeof new Boolean(true) === 'object';
-typeof new Number(1) ==== 'object';
+typeof new Number(1) === 'object';
 ```
 
 判断 Array 使用 `Array.isArray(arr)`
@@ -320,7 +320,7 @@ Number.isInteger(3.0000000000000002) // true
 
 
 
-`parseInt(string[,radix])`函数可解析一个字符串,并返回一个整数,第二个参数为进制(radix)参数，这个参数用于指定使用哪一种进制。如果不指定，str 以‘0x’或‘0X’开头则基础为16，以‘0’开头则基础为8或者10，即使ECMAscript 5规定用10，具体仍由环境决定。因此需要明确给出 radix 参数值
+`parseInt(string[,radix])`函数可解析一个字符串,并返回一个整数,第二个参数为进制(radix)参数，这个参数用于指定使用哪一种进制。如果不指定，str 以‘0x’或‘0X’开头则基础为16，以‘0’开头则基础为8或者10，省略参数或参数为0，则以十进制解析。因此需要明确给出 radix 参数值，基数介于2~36之间，大于或小于将返回NaN
 
 `parseFloat()`/ `Number(value)` 可用于任何数据类型- 创建新值！把给定的值转换成数字
 
@@ -808,7 +808,6 @@ s = 'eric,你好'
 
 对象属性名字可以是任意字符串，包括空串。如果对象属性名字不是合法的javascript标识符，它必须用""包裹。
 
-
 键都是字符串，但是在javascript中通常可以省略引号
 `var object = {name:eric,'height':180}`
 
@@ -1031,6 +1030,16 @@ Object.defineProperty(o, "conflict", {
 相比`a instanceof b`，后者是针对 `b.prototype`检查的，前者是针对 b 本身
 
 
+
+#### 拷贝
+
+浅拷贝：`Object.assign` /  展开运算符`…`
+
+深拷贝：
+
+`JSON.parse(JSON.stringify(object))` 
+
+会忽略 undefined、symbol、不能序列化函数、不能解决循环引用的对象
 
 ### Symbol
 
@@ -1295,6 +1304,17 @@ symbol 作为属性名时，不会出现在`for..in`和`for..of`循环中，也�
 
 有NaN返回NaN,In + In = In,In + (-In) = NaN, (+0) + (-0) = +0, (+0) + (+0) = +0,(-0)+(-0) = -0
 
+加法运算会触发三种类型转换：将值转换为原始值，转换为数字，转换为字符串。
+
+```js
+[1, 2] + [2, 1] // '1,22,1'
+// [1, 2].toString() -> '1,2'
+// [2, 1].toString() -> '2,1'
+// '1,2' + '2,1' = '1,22,1'
+
+'a' + + 'b'	// -> "aNaN"
+```
+
 减法`-`
 
 In - In = NaN, -In-(-In) = NaN, In-(-In) = In,
@@ -1328,6 +1348,25 @@ function() ? x1 : x2
 
 +=、-=、*=、/=、>>=、<<=、>>>=
 
+赋值操作是**从右到左**
+
+```js
+var a = {n: 1};
+var b = a;
+a.x = a = {n: 2};
+
+console.log(a.x) 	
+console.log(b.x)
+a.x 	// --> undefined
+b.x 	// --> {n: 2}
+//1.优先级上 . 高于 =，先执行 a.x,则堆内存中的{n:1}就会变成{n: 1, x: undefined}，改变之后相应的b.x也变化了，因为指向的是同一个对象。
+//2.赋值从右到左，先执行 a = {n:2},则 a的引用被改变，返回值赋给a.x，这时候a.x是第一步中的{n: 1, x: undefined}那个对象，其实就是b.x，相当于b.x = {n: 2}
+```
+
+
+
+
+
 **逗号操作符**
 
 负数的二进制补码格式存储方式：
@@ -1355,13 +1394,13 @@ objectName为数组时，propNameOrNumber为索引值或者数组的属性
 
 ### 比较运算
 
-| 比较运算     | code    |
-| ------------ | ------- |
-| 严格相等     | `===`   |
-| 严格不）相等 | `(!)==` |
-| (不)等于     | `(!)=`  |
-| 大于、小于   | `> & <` |
-| 大于等于     | `>=`    |
+| 比较运算      | code    |
+| ------------- | ------- |
+| 严格相等      | `===`   |
+| (严格不）相等 | `(!)==` |
+| (不)等于      | `(!)=`  |
+| 大于、小于    | `> & <` |
+| 大于等于      | `>=`    |
 
 在javascript中，由于是弱类型语言，类型不同有时候会发生转换。
 如 `1 == '1'`返回的是true
@@ -1369,7 +1408,7 @@ objectName为数组时，propNameOrNumber为索引值或者数组的属性
 
 `Object.is(val1,val2)`基本与`===`一致，不会做类型转换，但`NaN`等于自身，`+0`也不等于`-0`
 
-
+![img](https://user-gold-cdn.xitu.io/2018/3/30/16275f89ebf931e9)
 
 ### 逻辑运算
 
@@ -1914,7 +1953,7 @@ new Foo(); // logs "Foo instantiated with new"
 
 `function.toString()`返回一个表示当前函数源代码的字符串。覆盖了 `Object.prototype.toString` 方法。
 
-## 错误
+## Error
 
 ```javascript
 try {
@@ -2269,7 +2308,7 @@ user.removeAttribute('value')       //删除元素的'value'属性
 
 事件冒泡阶段：事件又传播回文档。
 
-
+addEventListener第三个参数 useCapture 默认为 false，表示冒泡，true 为捕获
 
 节点属性: 
 
@@ -3324,6 +3363,55 @@ async function f() {
 }
 ```
 
+
+
+例如实现一个等待1000毫秒的函数，可以用 promise、generator、async/await来实现
+
+```js
+//Promise
+const sleep = time => {
+  return new Promise(resolve => setTimeout(resolve,time))
+}
+sleep(1000).then(()=>{
+  console.log(1)
+})
+
+//Generator
+function* sleepGenerator(time) {
+  yield new Promise(function(resolve,reject){
+    setTimeout(resolve,time);
+  })
+}
+sleepGenerator(1000).next().value.then(()=>{console.log(1)})
+
+//async
+function sleep(time) {
+  return new Promise(resolve => setTimeout(resolve,time))
+}
+async function output() {
+  let out = await sleep(1000);
+  console.log(1);
+  return out;
+}
+output();
+
+//ES5
+function sleep(callback,time) {
+  if(typeof callback === 'function')
+    setTimeout(callback,time)
+}
+
+function output(){
+  console.log(1);
+}
+sleep(output,1000);
+
+```
+
+
+
+
+
 ##this 作用域
 
 this是一个动态作用域，总是指向调用该方法的对象。改变其指向的方法有：
@@ -3333,6 +3421,8 @@ this是一个动态作用域，总是指向调用该方法的对象。改变其�
 3. `fun.call(this,arg1[,arg2,...])`
 
 指定的 this 值不一定是真正的 this 值，非严格模式下，指定 null 或 undefined 会指向全局对象（window对象），且值为原始值（数字、字符串、布尔值）的 this 会指向原始值的自动包装对象
+
+call比apply的性能要好，平常可以多用call, call传入参数的格式正是内部所需要的格式
 
 ```javascript
 var o = {
@@ -3357,6 +3447,7 @@ apply() 和 call() 的第一个参数都是用来绑定到this
 后面的传入参数：
 apply是把参数打包作为一个数组array传入，然后解开将单独元素传入调用
 call是将参数直接传入
+
 console.log.apply(console,[1,2,3])
 console.log.call(console,1,2,3)
 
@@ -3580,7 +3671,23 @@ function C {
 
 
 
-### 函数节流
+### 防抖&&节流
+
+作用都是防止函数多次调用
+
+防抖
+
+> 触发高频事件后n 秒内函数只会执行一次，若n秒内事件再次被触发，则重新计算时间
+>
+> 即每次触发事件时都取消之前的延时调用方法
+
+常见情况：使用搜索引擎，在输入完最后一个字时才调用接口，那么可以使用**延迟执行**的防抖函数
+
+节流
+
+> 高频事件触发，但在n秒内只会执行一次，节流会稀释函数的执行频率
+
+
 
 某些代码不可以在没有间断的情况连接重复执行
 
@@ -3736,7 +3843,28 @@ encodeURIComponent()
 
 **JsonP**
 
-**CORS** Access-Control-Allow-origin
+> 利用 `<script>` 标签没有跨域限制的漏洞。通过 `<script>` 标签指向一个需要访问的地址并提供一个回调函数来接收数据当需要通讯时。只限于 `get` 请求。
+
+```html
+<script src="http://domain/api?param1=a&param2=b&callback=jsonp"></script>
+<script>
+    function jsonp(data) {
+    	console.log(data)
+	}
+</script>
+```
+
+**CORS** 
+
+Access-Control-Allow-origin表示哪些域名可以访问资源，如果设置通配符则表示所有网站都可以访问资源。
+
+**document.domain**
+
+用于二级域名相同的情况下
+
+**postMessage**
+
+用于获取嵌入页面中的第三方页面数据。一个页面发送消息，另一个页面判断来源并接收消息
 
 **FLASH**
 
@@ -3795,6 +3923,8 @@ Presto (opera)
 
 
 
+localstorage 和 sessionstorage 数据存储大小一样
+
 ###setTimeOut
 
 js 是单线程的，有一个事件队列机制，setTimeout 和 setInterval 的回调会到了延迟时间塞入事件队列中，排队执行。
@@ -3802,6 +3932,10 @@ js 是单线程的，有一个事件队列机制，setTimeout 和 setInterval �
 setTimeout ：延时 delay 毫秒之后，啥也不管，直接将回调函数加入事件队列。
 
 setInterval ：延时 delay 毫秒之后，先看看事件队列中是否存在还没有执行的回调函数（ setInterval 的回调函数），如果存在，就不要再往事件队列里加入回调函数了。
+
+
+
+设置 setTimeout 延时为0，其实还是异步，HTML规定参数不得小于4毫秒，不足会自动增加
 
 ```js
 for(var i = 0; i < 5; i++) {
@@ -3854,7 +3988,7 @@ JavaScript 是一门**单线程语言**。作为浏览器脚本语言，JavaScri
 
 #### 任务队列
 
-所有任务可以分成两种，一种是同步任务，另一种是异步任务。异步任务指的是，不进入主线程、而进入"任务队列"的任务，只有"任务队列"通知主线程，某个异步任务可以执行了，该任务才会进入主线程执行。
+所有任务可以分成两种，一种是同步任务，另一种是异步任务。同步任务都在主线程上执行，形成一个执行栈；异步任务指的是，不进入主线程、而进入"任务队列"的任务，只有"任务队列"通知主线程，某个异步任务可以执行了，该任务才会进入主线程执行。
 
 1. 所有同步任务都在主线程上执行，形成一个执行栈。
 
@@ -3905,6 +4039,93 @@ setTimeout(function timeout() {
 }, 0);
 //运行结果可能是1--TIMEOUT FIRED--2，也可能是TIMEOUT FIRED--1--2。
 //setImmediate总是将事件注册到下一轮Event Loop，所以函数A和timeout是在同一轮Loop执行，而函数B在下一轮Loop执行。
+```
+
+
+
+**微任务microtask**可以理解是在当前 macrotask 执行结束后立即执行的任务。也就是说，在当前task任务后，下一个task之前，在渲染之前。
+
+包括
+
++ `process.nextTick` 
+
++ `promise` 
+
++ `Object.observe` (废弃)
+
++ `MutationObserver`
+
+**宏任务macrotask**每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）。
+
+浏览器会在每一个 macrotask 执行结束后，下一个 macrotask 执行开始前对页面重新渲染
+
+包括 
+
++ `script` 
++  `setTimeout` 
++ `setInterval` 
++ `setImmediate` (Node环境)
++ `MessageChannel`
++ `postMessage`
++ `I/O` 
++ `UI rendering`
+
+1. 执行同步代码，这属于宏任务
+2. 执行栈为空，查询是否有微任务需要执行
+3. 执行所有微任务
+4. 必要的话渲染 UI
+5. 然后开始下一轮 Event loop，执行宏任务中的异步代码
+
+
+
+```js
+async function async1() {
+    console.log('async1 start');
+    await async2();
+    console.log('async1 end');
+}
+async function async2() {
+	console.log('async2');
+}
+
+console.log('script start');
+
+setTimeout(function() {
+    console.log('setTimeout');
+}, 0)
+
+async1();
+
+new Promise(function(resolve) {
+    console.log('promise1');
+    resolve();
+}).then(function() {
+    console.log('promise2');
+});
+console.log('script end');
+
+
+/*
+script start
+async1 start
+async2
+promise1
+script end
+async1 end
+promise2
+setTimeout
+*/
+
+//setTimeout作为宏任务，会放到下一个事件循环中去。
+//Promise中的异步体现在then和catch中，所以写在Promise中的代码是被当做同步任务立即执行的。而在async/await中，在出现await出现之前，其中的代码也是立即执行的。遇到 await，会将 await 后面的表达式执行一遍
+async1函数相当于
+async function async1() {
+	console.log('async1 start');
+	Promise.resolve(async2()).then(() => {
+    console.log('async1 end');
+  })
+}
+//执行完一个宏任务之后，会去检查是否存在 Microtasks.当所有的 Microtasks 执行完毕之后，表示第一轮的循环就结束了。第二轮循环依旧从宏任务队列开始。此时宏任务中只有一个 setTimeout
 ```
 
 
@@ -4464,3 +4685,64 @@ Presenter
 **ASCII码**
 
 **Unicode**
+
+
+
+## 页面性能
+
+**DNS解析**
+
+**缓存**
+
++ **强缓存**
+
+  > 强缓存表示在缓存期间不需要请求，可以通过两种响应头实现：`Expires` 和 `Cache-Control`。expires受限于本地时间，容易被修改。`Expires` 是 HTTP / 1.0 的产物，`Cache-Control` 出现于 HTTP / 1.1
+  >
+  > 浏览器在加载资源时，根据这两个字段判断，若读取缓存，则不会发送请求到服务器
+  >
+  > `Expires: Wed, 22 Oct 2018 08:41:00 GMT`
+
++ **协商缓存**
+
+  > 浏览器一定会发送请求到服务器，通过`last-modified`和`etag`来确认资源在某日期后或者 etag是否有变动，若有变动就发送新资源回来，没有则从本地读取缓存。etag 优先级高于 last-modified
+
+**预加载**
+
+Preload可以一定程度上降低首屏的加载时间，因为可以将一些不影响首屏但重要的文件延后加载，唯一缺点就是兼容性不好
+
+**预渲染**
+
+**懒加载**(资源延迟加载)
+
+**懒执行**(逻辑延迟加载)
+
+**图片加载优化**
+
+少用图片，用 css 代替
+
+CDN加载，根据屏幕宽度裁剪
+
+小图使用 base64
+
+雪碧图
+
+图标 svg，小图 png，webp，jpeg
+
+**文件优化**
+
+css放 head，script 放底部，用 defer、async
+
+webworker
+
+服务端开启文件压缩功能
+
+**webpack**
+
+压缩代码
+
+优化图片
+
+根据路由拆分代码，按需加载
+
+文件名添加哈希
+
