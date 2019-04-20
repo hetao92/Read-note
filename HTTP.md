@@ -330,7 +330,151 @@ HTTPS使用了HTTP协议，但使用了不同于HTTP协议的默认端口及一�
 4. 服务端使用自己的私钥，获取客户端发来的随机数
 5. 双方依据约定的加密方法，使用前面三个随机数，生成对话秘钥(session key)，用来加密接下来的对话
 
+## 缓存
 
+[参考](https://github.com/amandakelake/blog/issues/41)
+
+重用已获取的资源，减少延迟与网络阻塞，减少显示资源所等待的时间，响应性更快
+
+![缓存分类](https://user-images.githubusercontent.com/25027560/38461517-c7f2f422-3b04-11e8-8e94-20bbeb2a32b8.png)
+
+
+
+- **强缓存**
+
+  > 强缓存表示在缓存期间不需要请求
+  >
+  > 浏览器在请求某一资源时，会先获取该资源缓存的header信息，判断是否命中强缓存。可以通过两种响应头实现：`Expires` 和 `Cache-Control`。expires受限于本地时间，容易被修改。`Expires` 是 HTTP / 1.0 的产物，`Cache-Control` 出现于 HTTP / 1.1
+  >
+  > cache-control 优先级高于 expires
+  >
+  > 浏览器在加载资源时，根据这两个字段判断，若读取缓存，则不会发送请求到服务器
+  >
+  > `Expires: Wed, 22 Oct 2018 08:41:00 GMT`
+
+  Cache-Control：
+
+  + No-cache: 不使用本地可能过期的缓存（**实际还是可以缓存到本地！**），使用协商缓存前必须与服务器验证不能擅自提供给客户端，若有效、资源并未被修改，则读取缓存避免重新下载
+
+  + No-store：禁止浏览器缓存数据，每次请求都会下载完整资源
+
+  + public：可以被所有用户缓存，包括终端用户和CDN等中间代理服务器
+  + private：只能被终端用户的浏览器缓存，不能作为共享缓存，即代理服务器不能缓存
+
+  200（from memory）资源在内存当中，一般脚本、字体、图片会存在内存当中
+
+  200（from disk cache）在磁盘当中，一般非脚本会存在内存当中，如css等
+
+  对于脚本随时可能会执行，若存在磁盘，io 开销比较大，容易失去响应
+
+  [图解](https://zhuanlan.zhihu.com/p/55623075)
+
+- **协商缓存**
+
+  > 如果没有命中强缓存，浏览器会发送请求到服务器，请求会携带第一次请求返回的有关缓存的header字段信息（Last-Modified/If-Modified-Since和Etag/If-None-Match），由服务器根据请求中的相关header信息来比对结果是否协商缓存命中。若有变动就发送新资源回来，没有则返回**304(not modified)**，从本地读取缓存。etag 优先级高于 last-modified
+
+  可能某些文件修改频繁（秒以下）If-Modified-Since能检查到的粒度是s级的，这种修改无法判断
+
+  某些文件会周期性修改，实际内容不变只是改变修改时间，服务器可能不希望客户端认为它被修改了。
+
+  服务器可能不能精确得到最后修改时间。基于这些原因，添加 etag 标识符
+
+  ​	last-modified表示本地文件最后修改日期
+  
+  ​	if-modified-since会在 request header 上返回last-modified的值
+  
+  ​	ETag类似指纹，与修改时间无关联
+  
+  ​	if-none-match返回上次带过来的 etag 给服务器
+
+
+
+1. cookie：4K，可以手动设置失效期，可能会有主Domain污染的情况
+2. localStorage：5M，除非手动清除，否则一直存在
+3. sessionStorage：5M，**不可以跨标签访问**，页面关闭就清理
+4. indexedDB：浏览器端数据库，无限容量，除非手动清除，否则一直存在
+
+
+
+### Storage
+
+5M空间。
+
+只能操作字符串(JSON.stringify/parse)。
+
+明文存储。
+
+可以监听`window.addEventListener('storage',callback)`
+
+
+
+### cookie & session
+
+一个用户的所有请求操作都应该属于同一个会话。但是HTTP协议是无状态的协议。一旦数据交换完毕，客户端与服务器端的连接就会关闭，再次交换数据需要建立新的连接。这就意味着服务器无法从连接上跟踪会话。
+
+由服务器端生成的为辨别用户身份进行追踪、发送给浏览器并储存在用户本地终端上的数据，有一定的生存周期，随每一个请求发送至同一个服务器
+
+cookie机制采用的是在客户端保持状态的方案
+
+cookie的作用就是为了解决HTTP协议无状态的缺陷
+
+
+
+Set cookie
+
+Name: value
+
+Expires 失效时间
+
+Domain 域	可以不同二级域名下共享cookie，而Storage不可以
+
+path 路径
+
+secure 安全标志， 只能在 https 下发送 cookie
+
+
+
+**session机制**采用的是一种在服务器端保持状态的解决方案。服务器使用一种类似于散列表的结构来保存信息。同时我们也看到，由于采用服务器端保持状态的方案在客户端也需要保存一个标识，所以session机制可能需要借助于cookie机制来达到保存标识的目的。而session提供了方便管理全局变量的方式 。
+
+session是针对每一个用户的，变量的值保存在服务器上，用一个sessionID来区分是哪个用户session变量,这个值是通过用户的浏览器在访问的时候返回给服务器，当客户禁用cookie时，这个值也可能设置为由get来返回给服务器。
+
+当程序为客户端的请求创建session 时，服务器会先检查客户端请求里是否包含了 session 标识，若已包含，服务器就按照 session id 把这个 session 检索出来(检索不到则新建)，如果客户端请求不包含，则重建session 并生成相关联的 session id，并在响应中返回给客户端保存。客户端保存 session id 的方式可以用 cookie，或者附加在URL路径后面，或者表单隐藏字段等
+
+
+
+两者不同：
+
+1. **存取方式**---session 能存取任何类型数据，包括String/Integer/List/Map/Java类等。cookie 只能保管 ASCII 码，对于Unicode或者二进制需要先编码。
+2. **隐私策略**---cookie 存储在客户端是可见，容易被程序复制修改等操作，需要进行加密。而 session 是存储在服务器上，不存在敏感信息被透露的风险。
+3. **有效期**---有效期上，cookie 可以设置很长的过期时间。而 session依赖于名为JSESSIONID的 cookie，默认-1，不能达到长久有效的效果，即使设置时间过长，服务器累积的 session也会过多，导致内存溢出
+4. **服务器压力**---session 保管在服务端，若并发量过多，则会产生过多的 session，耗费内存。而 cookie 保留在客户端不占用服务器资源。
+5. **浏览器支持**---cookie 需要客户端浏览器支持，若禁用或不支持则失效。
+6. **跨域支持**---cookie 支持跨域名访问，而 session 则仅在他所在的域名内有效
+
+
+
+### Storage和cookie的区别
+
+共同点：都是保存在浏览器端、且同源的
+区别：
+
+- cookie数据始终在同源的http请求中携带（即使不需要），而sessionStorage和localStorage不会自动把数据发送给服务器，仅在本地保存。cookie数据还有路径（path）的概念，可以限制cookie只属于某个路径下
+- 存储大小限制也不同，cookie数据不能超过4K，同时因为每次http请求都会携带cookie、所以cookie只适合保存很小的数据，如会话标识。sessionStorage和localStorage虽然也有存储大小的限制，但比cookie大得多，可以达到5M或更大
+- 数据有效期不同，sessionStorage：仅在当前浏览器窗口关闭之前有效；localStorage：始终有效，窗口或浏览器关闭也一直保存，因此用作持久数据；cookie：只在设置的cookie过期时间之前有效，即使窗口关闭或浏览器关闭
+- 作用域不同，sessionStorage不在不同的浏览器窗口中共享，即使是同一个页面；localstorage在所有同源窗口中都是共享的；cookie也是在所有同源窗口中都是共享的
+- web Storage支持事件通知机制，可以将数据更新的通知发送给监听者
+- web Storage的api接口使用更方便
+
+
+
+缓存实践
+
++ 配置本地缓存
++ 采用内容摘要作为缓存更新依据
++ 静态资源CDN部署
++ 资源发布路径实现非覆盖式发布
++ 对于频繁变动的资源可以使用no-catch及ETag表示已被缓存，但每次都会发请求询问是否更新
++ 静态资源通过 service worker 进行缓存控制和离线化加载
 
 ## 安全相关
 
