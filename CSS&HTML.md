@@ -464,7 +464,11 @@ fixed
 
 relative  
 
->  相对定位：首先按static(float)方式生成一个元素(并且元素像层一样浮动了起来)，然后相对于以前的位置移动,且<strong>偏移前的位置保留不动</strong>(后面的元素不会因为前元素相对定位后发生移动)
+>  相对定位：首先按static(float)方式生成一个元素(并且元素像层一样浮动了起来)，然后相对于以前的位置移动,且<strong>偏移前的位置保留不动</strong>页面上的其他元素并不会因该元素的位置变化而受到影响。该元素在正常流中的位置会被保留
+
+sticky
+
+> 元素在页面滚动时如同在正常流中，但当其滚动到相对于视口的某个特定位置时就会固定在屏幕上，如同 fixed 一般。
 
 隐性改变display类型: 当元素设置`position : absolute`或`float : left/right`时，元素display就转变为inline-block，可以设置宽高了
 
@@ -529,6 +533,7 @@ BFC能清理浮动主要运用的是它的布局规则：
 4. BFC的区域不会与float box重叠。
 5. BFC就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素。反之也如此。
 6. 计算BFC的高度时，浮动元素也参与计算
+7. `display: flow-root`做的唯一的一件事就是去创建一个BFC，因此可以避免其他创建BFC方法带来的问题。
 
 浮动清理利用的主要是第六条规则，只要将父容器触发为BFC，就可以实现包含的效果。
 
@@ -923,6 +928,12 @@ div{
 }
 ```
 
+
+
+`window.requestAnimationFrame()`告诉浏览器某个JavaScript代码要执行动画，浏览器收到通知后，则会运行这些代码的时候进行优化，实现流畅的效果，而不再需要开发人员烦心刷新频率的问题了。
+
+而 settimeout 实现是在队列完成后再执行回调，这个时间间隔不一定可靠
+
 **多列布局：**
 column-count   -- 规定元素应该被分隔的列数
 column-gap  -- 规定列之间的间隔
@@ -1088,6 +1099,24 @@ color: red \0
 
 
 
+## CSS布局
+
+**正常文档流**
+
+**浮动**
+
+​	[参考](https://juejin.im/post/5b3b56a1e51d4519646204bb)
+
+**定位**
+
+**弹性布局**
+
+一种为一维布局而设计的布局方法。一维的意思是你希望内容是按行或者列来布局。
+
+**网络布局**
+
+一种用来进行二维布局的技术。二维（two-dimesional）意味着你希望按照行和列来排布你的内容。
+
 ##浏览器渲染机制
 
 1. 处理 HTML 并构建 DOM 树。
@@ -1120,3 +1149,66 @@ color: red \0
 + 避免使用 table 布局，即使很小的改动也会造成整个 table 的重新布局
 + css 选择符从右往左匹配查找，避免DOM深度过深
 + 将频繁运行的动画变成图层，图层能够阻止该节点回流影响别的元素。
+
+
+
+## others
+
+### z-index
+
+提供z-index栈空间特性并影响子元素渲染顺序的结构，我们称之为stacking context。
+
+- root元素(html)
+- 「已定位」元素（position: absolute or relative）且 指定z-index值非auto的元素
+- flex item且指定z-index值非auto的元素
+- opacity小于1的元素
+- 指定transform值非none的元素
+- 指定mix-blend-mode值非normal的元素
+- 指定filter值非none的元素
+- 指定isolation值为isolate的元素
+- ==特例 mobile webkit & chrome 22+， 指定position: fixed的元素==
+- 在will-change属性上指定值为上述列表任意属性的元素
+- 指定-webkit-overflow-scrolling值为touch的元素
+
+特点：
+
+1. stacking context可以嵌套
+2. 每个stacking context相对于兄弟元素是完全独立的，其内部规则不会影响到外部
+3. 每个stacking context元素都会被父stacking context当做一个元素施加stacking规则
+
+给已定位元素（position: absolute or relative)指定z-index值以改变元素在其parent stacking context中Z轴的「相对偏移」量。这里的「相对偏移」指的是**以parent stacking context为基准**，相对于其它兄弟元素距离用户远近的顺序。
+
+如果一个元素不是通过「定位」(position: absolute or relative)实现了stacking context，它将会以z-index: 0（高于auto）被看待，因此无论如何更改非「定位」元素的z-index都是无效的。
+
+
+
+# 浏览器
+
+浏览器包括：
+
+用户界面
+
+浏览器引擎	在用户界面和呈现引擎之间传送指令
+
+呈现引擎	负责显示请求的内容
+
+网络	网络调用
+
+用户界面后端
+
+JavaScript 解释器
+
+数据存储（持久层）
+
+其中 Chrome 每个标签页都是独立的进程，分别对应一个呈现引擎
+
+
+
+**流程**
+
+呈现引擎从网络层获取请求文档内容，解析文档，并将各标记逐个转化为内容树上的DOM节点，同时解析外部 css 文件及样式元素中的样式数据，创建“呈现树”
+
+呈现树包含多个包含视觉属性（颜色尺寸等）的矩形。呈现树构建完毕后，进入**布局处理**阶段，为每个节点分配一个应出现在屏幕上的确切坐标。然后**绘制**，呈现引擎遍历呈现树，由用户界面后端层将每个节点绘制出来
+
+呈现器和DOM元素并非一一对应。非可视化的DOM元素(如head)或者 display 为 none 的元素不会插入呈现树中。有些DOM元素对应多个可视化对象(如 select 有按钮区域、下拉列表框区域以及显示区域)
+

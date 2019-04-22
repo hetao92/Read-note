@@ -3716,7 +3716,7 @@ var process = {
 
 ### 上下文
 
->  JavaScript 代码运行时，会产生一个全局的上下文环境（context，又称运行环境），包含了当前所有的变量和对象。然后，执行函数（或块级代码）的时候，又会在当前上下文环境的上层，产生一个函数运行的上下文，变成当前（active）的上下文，由此形成一个上下文环境的堆栈（context stack）。
+>  JavaScript 代码运行时，会产生一个全局的上下文环境（context，又称运行环境），包含了当前所有的变量和对象。它会被推入主线程的栈中。然后，执行函数（或块级代码）的时候，又会在当前上下文环境的上层，产生一个函数运行的上下文，变成当前（active）的上下文，由此形成一个上下文环境的堆栈（context stack）。
 >
 > 这个堆栈是“后进先出”的数据结构，最后产生的上下文环境首先执行完成，退出堆栈，然后再执行完成它下层的上下文，直至所有代码执行完成，堆栈清空。
 >
@@ -3932,7 +3932,7 @@ setTimeout(fn,0)的含义是，指定某个任务在主线程最早可得的空�
 
 ###Event loop(单线程)
 
-> Event Loop是一个程序结构，用于等待和发送消息和事件。
+> Event Loop是一个程序结构，用于等待和发送消息和事件。ECMAScript没有 event loops，这是在HTML Standard 里定义浏览器何时进行渲染更新。
 
 JavaScript 是一门**单线程语言**。作为浏览器脚本语言，JavaScript的主要用途是与用户互动，以及操作DOM。这决定了它只能是单线程，否则会带来很复杂的同步问题。所以这个特性是 JavaScript 的核心特征。而HTML5里的 Web Worker标准虽然允许 JavaScript 脚本创建多个线程，但是子线程完全受主线程控制且不得操作DOM，但并没有改变 JavaScript 单线程的本质。
 
@@ -4002,6 +4002,12 @@ setTimeout(function timeout() {
 //运行结果可能是1--TIMEOUT FIRED--2，也可能是TIMEOUT FIRED--1--2。
 //setImmediate总是将事件注册到下一轮Event Loop，所以函数A和timeout是在同一轮Loop执行，而函数B在下一轮Loop执行。
 ```
+
+一个event loop有一个或者多个task队列。
+
+每一个task都来源于指定的任务源，比如可以为鼠标、键盘事件提供一个task队列，其他事件又是一个单独的队列。
+
+一个event loop里只有一个microtask 队列。
 
 
 
