@@ -301,6 +301,14 @@ JavaScript 中数字是双精度64位二进制格式，不区分整数浮点数
 
 `isNaN(x)/Number.isNaN(x)`  会尝试将值转换为数字再判断,因此对于被强制转换成功的非数字参数无法判断
 
+`isNaN('A String'); // true` 很明显不是 NaN 的 value 也被误判成 NaN 了。
+
+`Number.isNaN('A String'); // false`
+
+这个方法会先判断 type 是否为 number，不是则直接返回 false，若是数字类型才会进一步判断是否是NaN
+
+
+
 对于对象值，首先会调用`valueof()`方法确定返回值是否可以转为数值，若不能，再基于返回值调用`toString()`再测试返回值
 
 
@@ -494,9 +502,10 @@ Array(3) // [, , ,]
 | `arr.find(callback[, thisArg])`                          | 返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined。 |
 | `arr.findIndex(callback[, thisArg])`                     | 返回数组中满足提供的测试函数的第一个元素的索引。否则返回-1。 |
 | `arr.fill(val,startPos,endPos)`                          | 用给定值填充数组中指定的起始位置到结束位置间的位置           |
-| `arr.flat(n)`                                            | 将嵌套的数组拉平'n'层<br/>n可以取`Infinity`作为参数表示不管有多少层嵌套都可以拉平
-数组中有空位（空位不是 undefined，ubdefined 还是有值的）会被 flat 跳过 |
+| `arr.flat(n)`                                            | 将嵌套的数组拉平'n'层,n可以取`Infinity`作为参数表示不管有多少层嵌套都可以拉平,数组中有空位（空位不是 undefined，ubdefined 还是有值的）会被 flat 跳过 |
 | `arr.copyWithin(目标索引[, [源开始索引], [结束源索引]])` | 浅复制数组的一部分到同一数组中的另一个位置，并返回它，改变数组但不修改其大小。 |
+
+
 ```javascript
 //源开始索引被忽略，则从0开始复制
 //结束源索引被忽略，则会复制到arr.length
@@ -623,7 +632,7 @@ ES6则将空位转为 undefined
 ["1", "2", "3"].map(parseInt);
 // 你可能觉的会是[1, 2, 3]
 // 但实际的结果是 [1, NaN, NaN]
-//因为map方法在调用callback函数时,会给它传递三个参数,parseInt有两个参数，第二个 index 被当做进制参数
+//因为map方法在调用callback函数时,会给它传递三个参数（value,index,array原数组）,parseInt有两个参数，第二个 index 被当做进制参数
 ```
 
 `callback`只会为那些已经被赋值的索引调用。不会为那些被删除或从来没被赋值的索引调用。在处理数组时，数组元素的范围是在 `callback` 方法第一次调用之前就已经确定了。在 方法执行的过程中：原数组中新增加的元素将不会被 `callback` 访问到；若已经存在的元素被改变或删除了，则它们的传递到 `callback`的值是方法遍历到它们的那一时刻的值；而被删除的元素将不会被访问到。
@@ -823,7 +832,7 @@ Js 中 objects 是一种引用类型。两个独立声明的对象永远也不�
 
 
 
-`Object.assign(target,...sources)`方法用于对象的合并，将源对象（source）的所有可枚举属性，复制到目标对象（target)并返回目标对象，继承属性和不可枚举属性不能拷贝,且是浅拷贝,如果源对象某个属性的值是对象，那么目标对象拷贝得到的是这个对象的引用。
+`Object.assign(target,...sources)`方法用于对象的合并，将源对象（source）的所有可枚举属性，复制到目标对象(target)并返回目标对象，继承属性和不可枚举属性不能拷贝,且是浅拷贝,如果源对象某个属性的值是对象，那么目标对象拷贝得到的是这个对象的引用。
 对于同名属性，会进行替换，而不是添加
 
 
@@ -937,7 +946,7 @@ Object.defineProperties(o, {
 
 + `[[Configurable]]`
 
-  > 可改动性，表示能否通过 delete 删除属性从而重新定义属性，能否修改属性的特性，或者能否把属性修改为访问器属性。
+  > 可改动性，表示能否通过 delete 删除属性从而重新定义属性；能否修改属性的特性；或者能否把属性修改为访问器属性。
 
 + `[[Enumerable]]`
 
@@ -1084,7 +1093,7 @@ symbol 作为属性名时，不会出现在`for..in`和`for..of`循环中，也�
 
 
 
-`Symbol.keyFor()`	返回一个**已登记**的S ymbol 类型的值(即`Symbol.for`生成的)
+`Symbol.keyFor()`	返回一个**已登记**的Symbol 类型的值(即`Symbol.for`生成的)
 
 
 
@@ -1316,6 +1325,10 @@ symbol 作为属性名时，不会出现在`for..in`和`for..of`循环中，也�
 // '1,2' + '2,1' = '1,22,1'
 
 'a' + + 'b'	// -> "aNaN"
+//+'b'属于一元加法（高于加法，如果操作数不是一个数值，会尝试将其转换成一个数值。）
+//因为一元加法 +1 = 1 得出 + 'b'（不是number）出现 NAN ，
+
+
 ```
 
 减法`-`
@@ -1793,9 +1806,9 @@ try-catch语句中的 catch 块和 with 语句可延长作用域链
 >
 > 函数的原型对象`constructor`默认指向构造函数本身，原型对象除了有原型属性外，为了实现继承，还有一个原型链指针`_proto_`，该指针指向上一层的原型对象，而上一层的原型对象的结构依然类似，这样利用proto一直指向Object的原型对象上，而Object的原型对象用Object.proto = null表示原型链的最顶端，如此变形成了javascript的原型链继承，同时也解释了为什么所有的javascript对象都具有Object的基本方法。
 
-1. 所有的对象都有`__proto__`属性，该属性对应该对象的原型
+1. 所有的对象都有`__proto__`属性，该属性 对应 该对象的原型
 2. 所有的函数对象都有`prototype`属性，该属性的值会被赋值给该函数创建的对象的`_proto_`属性
-3. 所有的原型对象都有constructor属性，该属性对应创建所有指向该原型的实例的构造函数
+3. 所有的原型对象都有`constructor`属性，该属性对应创建所有指向该原型的实例的构造函数
 4. 函数对象和原型对象通过`prototype`和`constructor`属性进行相互关联
 
 
@@ -2204,8 +2217,8 @@ IE中有 attachEvent、detachEvent，只支持冒泡，且 attachEvent()会在�
 ### 查找元素
 
 使用 `document.querySelector(选择器)`
-烂办法：`document:getElementById()`
-`document:getElementsByClassName()`
+烂办法：`document.getElementById()`
+`document.getElementsByClassName()`
 
 **获取多个选择器**
 
@@ -2243,14 +2256,14 @@ pwd.parentElement.removeChild(pwd)
 
 ```
 
-在创建DOM节点时， innerTHML 比 appendChild 在较大的更改中快速的多
+在创建DOM节点时， innerHTML 比 appendChild 在较大的更改中快速的多
 
 因为 innerHTML 会在后台创建HTML解析器，再用内部DOM调用来创建，而内部方法是用 C+之类方法编译好的，而不是 JavaScript 解释执行
 
 ### 添加事件
 
 ```javascript
-//添加事件, 使用 addEventListener 函数,（又叫事件监听） 它有三个参数：第一个是事件的名字,第二个是事件发生后会被自动调用的函数，第三个见后面
+//添加事件, 使用 addEventListener 函数,（又叫事件监听） 它有三个参数：第一个是事件的名字,第二个是事件发生后会被自动调用的函数，第三个默认为false，即冒泡，true则为捕获
 loginButton.addEventListener('click', clicked，false)
 ```
 
@@ -2261,7 +2274,7 @@ loginButton.addEventListener('click', clicked，false)
 **失去焦点**
  `target.blur()`
 **拥有焦点**
-``target.focus()`
+`target.focus()`
 
 **阻止默认行为的发生, 也就是不插入回车**
 ` event.preventDefault()`
@@ -2380,7 +2393,7 @@ DOM中传入事件处理程序中的event对象
 
 
 在IE中的event对象：
-cancleBubble，ueviw设置为true可取消事件冒泡，与stopPropagation()作用相同
+cancleBubble，设置为true可取消事件冒泡，与stopPropagation()作用相同
 returnValue，设flase可取消事件的默认行为与preventDefault()作用相同
 srcElement，事件目标，与target相同
 type
@@ -4702,3 +4715,66 @@ webworker
 
 文件名添加哈希
 
+
+
+## 前端工程化的理解
+
+随着前端的规模越来越大，为了提高开发效率和代码质量，需要将前端开发流程**规范化**、**模块化**、**标准化**、**组件化**、**自动化**，包括开发流程、技术选型、代码规范以及构建发布等
+
+- 开发规范
+
+  编码规范
+
+  流程规范如进度管理、code review 机制、应对风险等
+
+  前后端接口等文档规范
+
+- 模块化开发
+
+- 组件化开发
+
+- 组件仓库
+
+- 性能优化
+
+- 部署
+
+- 开发流程
+
+  提高代码的可测试性，引入单元测试，提高代码质量
+
+- 开发工具
+
+  使用版本控制工具来高效安全管理代码
+
+一个完整的软件工程包含 开发-测试-部署上线
+
+自动化工程的工具
+
+构建工具：gulp、grunt
+
+编译工具：Babel、webpack
+
+开发辅助工具：数据 mock、livereload
+
+使用CI集成工具：Jenkins、Travis CI
+
+脚手架工具
+
+
+
+## 编写插件
+
+[参考](https://juejin.im/entry/5ae033d86fb9a07ac76e7bcc)
+
+一个合格的插件需满足：
+
+1. 插件作用域与用户的作用域相互独立，内部私有变量不能影响外部环境变量
+2. 插件需具备默认设置参数
+3. 插件需提供部分API，供使用者修改插件功能的默认参数，从而实现用户自定义插件效果
+4. 插件需提供监听入口，及针对指定元素进行监听，使元素与插件响应打到插件效果
+5. 插件支持链式调用
+
+
+
+可以在插件内使用闭包、立即执行函数

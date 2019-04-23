@@ -322,6 +322,8 @@ HTTPS使用了HTTP协议，但使用了不同于HTTP协议的默认端口及一�
 
 ##HTTPS
 
+[参考](https://mp.weixin.qq.com/s/3NKOCOeIUF2SGJnY7II9hA)
+
 SSL(Secure Socket Layer安全套接层)
 
 TLS(Transport Layer Security安全层传输协议)
@@ -396,7 +398,7 @@ TLS(Transport Layer Security安全层传输协议)
 
 **特点是私钥加密后的密文，只要是公钥，都可以解密，但是公钥加密后的密文，只有私钥可以解密。私钥只有一个人有，而公钥可以发给所有的人**。
 
-[参考](https://mp.weixin.qq.com/s/3NKOCOeIUF2SGJnY7II9hA)
+
 
 概括：HTTPS要保证客户端与服务器端的通信安全，必须使用的对称加密算法，但是协商对称加密算法的过程，需要使用非对称加密算法来保证安全，然而直接使用非对称加密的过程本身也不安全，会有中间人篡改公钥的可能性，所以客户端与服务器不直接使用公钥，而是使用数字证书签发机构颁发的证书来保证非对称加密过程本身的安全。
 

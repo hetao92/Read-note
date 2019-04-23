@@ -1045,7 +1045,7 @@ new Vue({
 
 ## 自定义指令
 
-```js
+```
 // 注册一个全局自定义指令 `v-focus`
 Vue.directive('focus', {
   // 当被绑定的元素插入到 DOM 中时……
@@ -1054,6 +1054,27 @@ Vue.directive('focus', {
     el.focus()
   }
 })
+//单文件
+<script>
+export default {
+  directives: {
+    'my-directive': {
+      bind: function () {
+        // 准备工作
+        // 例如，添加事件处理器或只需要运行一次的高耗任务
+      },
+      update: function (newValue, oldValue) {
+        // 值更新时的工作
+        // 也会以初始值为参数调用一次
+      },
+      unbind: function () {
+        // 清理工作
+        // 例如，删除 bind() 添加的事件监听器
+      }
+    }
+  }
+}
+</script>
 ```
 
 有以下几个钩子函数：
@@ -1068,7 +1089,7 @@ Vue.directive('focus', {
 **参数**
 
 - `el`：指令所绑定的元素，可以用来直接操作 DOM 。
-- `binding`：一个对象，包含以下属性：
+- `vm`：一个对象，包含以下属性：
   - `name`：指令名，不包括 `v-` 前缀。
   - `value`：指令的绑定值，例如：`v-my-directive="1 + 1"` 中，绑定值为 `2`。
   - `oldValue`：指令绑定的前一个值，仅在 `update` 和 `componentUpdated` 钩子中可用。无论值是否改变都可用。
