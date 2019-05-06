@@ -586,7 +586,7 @@ ES6则将空位转为 undefined
 
 
 复制数组：
-`.slice(0)` 和 `concat ()`
+`.slice(0)` 和 `concat()`
 这两种数组复制的操作都不适合对数组中包括复杂数据类型的数据，如果数组中包括复杂数据类型(对象引用)的数据，对这些数据的修改仍然会同时影响复制数组与被复制数组。需要深层克隆函数
 
 
@@ -950,7 +950,7 @@ Object.defineProperties(o, {
 
 + `[[Enumerable]]`
 
-  > 可枚举性，表示能否通过`for-in`循环返回属性
+  > 可枚举性，表示能否通过`for-in`循环返回属性。通过 `Object.defineProperty`等定义的属性，该标识值默认为 false。
 
 + `[[Writable]]`
 
@@ -972,10 +972,10 @@ Object.defineProperty(o, "a", {
 // 对象o拥有了属性a，值为37
 var bValue;
 Object.defineProperty(o, "b", {
-  get : function(){
+  get: function(){
     return bValue;
   },
-  set : function(newValue){
+  set: function(newValue){
     bValue = newValue;
   },
   enumerable : true,
@@ -1007,7 +1007,7 @@ Object.defineProperty(o, "conflict", {
 可枚举属性及不可枚举属性:`Object.getOwnPropertyNames(obj)`
 
 迭代功能：
-可枚举属性：`for..in`迭代，以` hasOwnProperty`筛选
+可枚举属性：`for..in`迭代，以` hasOwnProperty`筛选， **hasOwnProperty**是用来判断一个对象是否有你给出名称的属性或对象。不过需要注意的是，此方法无法检查该对象的**原型链**中是否具有该属性，该属性必须是对象本身的一个成员。
 不可枚举属性：使用 `getOwnPropertyNames` 进行迭代，并筛选不通过`propertyIsEnumerable`方法检测的属性
 可枚举属性及不可枚举属性:使用`getOwnPropertyNames`进行迭代
 
