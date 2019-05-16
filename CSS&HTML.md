@@ -279,7 +279,7 @@ a.currentTime = 1
 
 
 ##HTML5 拖放
-DataTransfer 对象：退拽对象用来传递的媒介，使用一般为Event.dataTransfer。
+DataTransfer 对象：拖拽对象用来传递的媒介，使用一般为Event.dataTransfer。
 draggable 属性：就是标签元素要设置draggable=true，否则不会有效果。
 dragstart 事件：当拖拽元素开始被拖拽的时候触发的事件，此事件作用在被拖曳元素上
 dragenter 事件：当拖曳元素进入目标元素的时候触发的事件，此事件作用在目标元素上
@@ -334,6 +334,18 @@ cxt.fillRect(0,0,150,75); //绘制矩形
 ```
 
 ##2D上下文
+
+```
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext(contextType)
+返回 canvas 上下文
+contextType
+'2d'
+'webgl'
+'webgl2'
+'bitmaprenderer'
+```
+
 2D上下文的基本绘图操作时填充和描边
 填充颜色 fillStyle
 描边颜色 strokeStyle
@@ -406,7 +418,13 @@ transform() 变化矩阵
 内联样式
 id选择器  #id{}
 class选择器   .class{}
-元素选择器   h1{}
+元素选择器   h1{} 、伪类、属性选择
+
+伪对象
+
+继承
+
+通配符
 
 
 
@@ -432,23 +450,86 @@ class选择器   .class{}
 
 标签选择器
 
-id/class选择器
+1. id/class选择器
 
-多元素选择器
+2. 多元素选择器
 
-后代选择器
+   E,F	同时匹配 E 或 F 元素
 
-子元素选择器
+   E F	后代元素选择，匹配所有属于 E 元素后代的 F 元素
 
-毗邻选择器
+   E > F	子元素选择，匹配所有 E 元素的子元素 F
 
-属性选择器
+   E + F	毗邻元素选择，匹配所有紧随 E 元素之后的同级元素 F
 
-伪类选择器
+3. 后代选择器
 
-伪元素选择器
+4. 子元素选择器
+
+5. 毗邻选择器
+
+6. 属性选择器 
+
+   `E[att]/E[att=val]`
+
+   `E[att~=val]`匹配所有att属性具有多个空格分隔的值、其中一个值等于"val"的E元素
+
+   `E[att|=val]`匹配所有att属性具有多个连字号分隔（hyphen-separated）的值、其中一个值以"val"开头的E元素，主要用于lang属性，比如"en"、"en-us"、"en-gb"等等
+
+   `E[att^="val"]`属性 att 值以 val 开头的元素
+
+   `E[att$="val"]`属性 att 值以 val 结尾的元素
+
+   `E[att*="val"]`属性 att 值包含 val 的元素
+
+   
+
+7. 伪类选择器
+
+   | 序号 | 选择器        | 含义                                    |
+   | ---- | ------------- | --------------------------------------- |
+   | 1.   | E:first-child | 匹配父元素的第一个子元素                |
+   | 2    | E:link        | 匹配所有未被点击的链接                  |
+   | 3    | E:visited     | 匹配所有已被点击的链接                  |
+   | 4    | E:active      | 匹配鼠标已经其上按下、还没有释放的E元素 |
+   | 5    | E:hover       | 匹配鼠标悬停其上的E元素                 |
+   | 6.   | E:focus       | 匹配获得当前焦点的E元素                 |
+   | 7.   | E:lang(c)     | 匹配lang属性等于c的E元素                |
+
+   结构性伪类
+
+   | 序号 | 选择器                | 含义                                                         |
+   | ---- | --------------------- | ------------------------------------------------------------ |
+   | 8.   | E:root                | 匹配文档的根元素，对于HTML文档，就是HTML元素                 |
+   | 9.   | E:nth-child(n)        | 匹配其父元素的第n个子元素，第一个编号为1                     |
+   | 10.  | E:nth-last-child(n)   | 匹配其父元素的倒数第n个子元素，第一个编号为1                 |
+   | 11.  | E:nth-of-type(n)      | 与:nth-child()作用类似，但是仅匹配使用同种标签的元素         |
+   | 12.  | E:nth-last-of-type(n) | 与:nth-last-child() 作用类似，但是仅匹配使用同种标签的元素   |
+   | 13.  | E:last-child          | 匹配父元素的最后一个子元素，等同于:nth-last-child(1)         |
+   | 14.  | E:first-of-type       | 匹配父元素下使用同种标签的第一个子元素，等同于:nth-of-type(1) |
+   | 15.  | E:last-of-type        | 匹配父元素下使用同种标签的最后一个子元素，等同于:nth-last-of-type(1) |
+   | 16.  | E:only-child          | 匹配父元素下仅有的一个子元素，等同于:first-child:last-child或 :nth-child(1):nth-last-child(1) |
+   | 17.  | E:only-of-type        | 匹配父元素下使用同种标签的唯一一个子元素，等同于:first-of-type:last-of-type或 :nth-of-type(1):nth-last-of-type(1) |
+   | 18.  | E:empty               | 匹配一个不包含任何子元素的元素，注意，文本节点也被看作子元素 |
+
+   反选伪类
+
+   `E:not(s)`匹配不符合当前选择器的任何元素
+
+8. 伪元素选择器
+
+| 序号 | 选择器         | 含义                      |
+| ---- | -------------- | ------------------------- |
+| 1    | E:first-line   | 匹配E元素的第一行         |
+| 2    | E:first-letter | 匹配E元素的第一个字母     |
+| 3    | E:before       | 在E元素之前插入生成的内容 |
+| 4    | E:after        | 在E元素之后插入生成的内容 |
 
 
+
+同级元素通用选择器
+
+E ~ F	匹配任何在E元素之后的同级F元素
 
 ##元素定位 Position
 
@@ -469,10 +550,22 @@ relative
 sticky
 
 > 元素在页面滚动时如同在正常流中，但当其滚动到相对于视口的某个特定位置时就会固定在屏幕上，如同 fixed 一般。
+>
+> 盒位置根据正常流计算(这称为正常流动中的位置)，然后相对于该元素在流中的 flow root（BFC）和 containing block（最近的块级祖先元素）定位。在所有情况下（即便被定位元素为 `table 时`），该元素定位均不对后续元素造成影响。当元素 B 被粘性定位时，后续元素的位置仍按照 B 未定位时的位置来确定。`position: sticky `对 `table` 元素的效果与 `position: relative `相同。
+
+static 正常布局行为
+
+Inherit/initial/unset
 
 隐性改变display类型: 当元素设置`position : absolute`或`float : left/right`时，元素display就转变为inline-block，可以设置宽高了
 
 `margin:0 auto`自动居中属性不能和float、position一起使用，会失效
+
+
+
+如果 `top` 和 `bottom` 都被指定（严格来说，这里指定的值不能为 `auto` ），`top` 优先。
+
+如果指定了 `left` 和 `right` ，当 `direction`设置为 `ltr`（水平书写的中文、英语）时 `left` 优先， 当`direction`设置为 `rtl`（阿拉伯语、希伯来语、波斯语由右向左书写）时 `right` 优先。
 
 ## 盒模型
 
@@ -682,7 +775,7 @@ Text-transform:capitalize 首字母大写
 }
 ```
 6. `table`
-7. css-table`
+7. `css-table`
 
 ```css
 .parent{
@@ -806,6 +899,88 @@ Text-transform:capitalize 首字母大写
 
 6.  align-self
   align-self属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。
+
+
+
+## 可继承属性
+
+1. 字体系列属性
+
+   font、font-family、font-weight、font-size、font-style、font-variant
+
+2. 文本系列属性
+
+   Text-indent、text-align、text-shadow、line-height、word-spacing、letter-spacing、
+
+   Text-transform、direction、color
+
+3. 元素可见性: visibility
+
+4. 表格布局属性
+
+   caption-size(表格标题位置)、border-collapse(合并边框)、empty-cells(是否显示表格中的空单元格)
+
+5. 列表属性
+
+   List-style-type(列表项标记的类型)、list-style-image(列表标记用图片代替)、list-style-position、list-style
+
+6. 设置嵌套引用的引号类型： quotes
+
+7. 光标属性：cursor
+
+8. 其他 speak、page 等
+
+
+
+所有元素可以继承的属性：
+
+1、元素可见性：visibility
+
+2、光标属性：cursor
+
+内联元素可以继承的属性:
+
+1、字体系列属性
+
+2、除text-indent、text-align之外的文本系列属性
+
+块级元素可以继承的属性:
+
+text-indent、text-align
+
+无继承的属性
+
+1、display
+
+2、文本属性：vertical-align、text-decoration
+
+3、盒子模型的属性:宽度、高度、内外边距、边框等
+
+4、背景属性：背景图片、颜色、位置等
+
+5、定位属性：浮动、清除浮动、定位position等
+
+6、生成内容属性:content、counter-reset、counter-increment
+
+7、轮廓样式属性:outline-style、outline-width、outline-color、outline
+
+8、页面样式属性:size、page-break-before、page-break-after
+
+继承中比较特殊的几点
+
+1、a 标签的字体颜色不能被继承
+
+1、<h1>-<h6>标签字体的大下也是不能被继承的
+
+因为它们都有一个默认值
+
+
+
+inherit 关键字可用于任何 HTML 元素上的任何 CSS 属性。
+
+initial:用来设置css属性值为它的默认值，也就是浏览器默认设置的css属性值。
+
+unset:一个属性定义了unset值，如果该属性是默认继承属性，该值等同于inherit，如果该属性是非继承属性，该值等同于initial
 
 
 
@@ -994,17 +1169,33 @@ DOM的appendChild()方法可以将一个选项框中的选项从父节点中移�
 
 ## 移动端
 
+[参考](https://github.com/jawil/blog/issues/21)
+
 **分辨率**：手机屏幕的实际像素尺寸，这与物理尺寸无关，不是成比例的。
 
 **像素密度**（pixels per inch）即每英寸长度上排列的像素点数量。
 
 实际像素/倍率 = 逻辑像素尺寸
 
+
+
 逻辑像素也就是 css 像素
 
 如 iPhone5使用 retina 屏幕，使用`2px x 2px`的 device pixel 代表`1px x 1px`的 css pixel，所以设备像素为640 x 1136px 在 css 逻辑像素数为320 x 568px
 
-**css px** 就是 css 像素，其显示大小是相对大小而非绝对大小，是与设备相关的。
+**css px** 就是 css 像素，其显示大小是**相对**大小而非绝对大小，相对的是设备像素(`device pixel`)。
+
+**它是图像显示的基本单元，既不是一个确定的物理量，也不是一个点或者小方块，而是一个抽象概念**。
+
+不同的设备，图像基本采样单元是不同的，显示器上的物理像素等于显示器的点距，而打印机的物理像素等于打印机的墨点。而衡量点距大小和打印机墨点大小的单位分别称为`ppi`和`dpi`：
+
+
+
+**设备像素（物理像素）**，顾名思义，显示屏是由一个个**物理像素**点组成的，通过控制每个像素点的颜色，使屏幕显示出不同的图像，屏幕从工厂出来那天起，它上面的**物理像素点**就固定不变了，单位**pt**
+
+**pt在css单位中属于真正的绝对单位，1pt = 1/72(inch),inch及英寸，而1英寸等于2.54厘米。**
+
+
 
 对于多数 pc 屏幕，因为倍率 devicePixelRatio 通常为1，所以会误以为 css px 即为实际屏幕像素。
 
@@ -1027,7 +1218,7 @@ retina 屏，相应倍率@2x，@3x
 }
 ```
 
-
+**设备像素比（dpr** 描述的是在移动开发中1个css像素占用多少设备像素，如2代表1个css像素用2x2个设备像素来绘制。
 
 ## CSS hack
 
@@ -1120,9 +1311,22 @@ color: red \0
 ##浏览器渲染机制
 
 1. 处理 HTML 并构建 DOM 树。
-2. 处理 CSS 构建 CSSOM 树。
+
+   + 浏览器从磁盘或网络读取HTML的原始字节，并根据文件的指定编码（例如 UTF-8）将它们转换成字符串，也就是代码。
+
+   - 将字符串转换成Token，例如：`<html>`、`<body>`等。**Token中会标识出当前Token是“开始标签”或是“结束标签”亦或是“文本”等信息**。
+   - 生成节点对象并构建DOM，一边生成Token一边消耗Token来生成节点对象。换句话说，每个Token被生成后，会立刻消耗这个Token创建出节点对象。**注意：带有结束标签标识的Token不会创建节点对象。**
+
+2. 处理 CSS 构建 CSSOM 树（css rule tree,主要是为了完成匹配并把CSS Rule附加上Rendering Tree上的每个Element。）。
+
+   因为样式可以自行设置给某个节点，也可以通过继承获得。在这一过程中，浏览器得递归 CSSOM 树，然后确定具体的元素到底是什么样式。
+
 3. 将 DOM 与 CSSOM 合并成一个渲染树。
-4. 根据渲染树来布局，计算每个节点的位置。
+
+   **渲染树只会包括需要显示的节点和这些节点的样式信息**，如果某个节点是 `display: none` 的，那么就不会在渲染树中显示。
+
+4. 根据渲染树来布局（回流），计算每个节点的位置。
+
 5. 调用 GPU 绘制，合成图层，显示在屏幕上。
 
 
@@ -1131,7 +1335,7 @@ color: red \0
 
 当 HTML 解析到 script 标签时，会暂停构建 DOM，完成后才会从暂停的地方重新开始。也就是说，如果你想首屏渲染的越快，就越不应该在首屏就加载 JS 文件。并且 CSS 也会影响 JS 的执行，只有当解析完样式表才会执行 JS，所以也可以认为这种情况下，CSS 也会暂停构建 DOM。
 
-
+![2019-01-03-0](https://image.fundebug.com/2019-01-03-0.png)
 
 ### repaint/reflow
 
@@ -1145,7 +1349,7 @@ color: red \0
 
 >当盒模型的位置,大小以及其他属性，如颜色,字体,等确定下来之后，且不影响他在文档流中的位置时，浏览器便开始将新样式赋予给元素并绘制内容，这个过程称为重绘
 
-回流必定会发生重绘，重绘不一定会引发回流。回流所需的成本比重绘高的多，改变深层次的节点很可能导致父节点的一系列回流。
+**回流必定会发生重绘，重绘不一定会引发回流**。回流所需的成本比重绘高的多，改变深层次的节点很可能导致父节点的一系列回流。
 
 减少重绘和回流的方法：
 
@@ -1198,6 +1402,20 @@ getComputedStyle()
 getBoundingClientRect()
 scrollTo()
 ```
+
+
+
+JavaScript的加载、解析与执行会阻塞DOM的构建。想首屏渲染的越快，就越不应该在首屏就加载 JS 文件，这也是都建议将 script 标签放在 body 标签底部的原因。或者加 defer、async
+
+JS文件不只是阻塞DOM的构建，它会导致CSSOM也阻塞DOM的构建。因为JavaScript不只是可以改DOM，它还可以更改样式，也就是它可以更改CSSOM。
+
+
+
+async 属性表示异步执行引入的 JavaScript，与 defer 的区别在于，如果已经加载好，就会开始执行——无论此刻是 HTML 解析阶段还是 DOMContentLoaded 触发之后。需要注意的是，这种方式加载的 JavaScript 依然会阻塞 load 事件。
+
+defer 属性表示延迟执行引入的 JavaScript，即这段 JavaScript 加载时 HTML 并未停止解析，这两个过程是并行的。整个 document 解析完毕且 defer-script 也加载完成之后（这两件事情的顺序无关），会执行所有由 defer-script 加载的 JavaScript 代码，然后触发 DOMContentLoaded 事件。
+
+
 
 
 

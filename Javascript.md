@@ -264,7 +264,7 @@ typeof new Number(1) === 'object';
 
 
 
-**instanceof**
+**instanceof **基于原型链去判断
 
 对于引用类型可以用`instanceof`，但`instanceof` 的一个缺点在于它假定单一的全局执行环境，若存在多个框架，当一个框架向另一个框架传入一个数组，那传入的数组与第二个框架中原生创建的数组具有不同的构造函数。
 
@@ -272,7 +272,15 @@ typeof new Number(1) === 'object';
 
 在检测对象是原生还是自定义的，可以使用`toString()` 方法，可以返回一个`[object NativeConstructorName]`，对于原生数组/函数等会返回`[object Array]/[object Function]`；而对于自定义函数，`toString()`不能检测其构造函数名，会返回`[object object]`
 
+Object.protype.toString –判断数组或者函数
 
+Object.prototype.toString().apply([]);===”[object Array]”; 
+Object.prototype.toString().apply(function(){});===”[object Function]”; 
+Object.prototype.toString().apply(null);===”[object Null]”; 
+
+Object.prototype.toString().apply(undefined);===”[object Undefined]”;
+
+**constructor** – 属性返回对创建此对象的函数的引用。
 
 ### 数字 Number
 
@@ -2290,6 +2298,54 @@ useCapture默认为false，即冒泡，true则为捕获
 
 
 
+“DOM2级事件”规定事件流包括三个阶段，事件捕获阶段、处于目标阶段和事件冒泡阶段。首先发生的事件捕获，为截获事件提供了机会。然后是实际的目标接收了事件。最后一个阶段是冒泡阶段，可以在这个阶段对事件做出响应。
+
+
+
+当事件流处于**目标阶段**，不是冒泡阶段、也不是捕获阶段，事件处理程序被调用的顺序是**注册的顺序**。不会因为说注册的是冒泡阶段的方法一定会在捕获阶段的方法执行完才执行。
+
+```
+<div id="a">
+    <div id="b">
+        <div id="c"></div>
+    </div>
+</div>
+var a = document.getElementById("a"),
+    b = document.getElementById("b"),
+    c = document.getElementById("c");
+c.addEventListener("click", function (event) {
+    console.log("c1");
+    // 注意第三个参数没有传进 false , 因为默认传进来的是 false
+    //，代表冒泡阶段调用，个人认为处于目标阶段也会调用的
+});
+c.addEventListener("click", function (event) {
+    console.log("c2");
+}, true);
+b.addEventListener("click", function (event) {
+    console.log("b");
+}, true);
+a.addEventListener("click", function (event) {
+    console.log("a1");
+}, true);
+a.addEventListener("click", function (event) {
+    console.log("a2")
+});
+a.addEventListener("click", function (event) {
+    console.log("a3");
+    event.stopImmediatePropagation();
+}, true);
+a.addEventListener("click", function (event) {
+    console.log("a4");
+}, true);
+点击a，输出 a1、a2、a3
+stopImmediatePropagation包含了stopPropagation的功能，即阻止事件传播（捕获或冒泡），但同时也阻止该元素上后来绑定的事件处理程序被调用，所以不输出 a4
+当点击a的时候，先从document捕获，然后一步步往下找，找到a这个元素的时候，此时的target和currentTarget是一致的，所以认定到底了，不需要再捕获了，此时就按顺序执行已经预定的事件处理函数，执行完毕后再继续往上冒泡...）
+```
+
+
+
+
+
 *支持事件冒泡*（EventBubbling）的事件类型为鼠标事件和键盘事件，例如：mouseover, mouseout, click, keydown, keypress。
 
 *接口事件*则通常不支持事件冒泡（Event Bubbling），例如：load, change, submit, focus, blur。
@@ -3770,6 +3826,18 @@ var process = {
 即在进入函数体之前，就计算x + 5的值（等于 6），再将这个值传入函数f。C 语言就采用这种策略。
 “传名调用”
 即直接将表达式x + 5传入函数体，只在用到它的时候求值。Haskell 语言采用这种策略。
+
+
+
+浏览器是多进程的，有
+
+主进程(显示交互、各个页面管理、创建销毁)、网络资源管理等
+
+第三方插件进程
+
+GPU 进程
+
+浏览器渲染进程(内核)：页面的渲染，JS的执行，事件的循环，都在这个进程内进行。
 
 
 
