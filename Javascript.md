@@ -490,28 +490,29 @@ Array(3) // [, , ,]
 
 
 
-| 语法                                                     | 描述                                                         |
-| -------------------------------------------------------- | ------------------------------------------------------------ |
-| `array.length`                                           | 数组长度                                                     |
-| `array.slice(begin,end)`                                 | 返回浅拷贝的**新数组**                                       |
-| ` array[i]`                                              | 下标访问                                                     |
-| `array.push()`                                           | 末尾添加一个或多个元素并返回长度                             |
-| `arr.unshift()`                                          | 头部添加一个或多个元素并返回长度                             |
-| `array.pop()`                                            | 末尾删除最后一个元素并返回该元素                             |
-| `arr.shift()`                                            | 头部删除第一个元素并返回该元素                               |
-| `arr.includes(value[,fromIndex])`                        | 判断一个数组是否包含指定的值                                 |
-| `arr.sort([fun]) / arr.reverse()`                        | 排序与翻转                                                   |
-| `arr.indexof(value[,fromIndex])/lastIndexof()`           | 索引返回索引值,不存在则返回-1                                |
-| `arr.concat(...arr)`                                     | 连接两个以上数组返回**新数组**，不改变现有数组               |
-| `arr.join([separator])`                                  | 连接数组元素形成字符串，不改变数组，separator默认`','`       |
-| `arr.splice(index,howmany,items)`                        | 从数组中添加/删除项目并返回被删除的项目（index：添加/删除项目的起始位置；howmany:要删除的项目数量，若为0，则不删除；item1，…… 添加的新项目，可选。返回删除元素形成的数组 |
-| `arr.toString()`                                         | 返回一个包含数组中所有元素的字符串，每个元素通过逗号分隔。   |
-| `arr.toLocalString()`                                    | 根据区域设置，返回一个包含数组中所有元素各自用`toLocalString`转换的字符串，每个元素通过逗号分隔。 |
-| `arr.find(callback[, thisArg])`                          | 返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined。 |
-| `arr.findIndex(callback[, thisArg])`                     | 返回数组中满足提供的测试函数的第一个元素的索引。否则返回-1。 |
-| `arr.fill(val,startPos,endPos)`                          | 用给定值填充数组中指定的起始位置到结束位置间的位置           |
-| `arr.flat(n)`                                            | 将嵌套的数组拉平'n'层,n可以取`Infinity`作为参数表示不管有多少层嵌套都可以拉平,数组中有空位（空位不是 undefined，ubdefined 还是有值的）会被 flat 跳过 |
-| `arr.copyWithin(目标索引[, [源开始索引], [结束源索引]])` | 浅复制数组的一部分到同一数组中的另一个位置，并返回它，改变数组但不修改其大小。 |
+| 语法                                                        | 描述                                                         |
+| ----------------------------------------------------------- | ------------------------------------------------------------ |
+| `array.length`                                              | 数组长度                                                     |
+| `array.slice(begin,end)`                                    | 返回浅拷贝的**新数组**                                       |
+| ` array[i]`                                                 | 下标访问                                                     |
+| `array.push()`                                              | 末尾添加一个或多个元素并返回长度                             |
+| `arr.unshift()`                                             | 头部添加一个或多个元素并返回长度                             |
+| `array.pop()`                                               | 末尾删除最后一个元素并返回该元素                             |
+| `arr.shift()`                                               | 头部删除第一个元素并返回该元素                               |
+| `arr.includes(value[,fromIndex])`                           | 判断一个数组是否包含指定的值                                 |
+| `arr.sort([fun]) / arr.reverse()`                           | 排序与翻转                                                   |
+| `arr.indexof(value[,fromIndex])/lastIndexof()`              | 索引返回索引值,不存在则返回-1                                |
+| `arr.concat(...arr)`                                        | 连接两个以上数组返回**新数组**，不改变现有数组               |
+| `arr.join([separator])`                                     | 连接数组元素形成字符串，不改变数组，separator默认`','`       |
+| `arr.splice(index,howmany,items)`                           | 从数组中添加/删除项目并返回被删除的项目（index：添加/删除项目的起始位置；howmany:要删除的项目数量，若为0，则不删除；item1，…… 添加的新项目，可选。返回删除元素形成的数组 |
+| `arr.toString()`                                            | 返回一个包含数组中所有元素的字符串，每个元素通过逗号分隔。   |
+| `arr.toLocalString()`                                       | 根据区域设置，返回一个包含数组中所有元素各自用`toLocalString`转换的字符串，每个元素通过逗号分隔。 |
+| `arr.find(callback[, thisArg])`                             | 返回数组中满足提供的测试函数的第一个元素的值。否则返回 undefined。 |
+| `arr.findIndex(callback[, thisArg])`                        | 返回数组中满足提供的测试函数的第一个元素的索引。否则返回-1。 |
+| `arr.fill(val,startPos,endPos)`                             | 用给定值填充数组中指定的起始位置到结束位置间的位置           |
+| `arr.flat(n)`                                               | 将嵌套的数组拉平'n'层,n可以取`Infinity`作为参数表示不管有多少层嵌套都可以拉平,数组中有空位（空位不是 undefined，ubdefined 还是有值的）会被 flat 跳过 |
+| `arr.copyWithin(目标索引[, [源开始索引], [结束源索引]])`    | 浅复制数组的一部分到同一数组中的另一个位置，并返回它，改变数组但不修改其大小。 |
+| `array.filter(function(currentValue,index,arr), thisValue)` | 过滤并创建一个新的数组                                       |
 
 
 ```javascript

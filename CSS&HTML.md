@@ -1169,43 +1169,53 @@ DOM的appendChild()方法可以将一个选项框中的选项从父节点中移�
 
 ## 移动端
 
+###分辨率、像素
+
 [参考](https://github.com/jawil/blog/issues/21)
 
 **分辨率**：手机屏幕的实际像素尺寸，这与物理尺寸无关，不是成比例的。
 
-**像素密度**（pixels per inch）即每英寸长度上排列的像素点数量。
+**设备像素（物理像素）**：设备上真实的物理单元
+
++ **PPI像素密度**（pixels per inch）即每英寸包括的像素点数量。可以用于描述屏幕的清晰度以及一张图片的质量。PPI 越高，图片质量越高或者屏幕越清晰。
+
++ **DPI ** (Dot Per Inch): 即每英寸包括的点数，点是一个抽象的单位，它可以是屏幕像素点、图片像素点也可以是打印机的墨点。若描述图片和屏幕，则和 PPI 等价
+
+
+
+**DIP/DP 设备独立像素** (Device Independent Pixels)，也可以叫逻辑像素
+
+照理来说，相同大小的图片文字，若屏幕分辨率越高，则它在屏幕上会越来越小。因此需要一个单位来告诉不同分辨率的设备在界面上显示元素的大小是多少。ios 尺寸单位是 pt，Android 单位是 dp
+
+
+
+web 端写 css 时，单位 px 即 css 像素，当页面缩放比例是 100%时，一个 css 像素等于一个设备独立像素。但当用户对浏览器放大时，css 像素也会被放大，跨越更多的物理像素。页面的缩放系数=CSS像素/设备独立像素
+
+如 iPhone5使用 retina 屏幕，使用`2px x 2px`的 device pixel 代表`1px x 1px`的 css pixel，所以设备像素为640 x 1136px 在 css 逻辑像素数为320 x 568px
+
+在 Chrome 开发者工具上，比如 `iPhone X`显示的尺寸是 `375x812`，实际 `iPhone X`的分辨率会比这高很多，这里显示的就是设备独立像素。
+
+
+
+**drp 设备像素比** (device pixel ratio): 即物理像素和设备独立像素的比值。
 
 实际像素/倍率 = 逻辑像素尺寸
 
 
 
-逻辑像素也就是 css 像素
+屏幕可以用 K 和 P 单位来形容屏幕
 
-如 iPhone5使用 retina 屏幕，使用`2px x 2px`的 device pixel 代表`1px x 1px`的 css pixel，所以设备像素为640 x 1136px 在 css 逻辑像素数为320 x 568px
+P 代表屏幕纵向的像素个数，1080P 即纵向上有 1080 个元素
 
-**css px** 就是 css 像素，其显示大小是**相对**大小而非绝对大小，相对的是设备像素(`device pixel`)。
+K 代表屏幕横向有几个 1024 个像素，2K 即横向像素超过 2048
 
-**它是图像显示的基本单元，既不是一个确定的物理量，也不是一个点或者小方块，而是一个抽象概念**。
+
+
+**css px是图像显示的基本单元，既不是一个确定的物理量，也不是一个点或者小方块，而是一个抽象概念**。
 
 不同的设备，图像基本采样单元是不同的，显示器上的物理像素等于显示器的点距，而打印机的物理像素等于打印机的墨点。而衡量点距大小和打印机墨点大小的单位分别称为`ppi`和`dpi`：
 
 
-
-**设备像素（物理像素）**，顾名思义，显示屏是由一个个**物理像素**点组成的，通过控制每个像素点的颜色，使屏幕显示出不同的图像，屏幕从工厂出来那天起，它上面的**物理像素点**就固定不变了，单位**pt**
-
-**pt在css单位中属于真正的绝对单位，1pt = 1/72(inch),inch及英寸，而1英寸等于2.54厘米。**
-
-
-
-对于多数 pc 屏幕，因为倍率 devicePixelRatio 通常为1，所以会误以为 css px 即为实际屏幕像素。
-
-而 css `width:100px;height:100px`，假设倍率为3，相当于三个物理像素来描绘一个电子像素，所以会显得模糊，因此做法是把图片换成300x300的，css 设置不变，这时在移动端 css 宽高会被换算为300x300，就不会糊了
-
-逻辑像素尺寸：ios 单位是 `pt`, Android 单位是`dp`，其实是一样的，根据倍率转换为 px
-
-iPhone 逻辑像素尺寸：320x568；375x667；414x736
-retina 屏，相应倍率@2x，@3x
-安卓逻辑像素趋于统一：360X640
 安卓根据屏幕像素密度分为 `ldpi/mdpi/hdpi/xhdpi`等，以160px 为基准
 
 `window.devicePixelRatio`可以查询设备像素比，即倍率（DPPR）
@@ -1218,7 +1228,148 @@ retina 屏，相应倍率@2x，@3x
 }
 ```
 
-**设备像素比（dpr** 描述的是在移动开发中1个css像素占用多少设备像素，如2代表1个css像素用2x2个设备像素来绘制。
+
+
+移动端中的 1px 问题：
+
+为了适配各种屏幕，我们写代码时一般使用设备独立像素来对页面进行布局。
+
+而在设备像素比大于 `1`的屏幕上，我们写的 `1px`实际上是被多个物理像素渲染，这就会出现 `1px`在有些屏幕上看起来很粗的现象。
+
+1.可以使用基于 media 判断不同设备像素比设定 `border-image`或`background-image`
+
+```css
+.border_1px {
+	border-bottom: 1px solid #000;      
+}
+@media only screen and (-webkit-min-device-pixel-ratio:2) {
+  .border_1px {
+ 		border-bottom: none;
+    border-width: 0 0 1px 0;
+    border-image: url(../img/1pxline.png) 0 0 2 0 stretch;
+	}
+  .border_1px {
+ 		background: url(../img/1pxline.png ) repeat-x left bottom;
+	}
+}
+```
+
+2.基于 `media`查询判断不同的设备像素比对线条进行缩放：
+
+```css
+.border_1px:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 1px;
+  width: 100%;
+  background-color: #000;
+  transform-origin: 50% 0%;
+}
+@media only screen and (-webkit-min-device-pixel-ratio:2) {
+  .border_1px:before { 
+  	transform: scaleY(0.5);
+  }
+}
+@media only screen and (-webkit-min-device-pixel-ratio:3) {
+	.border_1px:before { 
+  	transform: scaleY(0.33);
+  }
+}
+```
+
+
+
+3.svg,借助 `PostCSS`的 `postcss-write-svg`我们能直接使用 `border-image`和 `background-image`创建 `svg`的 `1px`边框：
+
+
+
+### 视口
+
+> 当前可见的计算机图形区域，在浏览器中不包括浏览器的 UI、菜单栏等。通常包括布局视口、视觉视口和理想视口
+
+**布局视口**是网页布局的基准窗口，在 `PC`浏览器上，布局视口就等于当前浏览器的窗口大小（不包括 `borders` 、 `margins`、滚动条）。在移动端，布局视口被赋予一个默认值，大部分为 `980px`，这保证 `PC`的网页可以在手机浏览器上呈现，但是非常小，用户可以手动对网页进行放大。
+
+通过调用 `document.documentElement.clientWidth/clientHeight`来获取布局视口大小。
+
+
+
+**视觉视口**( `visual viewport`)：用户通过屏幕真实看到的区域。默认等于当前浏览器的窗口大小（包括滚动条宽度）。
+
+可以通过调用 `window.innerWidth/innerHeight`来获取视觉视口大小。
+
+
+
+**理想视口**( `ideal viewport`)：网站页面在移动端展示的理想大小。单位正是设备独立像素。`页面的缩放系数=CSS像素/设备独立像素`，实际上说 `页面的缩放系数=理想视口宽度/视觉视口宽度`更为准确。
+
+可以通过调用 `screen.width/height`来获取理想视口大小。
+
+
+
+在移动端 meta 中定义 viewpoint 时必须让布局视口、视觉视口都尽可能等于理想视口。
+
+`device-width`就等于理想视口的宽度，所以设置 `width=device-width`就相当于让布局视口等于理想视口。
+
+由于 `initial-scale=理想视口宽度/视觉视口宽度`，所以我们设置 `initial-scale=1;`就相当于让视觉视口等于理想视口。
+
+
+
+获取浏览器大小
+
+- `window.innerHeight`：获取浏览器视觉视口高度（包括内容、边框以及滚动条）。
+
+- `window.outerHeight`：获取浏览器窗口外部的高度。表示整个浏览器窗口的高度，包括侧边栏、窗口镶边和调正窗口大小的边框。
+
+- `window.screen.Height`：获取获屏幕取理想视口高度，这个数值是固定的， `设备的分辨率/设备像素比`
+
+- `window.screen.availHeight`：浏览器窗口可用的高度。
+
+- `document.documentElement.clientHeight`：获取浏览器布局视口高度，包括内边距，但不包括垂直滚动条、边框和外边距。
+
+- `document.documentElement.offsetHeight`：包括内边距、滚动条、边框和外边距。
+
+- `document.documentElement.scrollHeight`：在不使用滚动条的情况下适合视口中的所有内容所需的最小宽度。测量方式与 `clientHeight`相同：它包含元素的内边距，但不包括边框，外边距或垂直滚动条。
+
+  
+
+  `documentElement`是文档根元素，就是`<html>`标签
+
+  在不支持`window.innerHeight`的浏览器中，可以读取`documentElement`和`body`的高度
+
+  
+
+  ```js
+  var height = window.innerHeight
+      || document.documentElement.clientHeight
+      || document.body.clientHeight;
+  //通常这样兼容大多浏览器
+  //documentElement.clientHeight不包括整个文档的滚动条，但包括<html>元素的边框。
+  body.clientHeight不包括整个文档的滚动条，也不包括<html>元素的边框，也不包括<body>的边框和滚动条。
+  ```
+
+  
+
+  
+
+  ![img](http://imweb-io-1251594266.file.myqcloud.com/FmoyfwVMoVKbeRfuHAghzFPImwr5)
+
+![img](http://imweb-io-1251594266.file.myqcloud.com/Fi-h0tWFq6Nz79kgOdc4t3f0y5js)
+
+
+
+### 移动端适配方案
+
+- flexible 方案
+
+- vh、vw 方案
+
+  > 将视觉视口宽度 `window.innerWidth`和视觉视口高度 `window.innerHeight` 等分为 100 份。
+  >
+  > `vw(Viewport's width)`： `1vw`等于视觉视口的 `1%`
+  >
+  > `vh(Viewport's height)` : `1vh` 为视觉视口高度的 `1%`
+
+
 
 ## CSS hack
 
