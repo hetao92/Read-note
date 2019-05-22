@@ -1600,6 +1600,20 @@ defer 属性表示延迟执行引入的 JavaScript，即这段 JavaScript 加载
 
 
 
+### icon 相关
+
+雪碧图 古老
+
+iconfont 三种形式
+
+​	Unicode 格式 兼容性好，支持调整图标大小颜色，但不支持多色图标。不同设备浏览器字体渲染会略有差别
+
+​	Font-class 兼容性好，相比于unicode语意明确，书写更直观。相比 Unicode 会做一步转化，在 class 里直接写了Unicode，只要引入 class 就好
+
+​	symbol 	svg-icon,支持多色图标，也可以像字体一样调整大小等，兼容性好，支持 ie9+；矢量缩放不失真。因为是用 js 生成 svg，相对不直观，无法按需加载，添加改动不友善
+
+
+
 # 浏览器
 
 浏览器包括：

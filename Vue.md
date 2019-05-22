@@ -591,7 +591,9 @@ new Vue({
 
 组件名可以是短横线分隔命名也可以是首字母大写方式，不过用短横线分隔命名命名时引用组件也必须用驼峰，而用首字母大写方式命名则两种方式都可以用于引用之时
 
+**对于绝大多数项目来说，在单文件组件和字符串模板中组件名应该总是 PascalCase 的——但是在 DOM 模板中总是 kebab-case 的。**
 
+因为 PascalCase 同样适用于 JavaScript。而 HTML 是大小写不敏感的，在 DOM 模板中必须仍使用 kebab-case。
 
 对自定义组件，HTML 本身存在一些限制，`<ul>`/`<ol>`/`<table>`/`<select>`等元素里能包含的元素是有限制的，因此在自定义组件中使用这些受限元素是会出渲染问题的
 
@@ -1228,6 +1230,12 @@ data () {
 为了给样式设置作用域，Vue 会为元素添加一个独一无二的特性，例如 `data-v-f3f3eg9`。然后修改选择器，使得在匹配选择器的元素中，只有带这个特性才会真正生效 (比如 `button[data-v-f3f3eg9]`)。
 
 问题在于大量的元素和特性组合的选择器 (比如 `button[data-v-f3f3eg9]`) 会比类和特性组合的选择器慢，所以应该尽可能选用类选择器。
+
+
+
+用 vue 写代码了，核心思想转变为用数据驱动 `view`，不用像`jQuery`时代那样，频繁的操作 DOM 节点。但还是免不了有些场景还是要操作 DOM 的。我们在组件内选择节点的时候一定要切记避免使用 `document.querySelector()`等一系列的全局选择器。你应该**使用`this.$el`或者`this.refs.xxx.$el`的方式来选择 DOM**。这样就能将你的操作局限在当前的组件内，能避免很多问题。
+
+当需要注册一些全局性的事件，比如监听页面窗口的变化`window.addEventListener('resize', this.__resizeHandler)`，声明了之后一定要在 `beforeDestroy`或者`destroyed`生命周期注销它。`window.removeEventListener('resize', this.__resizeHandler)`避免造成不必要的消耗。
 
 
 

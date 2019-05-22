@@ -1062,6 +1062,8 @@ Object.defineProperty(o, "conflict", {
 
 会忽略 undefined、symbol、不能序列化函数、不能解决循环引用的对象
 
+使用递归实现
+
 ### Symbol
 
 > 表示独一无二的值
@@ -3409,7 +3411,7 @@ obj.hello() // 'hi!'
 
 内置执行器，无需调用 next，自动执行
 
-语义更好，适用性广
+语义更好，适用性广，异步代码在形式上更接近于同步代码
 
 返回值是 promise，可用 then 指定下一步操作，而G返回的是Iterator对象
 
@@ -3419,7 +3421,16 @@ obj.hello() // 'hi!'
 
 
 
+相比 promise 的优点
+
++ 简洁，可读性
++ 错误处理 async/await 可以使用try/catch来处理错误
++ 调用多个 promise 时更加直观
++ 便于调试
+
 任何一个 await 语句后 promise 对象变成 reject 状态，整个 async 函数会中断执行，所以最好把 await 放在`try..catch`中
+
+
 
 ```javascript
 async function f() {
