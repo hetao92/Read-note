@@ -12,6 +12,43 @@
 
 
 
+对于打包生成的文件，会包含一个立即执行函数IIFE（webpackBootstrap），它仅接收一个对象——未加载的模块集合，对象的key 是路径，值是函数
+
+```js
+(function(modules){
+  // 缓存 __webpack_require__ 函数加载过的模块
+  var installedModules = {};
+
+  /**
+   * Webpack 加载函数，用来加载 webpack 定义的模块
+   * @param {String} moduleId 模块 ID，一般为模块的源码路径，如 "./src/index.js"
+   * @returns {Object} exports 导出对象
+   */
+  function __webpack_require__(moduleId) {
+    // ...
+  }
+
+  // 在 __webpack_require__ 函数对象上挂载一些变量及函数 ...
+
+  // 传入表达式的值为 "./src/index.js"
+  return __webpack_require__(__webpack_require__.s = "./src/index.js");
+})({
+  "./src/index.js": (function(module, __webpack_exports__, __webpack_require__) {
+    // ...
+  })
+});
+
+//在立即执行函数里，定义一个模块加载函数，最后 return 加载函数加载入口模块
+//执行顺序是：入口模块 -> 工具模块 -> 入口模块。入口模块中首先就通过 __webpack_require__("./src/utils/math.js") 拿到了工具模块的 exports 对象。再看工具模块，ES 导出语法转化成了__webpack_require__.d(__webpack_exports__, [key], [getter])，__webpack_require__.d 其实就是 Object.defineProperty 的简单包装
+
+//流程 加载 main.js
+//执行 webpackBootstrap
+//__webpack_require__入口模块 执行模块，若有其他模块，__webpack_require__其他模块，直至结束
+
+```
+
+
+
 **四个核心概念：**
 入口(entry)：即从哪里开始逐步确定需要打包的内容
 输出(output)：将所有资源归拢，在哪里如何打包程序
