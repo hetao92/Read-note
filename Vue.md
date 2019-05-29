@@ -132,6 +132,7 @@ computed: {
 }
 ```
 **2.methods**
+
 ```
 methods: {
   reversedMessage: function () {
@@ -892,6 +893,132 @@ new Vue({
 
 
 
+### 组件间通信方式
+
+1. Props / $emit 父子组件间互相传值
+
+2. eventBus `$emit / $on` 通过创建一个空的 vue 实例作为作为中央事件总线，用它来触发事件和监听事件，这样可以实现父子、兄弟、跨级的组件通信
+
+   ```js
+   var Event = new Vue();
+   Event.$emit(事件名, 数据);
+   Event.$on(事件名, data => {})
+   ```
+
+   
+
+3. vuex。其中 vuex 由于是响应式，所以刷新后并不会保存起来而是回到初始状态，此时可以配合 localStorage 使用
+
+4. `$attrs / $listeners`
+
+   - `$attrs`：包含了父作用域中不被 prop 所识别 (且获取) 的特性绑定 (class 和 style 除外)。当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 (class 和 style 除外)，并且可以通过 v-bind="$attrs" 传入内部组件。通常配合 interitAttrs 选项一起使用。
+   - `$listeners`：包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器。它可以通过 v-on="$listeners" 传入内部组件
+
+   简单来说： `$attrs`与 `$listeners` 是两个对象， `$attrs` 里存放的是父组件中绑定的非 Props 属性， `$listeners`里存放的是父组件中绑定的非原生事件。
+
+5. Provide / inject
+
+   这对 API 允许一个祖先组件向所有子孙后代注入一个依赖，无论组件层次多深，并在起上下游关系成立的时间里始终生效。即祖先组件通过 provider 提供变量，在子孙组件中通过 inject 注入变量。使用场景多是子组件获取跨级上级组件的状态
+
+   provide 和 inject 绑定**并不是可响应的**,**然而，如果你传入了一个可监听的对象，那么其对象的属性还是可响应的**
+
+   ```js
+   // A.vue,B 是 A 的子组件
+   export default {
+   	provide: {
+       name:'hello'
+     }
+   }
+   //此时 A 组件将 name 变量提供给所有子组件
+   // B.vue
+   export default {
+     inject: ['name'],
+     mounted() {
+       console.log(this.name)
+     }
+   }
+   //B 中通过 inject 注入 A 提供的 name 变量
+   ```
+
+   实现 provide 与 inject 间响应式的方法：
+
+   + vue 2.6新提供的api  Vue.observable 来优化响应式 provide(推荐)
+
+     ```vue
+     provide() {
+       this.theme = Vue.observable({
+         color: 'blue'
+       })
+       return {
+         theme: this.theme
+       }
+     }
+     //子组件
+     <template functional>
+       <div>
+       	<h3 :style='{color: injections.theme.color}'>组件</h3>
+       </div>
+     </template>
+     <script>
+     export default {
+       inject: {
+         theme: {
+           //函数式组件取值不同
+           default: () => ({})
+         }
+       }
+     }
+     </script>
+     ```
+
+     
+
+   + provide 一个组件组件的实例 this，在子孙组件中直接修改组件组件的实例属性，缺点是挂载了很多没必要的东西 methods 等。
+
+     ```js
+     provide() {
+       return {
+         theme: this
+       }
+     }
+     ```
+
+     
+
+6. `$parent/$children` & `ref`
+
+   ref在普通 DOM 元素上使用，引用指向的就是 DOM 元素，若用在子组件上，则指向组件实例
+
+   `$parent` / `$children`：访问父 / 子实例
+
+   这个方法弊端是无法在跨级或兄弟间通信
+
+   ```vue
+   //父组件
+   <template>
+   	<component-a ref='comA'></component-a>
+   </template>
+   <script>
+     export default {
+       mounted() {
+         const comA = this.$refs.comA;
+         console.log(comA.title)	//组件里的 data 属性
+         comA.sayHello();	//组件里的 methods 方法
+       }
+     }
+   </script>
+   ```
+
+
+
+总结
+
+- 父子通信： 父向子传递数据是通过 props，子向父是通过 events（ `$emit`）；通过父链 / 子链也可以通信（ `$parent` / `$children`）；ref 也可以访问组件实例；provide / inject API； `$attrs/$listeners`
+- 兄弟通信： Bus；Vuex
+- 跨级通信： Bus；Vuex；provide / inject API、 `$attrs/$listeners`
+
+
+
 ## 过渡&动画
 
 Vue 提供了 `transition` 的封装组件，在下列情形中，可以给任何元素和组件添加进入/离开过渡
@@ -1202,6 +1329,198 @@ JS是单线程的，意思就是同一时间只能做一件事情。它是基于
 
 
 
+### 双向绑定自我实现
+
+1.view 更新 data 可以通过事件监听
+
+2.data 更新 view 
+
++ 实现一个监听器Observer，用来劫持并监听所有属性，如果有变动的，就通知订阅者。
+
+  利用`Object.defineProperty()`
+
++ 实现一个订阅者Watcher，可以收到属性的变化通知并执行相应的函数，从而更新视图。
+
+  需要在上面的 observer 植入消息订阅器 dep
+
++ 实现一个解析器Compile，可以扫描和解析每个节点的相关指令，并根据初始化模板数据以及初始化相应的订阅器。
+
+```js
+function defineReactive(data, key, val) {
+	observe(val);	//递归遍历所有子属性
+  var dep = new Dep();
+	Object.defineProperty(data, key, {
+    enumerable: true,
+		configurable: true,
+    get: function() {
+      if(Dep.target) {	//是否需要添加订阅者
+        dep.addSub(watcher) //添加订阅者
+      }
+      return val;
+    },
+    set: function(newVal) {
+      val = newVal;
+      console.log('属性' + key + '已经被监听了，现在值为' + newVal.toString())
+      dep.notify()	//数据变化通知订阅者
+    }
+  })
+}
+
+function Dep() {
+  this.subs = [];
+}
+Dep.target = null;
+
+Dep.prototype = {
+  addSub: function(sub) {
+    this.subs.push(sub);
+  }
+  notify: function() {
+    this.subs.forEach(function(sub) {
+      sub.update();
+    })
+  }
+}
+
+//订阅者
+function Watcher(vm, exp, cb) {
+  this.cb = cb;
+  this.vm = vm;
+  this.exp = exp;
+  this.value = this.get() //将自己添加到订阅器的操作
+}
+Watcher.prototype = {
+  update: function() {
+    this.run();
+  }
+  run: function() {
+    var value = this.vm.data[this.exp];
+    var oldVal = this.value;
+    if(value !== oldVal) {
+    	this.value = value;
+      this.cb.call(this.vm, value, oldVal);
+    }
+  }
+	get: function() {
+    Dep.target = this;	//缓存自己
+    var value = this.vm.data[this.exp]	//强制执行监听器里的 get 函数
+    Dep.target = null;	//释放自己
+    return value
+  }
+}
+
+//关联 observer 和 watcher
+function SelfVue(data, el, exp) {
+  this.data = data;
+   Object.keys(data).forEach(function(key) {
+     self.proxyKeys(key);  // 绑定代理属性
+   });
+  observe(data);
+  el.innerHTML = this.data[exp];	//初始化模板数据的值
+  new Watcher(this, exp, function(value) {
+    el.innerHTML = value;
+  })
+  return this
+}
+function SelfVue(data, el, exp) {
+
+SelfVue.prototype = {
+  //赋值时通过 selfVue.name 而不是 selfVue.data.name 
+  proxyKeys: function(key) {
+    var self = this;
+    Object.defineProperty(this, key, {
+      enumerable: false,
+      configurable: true,
+      get: function proxyGetter() {
+        return self.data[key]
+      }
+      set: function proxySetter(newVal) {
+      	self.data[key] = newVal;
+    	}
+    })
+  }
+}
+//循环遍历对象
+function observe(data) {
+  if(!data || typeof data !== 'object') {
+    return 
+  }
+  Object.keys(data).forEach(function(key) {
+    defineReactive(data, key, data[key]);
+  })
+}
+
+//在页面实例化
+<h1 id="name">{{name}}</h1>
+var ele = document.querySelector('#name');
+var selfVue = new SelfVue({
+  name: 'hello'
+}, ele, name)
+window.setTimeout(function() {
+  selfVue.data.name = 'text'
+}, 2000)
+```
+
+
+
+```js
+//实现 compile
+//解析 dom 节点
+function nodeToFragment(el) {
+  var fragment = document.createDocumentFragment();
+  var child = el.firstChild;
+  while(child) {
+    //将 Dom 元素移入 fragment 中
+    fragment.appendChild(child);
+    child = el.firstChild
+  }
+  return fragment
+}
+
+function compileElement(el) {
+  var childNodes = el.childNodes;
+  var self = this;
+  [].slice.call(childNodes).forEach(function(node) {
+  	var reg = /\{\.*)\}\}/
+    var text = node.textContent;
+    if(self.isTextNode(node) && reg.test(text)) {
+      self.compileText(node, reg.exec(text)[1])
+    }
+    if(node.childNodes && node.childNodes.length) {
+      self.compileElement(node) //继续递归遍历子节点
+    }
+  })
+}
+function compileText(node, exp) {
+  var self = this;
+  var initText = this.vm[exp];
+  this.updateText(node, initText);	//将初始化的数据初始化到视图
+  new Watcher(this.vm, exp, function(value) {	// 生成订阅器并绑定更新函数
+    self.updateText(node, value)
+  })
+}
+function updateText(node,value) {
+  node.textContent = typeof value == 'undefined' ? '' : value;
+}
+
+//再将 selfvue 修改
+function SelfVue (options) {
+    var self = this;
+    this.vm = this;
+    this.data = options;
+ 
+    Object.keys(this.data).forEach(function(key) {
+        self.proxyKeys(key);
+    });
+ 
+    observe(this.data);
+    new Compile(options, this.vm);
+    return this;
+}
+```
+
+[完整参考](https://juejin.im/entry/5923973da22b9d005893805a)
+
 ## 代码风格
 
 **组件 data 必须是一个函数**
@@ -1280,4 +1599,37 @@ dom diff 则是通过JS层面的计算，返回一个patch对象，即补丁对�
 
 > 触发指定事件后进入脏数据监测，会调用`$digest`循环遍历所有的数据观察者，判断当前值是否和先前的值有区别，若监测到变化的话，会调用`$watch`函数，然后再次调用`$digest`循环直到没有变化
 >
-> 
+
+
+
+**React**
+
+区别
+
++ 监听数据变化的实现原理不同
+
+vue 是双向数据绑定，数据劫持配合观察订阅者模式
+
+react 是单向数据绑定，当某个组件的状态发生变化时，它会以该组件为根，重新渲染整个组件子树。
+
+
+
++ 组件通信的区别
+
+vue 通过 props 向子组件传递，子组件通过事件向父组件发送消息(当然可以用`$parent/$children`来修改)
+
+react 父组件可以通过 props 向子组件传递数据或者回调，可以通过 context 进行跨层级通信。可以说 react 不支持自定义事件，子组件向父组件传递都是使用回调函数的
+
+
+
++ 模拟渲染方式不同
+
+  vue 通过拓展的 HTML 语法渲染，在和组件JS代码分离的单独的模板中，通过指令来实现的，比如条件语句就需要 v-if 来实现
+
+  react 通过 JSX 渲染，在组件JS代码中，通过原生JS实现模板中的常见语法，比如插值，条件，循环等，都是通过JS语法实现的
+
++ vuex 和 redux 区别
+
+  Redux 使用的是不可变数据，而Vuex的数据是可变的。Redux每次都是用新的state替换旧的state，而Vuex是直接修改
+
+  Redux 在检测数据变化的时候，是通过 diff 的方式比较差异的，而Vuex其实和Vue的原理一样，是通过 getter/setter来比较的

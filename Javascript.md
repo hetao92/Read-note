@@ -3268,7 +3268,7 @@ Generator 函数也不能跟`new`命令一起用，会报错。因为他不是�
 
 **注意**
 
-`yield`不能再普通函数中使用
+`yield`不能在普通函数中使用
 
 `yield`若在另一个表达式中，必须放在圆括号内
 
@@ -4241,6 +4241,14 @@ async function async1() {
 + 图片尽量加 alt
 + 提高网站速度
 
+
+
+### 函数式编程
+
+在设计应用程序的时候，往往需要考虑几个设计原则：可扩展性、易模块化、可重用性、可测性、易推理性。
+
+函数式编程使用函数来抽象作用在数据之上的控制流和操作，从而在系统中消除副作用并减少对状态的改变。
+
 ##模块
 
 **模块系统的演进**
@@ -4545,31 +4553,278 @@ CommonJS 的一个模块，就是一个脚本文件。require命令第一次加�
 
 
 
-## 页面优化
+## 框架
+
+### MVVM
+
+View	视图
+
+Model	模型
+
+View Model	视图模型
+
+*视图模型*是暴露公共属性和命令的视图的抽象。MVVM没有MVC模式的控制器，也没有MVP模式的presenter，有的是一个*绑定器*。在视图模型中，绑定器在视图和[数据绑定器](https://zh.wikipedia.org/w/index.php?title=%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A%E5%99%A8&action=edit&redlink=1)之间进行通信。
+
+### MVC
+
+View 视图
+
+Model 模型
+
+Controller 控制器
+
+###MCP
+
+View
+
+Model
+
+Presenter	
+
+包含着组件的事件处理，负责检索 Model 获取数据，和将获取的数据经过格式转换与 View 进行沟通。
+
+
+
+## Js设计模式
+
+单例模式
+
+> 产生一个类的唯一实例，用来划分命名空间并将属性、方法组织在一起的对象，用一个变量标识是否被实例化
+
+
+
+观察者模式(发布者-订阅者模式)
+
+>对象间一对多的关系，让多个观察者可以同时监听某一个对象，当对象发生改变时，所有依赖于他的对象都可以得到通知
+
+
+
+模块模式
+
+> 为单体模式添加私有变量，私有方法来减少全局变量的使用
+
+
+
+代理模式
+
+> 本体注重自身代码的实现，而代理负责控制对本体对象的访问，控制以及实例化
+
+### 创建对象
+
+1. 工厂模式
+
+   根据接收的参数构建一个包含信息的对象，可创建多个相似对象，但无法识别对象类型
+
+   ```js
+   function createP(name, age, job) {
+     var o = new Object();
+     o.name = name;
+     o.job = job;
+     return o
+   }
+   ```
+
+2. 构造函数模式
+
+   ```js
+   function P(name) {
+     this.name = name;
+   }
+   let b = new P();
+   ```
+
+   缺点：构造函数中的每个方法，都需要在实例中重建一遍，则会产生不同的F unction 实例，导致不同作用域链与标识符解析
+
+3. 原型模式
+
+   由于 prototype 属性指向包含所有实例共享的属性与方法，因此直接将信息添加到原型对象中
+
+   ```js
+   function P() {
+     person.prototype.sayName = function() {...}
+   }
+     //this.name 与 prototype.name 不同
+     //前者是建立每个实例的 name 属性，后者使所有实例都访问同一个属性
+   ```
+
+   构造函数不等于原型对象
+
+   构造函数P	原型对象P.prototype	实例P1,P2
+
+   P.prototype指向原型对象 P.prototype，而原型对象的 constructor 指向P
+
+   而P1,P2内部属性均执行P.prototype，与P无直接关系
+
+   原型模式的缺点在于共享，在一个实例中修改属性也会影响另一个实例，而且当包含引用类型时也会有问题
+
+4. 组合使用构造函数与原型模式
+
+   构造函数用于定义实例属性，原型模式用于定义方法与共享属性
+
+5. 动态原型模式
+
+   将原型模式用if 语句应用到构造函数中
+
+   ```js
+   function P(name, job) {
+   	this.name = name;
+     ...
+     if(typeof this.sayName != 'function') {
+       P.prototype.sayName = function() {..};
+     }
+     //仅在初次调用构造函数时才会执行
+   }
+   ```
+
+6. 寄生构造函数模式
+
+   在构造函数中应用工厂模式，可用于创建一个具有额外方式的数组
+
+   此类返回的对象与构造函数及原型无关系
+
+   ```js
+   function P(name,..) {
+     let o = new Object();
+     o.name = name;
+     return o
+   }
+   ```
+
+7. 稳妥构造函数模式
+
+### 继承
+
+依据原型链
+
+1. 借用构造函数
+
+   在子类构造函数内部用 apply、call 调用超类构造函数
+
+   ```js
+   function sub() {
+     sup.call(this, val)
+   }
+   ```
+
+   缺点：超类方法对于子类未知，且方法均在构造函数中定义，函数无法复用
+
+2. 组合继承
+
+   原型链实现对原型属性、方法的继承，构造函数实现对实例属性的继承
+
+   ```js
+   function SuperType(name){
+       this.name = name;
+       this.colors = ['red','blue','green'];    
+   }
+   
+   SuperType.prototype.sayName = function(){
+       alert(this.name);
+   }
+   
+   function SubType(name,age){   
+       SuperType.call(this,name);     //第二次调用SuperType() 
+       this.age = age;
+   }
+   SubType.prototype = new SuperType();    //第一次调用SuperType()
+   SubType.prototype.constructor = SubType;  
+   SubType.prototype.sayAge=function(){
+        alert(this.age);
+   };
+   
+   var instance = new SubType('Greg',39);     //调用SubType构造函数，重写原型属性
+   instance.colors.push('black');      //重写原型属性
+   ```
+
+3. 原型式继承
+
+   创建临时性构造函数，将传入对象 o 作为原型，最后返回新实例，相当于对o的浅复制
+
+   ```js
+   function object(o) {
+     function F() {}
+     F.prototype = o;
+     return new F()
+   }
+   ```
+
+4. 寄生式继承
+
+   创建一个封装继承过程的函数。
+
+   ```js
+   function create(o) {
+     var clone = object(o);
+     clone.attr = function() {}
+     return clone
+   }
+   //基于 o 创建新对象，不仅有 o 的属性方法，也有自己的 attr 方法
+   ```
+
+5. 寄生组合式继承
+
+   借用构造函数继承属性，通过原型链的形式继承方法
+
+   ```js
+   function inheritPrototype(subType,superType){
+       var prototype = object(superType.prototype);    //创建对象
+       prototype.constructor = subType;    //增强对象
+       subType.prototype = prototype;    //指定对象
+   }
+   此函数接收两个参数，子类构造函数和超类构造函数。函数内部，第一步创建超类原型对象的一个副本，第二步为副本添加constructor属性，使其指向subType，弥补因为重写原型而失去默认的constructor属性。最后一步，将副本赋值给子类型的原型。整个过程说的简单点，就是将超类原型对象的一个副本复制给子类的原型对象。这样一来就可以避免继承超类的实例属性，也就是避免了在子类原型对象上创建多余的属性了。
+   ```
+
+   
+
+## 编码相关
+
+**ASCII码**
+
+**Unicode**
+
+
+
+## 页面性能
+
+页面加载速度优化的核心包括三点： 减少资源文件的请求数量；减小每个资源文件的大小；提高每个资源的加载速度。
+
+像合并 API，压缩文件，支持 webp图片，资源 cdn 缓存等都是以此为出发点
+
+
+
+对于性能问题，首先需要对工作的任务做数据统计，将数据和指标记录下来。比如说 webpack 打包花费时间性能优化前后对比，脚本使用增加数量等
+
+对于数据统计往往可以使用埋点
+
+1. 添加埋点
+2. 收集埋点数据信息
+3. 展示埋点数据信息
+
+
 
 网络、热保护、缓存回收、第三方脚本、解析器阻塞模式、磁盘的读写、IPC jank、插件安装、CPU、硬件和内存限制、L2/L3缓存、RTTS、图像、Web字体加载行为的差异 —— JavaScript 的代价是最大的，web 字体阻塞默认渲染和图片的加载消耗了大量的内存。
 
 
 
-+ 合并 js, css
-+ 用 css sprites
-+ 压缩文本图片等
-+ 延迟显示可见区域外内容，懒加载
-+ 让部分图片按钮等关键信息优先加载
-+ 精简代码
-+ ajax 异步更新
-+ 缓存
+- 合并 js, css
+- 用 css sprites
+- 压缩文本图片等
+- 延迟显示可见区域外内容，懒加载
+- 让部分图片按钮等关键信息优先加载
+- 精简代码
+- ajax 异步更新
+- 缓存
 
 
 
 可以参考的度量
 
-+ 首次有效渲染(主要内容出现在页面所需的时间)
-+ 重要渲染时间(页面最重要部分渲染完成所需的时间)
-+ 可交互时间(页面布局稳定，关键页面字体可见，主进程可以足够处理用户的输入即可在 UI 上点击交互)
-+ 输入响应(接口响应用户操作所需的时间)
-+ speed index，测量填充页面内容的速度
-+ 其他
+- 首次有效渲染(主要内容出现在页面所需的时间)
+- 重要渲染时间(页面最重要部分渲染完成所需的时间)
+- 可交互时间(页面布局稳定，关键页面字体可见，主进程可以足够处理用户的输入即可在 UI 上点击交互)
+- 输入响应(接口响应用户操作所需的时间)
+- speed index，测量填充页面内容的速度
+- 其他
 
 
 
@@ -4823,239 +5078,6 @@ var entry = {
 
 
 
-
-## 框架
-
-### MVVM
-
-View	视图
-
-Model	模型
-
-View Model	视图模型
-
-*视图模型*是暴露公共属性和命令的视图的抽象。MVVM没有MVC模式的控制器，也没有MVP模式的presenter，有的是一个*绑定器*。在视图模型中，绑定器在视图和[数据绑定器](https://zh.wikipedia.org/w/index.php?title=%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A%E5%99%A8&action=edit&redlink=1)之间进行通信。
-
-### MVC
-
-View 视图
-
-Model 模型
-
-Controller 控制器
-
-###MCP
-
-View
-
-Model
-
-Presenter	
-
-包含着组件的事件处理，负责检索 Model 获取数据，和将获取的数据经过格式转换与 View 进行沟通。
-
-
-
-## Js设计模式
-
-单例模式
-
-> 产生一个类的唯一实例，用来划分命名空间并将属性、方法组织在一起的对象，用一个变量标识是否被实例化
-
-
-
-观察者模式(发布者-订阅者模式)
-
->对象间一对多的关系，让多个观察者可以同时监听某一个对象，当对象发生改变时，所有依赖于他的对象都可以得到通知
-
-
-
-模块模式
-
-> 为单体模式添加私有变量，私有方法来减少全局变量的使用
-
-
-
-代理模式
-
-> 本体注重自身代码的实现，而代理负责控制对本体对象的访问，控制以及实例化
-
-### 创建对象
-
-1. 工厂模式
-
-   根据接收的参数构建一个包含信息的对象，可创建多个相似对象，但无法识别对象类型
-
-   ```js
-   function createP(name, age, job) {
-     var o = new Object();
-     o.name = name;
-     o.job = job;
-     return o
-   }
-   ```
-
-2. 构造函数模式
-
-   ```js
-   function P(name) {
-     this.name = name;
-   }
-   let b = new P();
-   ```
-
-   缺点：构造函数中的每个方法，都需要在实例中重建一遍，则会产生不同的F unction 实例，导致不同作用域链与标识符解析
-
-3. 原型模式
-
-   由于 prototype 属性指向包含所有实例共享的属性与方法，因此直接将信息添加到原型对象中
-
-   ```js
-   function P() {
-     person.prototype.sayName = function() {...}
-   }
-     //this.name 与 prototype.name 不同
-     //前者是建立每个实例的 name 属性，后者使所有实例都访问同一个属性
-   ```
-
-   构造函数不等于原型对象
-
-   构造函数P	原型对象P.prototype	实例P1,P2
-
-   P.prototype指向原型对象 P.prototype，而原型对象的 constructor 指向P
-
-   而P1,P2内部属性均执行P.prototype，与P无直接关系
-
-   原型模式的缺点在于共享，在一个实例中修改属性也会影响另一个实例，而且当包含引用类型时也会有问题
-
-4. 组合使用构造函数与原型模式
-
-   构造函数用于定义实例属性，原型模式用于定义方法与共享属性
-
-5. 动态原型模式
-
-   将原型模式用if 语句应用到构造函数中
-
-   ```js
-   function P(name, job) {
-   	this.name = name;
-     ...
-     if(typeof this.sayName != 'function') {
-       P.prototype.sayName = function() {..};
-     }
-     //仅在初次调用构造函数时才会执行
-   }
-   ```
-
-6. 寄生构造函数模式
-
-   在构造函数中应用工厂模式，可用于创建一个具有额外方式的数组
-
-   此类返回的对象与构造函数及原型无关系
-
-   ```js
-   function P(name,..) {
-     let o = new Object();
-     o.name = name;
-     return o
-   }
-   ```
-
-7. 稳妥构造函数模式
-
-### 继承
-
-依据原型链
-
-1. 借用构造函数
-
-   在子类构造函数内部用 apply、call 调用超类构造函数
-
-   ```js
-   function sub() {
-     sup.call(this, val)
-   }
-   ```
-
-   缺点：超类方法对于子类未知，且方法均在构造函数中定义，函数无法复用
-
-2. 组合继承
-
-   原型链实现对原型属性、方法的继承，构造函数实现对实例属性的继承
-
-   ```js
-   function SuperType(name){
-       this.name = name;
-       this.colors = ['red','blue','green'];    
-   }
-   
-   SuperType.prototype.sayName = function(){
-       alert(this.name);
-   }
-   
-   function SubType(name,age){   
-       SuperType.call(this,name);     //第二次调用SuperType() 
-       this.age = age;
-   }
-   SubType.prototype = new SuperType();    //第一次调用SuperType()
-   SubType.prototype.constructor = SubType;  
-   SubType.prototype.sayAge=function(){
-        alert(this.age);
-   };
-   
-   var instance = new SubType('Greg',39);     //调用SubType构造函数，重写原型属性
-   instance.colors.push('black');      //重写原型属性
-   ```
-
-3. 原型式继承
-
-   创建临时性构造函数，将传入对象 o 作为原型，最后返回新实例，相当于对o的浅复制
-
-   ```js
-   function object(o) {
-     function F() {}
-     F.prototype = o;
-     return new F()
-   }
-   ```
-
-4. 寄生式继承
-
-   创建一个封装继承过程的函数。
-
-   ```js
-   function create(o) {
-     var clone = object(o);
-     clone.attr = function() {}
-     return clone
-   }
-   //基于 o 创建新对象，不仅有 o 的属性方法，也有自己的 attr 方法
-   ```
-
-5. 寄生组合式继承
-
-   借用构造函数继承属性，通过原型链的形式继承方法
-
-   ```js
-   function inheritPrototype(subType,superType){
-       var prototype = object(superType.prototype);    //创建对象
-       prototype.constructor = subType;    //增强对象
-       subType.prototype = prototype;    //指定对象
-   }
-   此函数接收两个参数，子类构造函数和超类构造函数。函数内部，第一步创建超类原型对象的一个副本，第二步为副本添加constructor属性，使其指向subType，弥补因为重写原型而失去默认的constructor属性。最后一步，将副本赋值给子类型的原型。整个过程说的简单点，就是将超类原型对象的一个副本复制给子类的原型对象。这样一来就可以避免继承超类的实例属性，也就是避免了在子类原型对象上创建多余的属性了。
-   ```
-
-   
-
-## 编码相关
-
-**ASCII码**
-
-**Unicode**
-
-
-
-## 页面性能
 
 **DNS解析**
 

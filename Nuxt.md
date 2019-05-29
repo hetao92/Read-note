@@ -2,7 +2,7 @@
 
 #Nuxt
 
-> 服务端渲染	路由功能	支持异步数据	静态文件服务
+> 服务端渲染SSR	路由功能	支持异步数据	静态文件服务
 >
 > 打包压缩JS/CSS	HTML头部标签管理	支持热加载	集成ESLint
 >
@@ -492,3 +492,114 @@ Nuxt.js 支持两种使用 `store` 的方式，你可以择一使用：
 <no-ssr></no-ssr>
 
 设置组件不在服务器渲染中呈现。
+
+
+
+##性能优化
+
+1. 利用nuxt 应用到的特性，主要包括 asyncData 异步获取数据、mounted 不支持服务端渲染、 no-ssr 组件不在服务端渲染中呈现等。
+
+   可以利用这些特性做到 API 数据和页面结构合理拆分，首屏所需数据和结构通过服务端获取并渲染，非首屏数据和结构通过客户端获取并渲染
+
+2. 服务端引入缓存
+
+   + 将服务端获取的数据全部缓存到 node 进程内存中，定时刷新，有效期内请求都通过缓存获取 API 接口数据，减小数据获取时间，适用于基本不变或变更不频繁的 API 数据，与用户个人数据无关。
+
+     ```js
+     import LRU from 'lru-cache'
+     const CACHED = new LRU({
+     	max: 100,	//缓存队列长度
+     	maxAge: 1000 * 60 //缓存时间
+     })
+     export default {
+     	async asyncData({app, query}) {
+     		try {
+           let banner, footer
+           if(CACHED.has('baseData')) {
+             let data = CACHED.get('baseData')
+             data = JSON.parse(data);
+             ...
+           } else {
+             app.$axios.get(...)
+             CACHED.set('baseData', JSON.stringify(..))           
+         	}
+           return ...
+         } catch (e) {
+           
+         }
+     	}
+     }
+     ```
+
+     
+
+   + 组件级别缓存。将渲染后的组件 DOM 结构存入缓存，定时刷新，有效期通过缓存获取组件 DOM 结构，减小生成 DOM 结构所需时间。对于缓存的组件，需增加 name 及 serverCacheKey 字段以确定缓存的唯一键值
+
+     依赖多全局状态或取值较多的组件不适合缓存，而且组件缓存只是缓存了 DOM 结构， created 等钩子中代码逻辑并不会被缓存，若其中逻辑会影响上下边变更，是不会执行的，因此这种也不适合
+
+     ```js
+     //组件内
+     export default {
+     	name: 'xComponent',
+       props: ['type'],
+       serverCacheKey: props => props.type
+     }
+     // nuxt.config.js 配置修改
+     const LRU = require('lru-cache')
+     module.exports = {
+       render: {
+         bundleRenderer: {
+           cache: LRU({
+             max: 100,	//缓存队列长度
+             maxAge: 1000 * 60 //缓存时间
+           })
+         }
+       }
+     }
+     ```
+
+   + 页面整体缓存
+
+     当整个页面与用户数据无关，依赖的数据基本不变的情况下，可以对整个页面做缓存，减小页面获取时间;
+
+     页面整体缓存前提是在使用Nuxt.js脚手架工具create-nuxt-app初始化项目时，必须选择集成服务器框架，如express、koa，只有这样才具有服务端中间件扩展的功能。
+
+     ```js
+     //服务端中间件
+     import LRU from 'lru-cache'
+     const CACHED = new LRU({
+     	max: 100,	//缓存队列长度
+     	maxAge: 1000 * 60 //缓存时间
+     })
+     export default function(req, res, next) {
+       let url = req._parseOriginalUrl;
+       let pathname = url.pathname;
+       //通过路由判断，只有首页才进行缓存
+       if(['/home'].indexOf(pathname) > -1) {
+         const existsHtml = cachePage.get('homeData')
+         if(existsHtml) {
+           return res.end(existsHtml.html, 'utf-8')
+         } else {
+           res.original_end = res.end
+           //重写 res.end
+           res.end = function(data) {
+             if(res.statusCode === 200) {
+               cachePage.set('homeData', {html: data})
+             }
+            	//最终返回结果 
+             res.original_end(data, 'utf-8')
+           }
+         }
+       }
+       next()
+     }
+     
+     //config 中引入中间件
+     serverMiddleware: {
+       {path: '/home', handler: '~/middleware/page-cache.js'}
+     }
+     ```
+
+     
+
+3. 

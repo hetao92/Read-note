@@ -835,6 +835,26 @@ Text-transform:capitalize 首字母大写
 
 
 
+### 两端对齐
+
+```
+// html
+<div>姓名</div>
+<div>手机号码</div>
+<div>账号</div>
+<div>密码</div>
+
+//css
+div {
+	margin: 10px 0;
+	width: 100px;
+	border: 1px solid red;
+	text-align-last: justify;
+}
+```
+
+![img](https://mmbiz.qpic.cn/mmbiz_png/iccXN8sGPLT4hFEAdGrN8C406yW3fS6Kx11VibqObrV7cKiaXJzVwx08gemBYK0QX1sdCicQUpNbQ5G6THUcWWPOfQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
 ## Flex布局
 
 [参考](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
@@ -1621,6 +1641,10 @@ iconfont 三种形式
 ​	symbol 	svg-icon,支持多色图标，也可以像字体一样调整大小等，兼容性好，支持 ie9+；矢量缩放不失真。因为是用 js 生成 svg，相对不直观，无法按需加载，添加改动不友善
 
 
+
+### 滚动吸顶
+
+[参考](https://mp.weixin.qq.com/s/hV-dWqOuhXBvU-69qoZGMw)
 
 # 浏览器
 
