@@ -59,7 +59,7 @@ type
 
 语义化：明白每个标签的用途
 1. 更容易被搜索引擎收录。
-2. 更容易让屏幕阅读器读出网页内容。
+2. 更容易让屏幕阅读器读出网页内容。支持读屏软件，根据文章可以自动生成目录
 
 标签中name 属性规定锚（anchor）的名称,将 # 符号和锚名称添加到 URL 的末端，就可以直接链接到这个命名锚了。可以用于跳转到同一页面的不同位置！！！
 
@@ -68,14 +68,28 @@ type
 `<em>test</em>`  <em>斜体</em>
 `<strong>test</strong>`  <strong>加粗</strong>
 
-`<q>test</q>`表示短文本引用，不用加双引号
-`<blockquote></blockquote>`长文本引用，带有缩进样式
+`<q>test</q>`表示短文本行内的引用，不用加双引号
+`<blockquote></blockquote>`长文本段落级引用，带有缩进样
+
+`<cite></cite>`表示引述的作品名
 
 `&nbsp;` 由于html忽略空格回车等，这是用来输入空格的
 
 `<address>联系地址信息</address>`
 `<code>code</code>`在网页中显示代码（单行），多行参下
-`<pre>语言代码段</pre>`  主要作用:预格式化的文本。被包围在 pre
+`<pre>语言代码段</pre>`  主要作用:预格式化的文本。被包围在 pre,表示这部分内容是预先排版过的，不需要浏览器进行排版。
+
+
+
+`<abbr title="world wide web">www</abbr>`abbr 标签表示缩写
+
+`<hr>` 横向分隔线，语义上表示故事走向的转变或者话题的转变
+
+`<figure><img/></figure>` （用于表示与主文章相关的图像、照片等流内容）
+
+`<dfn></dfn>` 标签是用来包裹被定义的名词。
+
+
 
 
 
@@ -164,6 +178,12 @@ below：下边框  ； hsides：上下边框； vsides：左右边框
 | main    | 主内容                       |
 | mark    | 强调                         |
 |         |                              |
+
+Section会改变 h1-h6 的语义。section 的嵌套会使得其中的 h1-h6 下降一级
+
+
+
+
 
 ##新的表单元素
 
@@ -428,6 +448,30 @@ class选择器   .class{}
 
 
 
+css 顶层样式表由两种规则组成的规则列表组成，一个是at 规则，另一种是普通规则
+
+at规则有：
+
++ @chatset 提示 CSS 文件使用的字符编码方式，必须出现在最前面
+
+  `@chatset "utf-8"`
+
++ @import 引入一个 css 文件全部内容
+
++ @media  media query对设备类型进行判断
+
++ @page  分页媒体(如打印机)访问网页时的表现设置
+
++ @counter-style 产生一种数据，用于定义列表项的表现
+
++ @keyframes 定义动画关键帧
+
++ @fontface 定义字体
+
++ @supports 检查环境特性，与 media 有点类似
+
++ @namespace 用于和 XML 命名空间配合的一个规则，表示内部 css 选择器全都带上特定命名空间
+
 ## 选择器
 
 子选择器：选择指定标签元素的**第一代**（所有）子元素,用 >
@@ -635,10 +679,14 @@ BFC能清理浮动主要运用的是它的布局规则：
 1. 根元素
 2. float属性不为none
 3. position为absolute或fixed
-4. display为inline-block, table-cell, table-caption, flex, inline-flex
+4. display为inline-block, table-cell, table-caption, flex, inline-flex（flow-root兼容性一般）
 5. overflow不为visible(可以用overflow: auto 或 overflow: hidden)
 
 
+
+另外，BFC 可以防止 margin 折叠
+
+(在CSS当中，相邻的两个盒子（可能是兄弟关系也可能是祖先关系）的外边距可以结合成一个单独的外边距。这种合并外边距的方式被称为折叠)
 
 ##伪类
 

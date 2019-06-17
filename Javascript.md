@@ -63,6 +63,16 @@ b = ++a  //b=6 a=6
 
 将真实世界各种复杂关系抽象成一个个对象，对象之间分工合作。每个对象都能够接收处理数据并发送消息给其他对象。对象也可以复用。用面向对象编程易于维护和开发，具有灵活、代码可复用、模块化的特点
 
+对象有几个特点：
+
+对象具有唯一标识性：即使完全相同的两个对象，也并非同一个对象。
+
+对象有状态：对象具有状态，同一对象可能处于不同状态之下。
+
+对象具有行为：即对象的状态，可能因为它的行为产生变迁。
+
+状态和行为在别的语言可能叫属性和方法
+
 一种面向对象语言需要向开发者提供四种基本能力：
 封装 - 把相关的信息（无论数据或方法）存储在对象中的能力
 聚集 - 把一个对象存储在另一个对象内的能力
@@ -70,6 +80,22 @@ b = ++a  //b=6 a=6
 多态 - 编写能以多种方法运行的函数或方法的能力
 
 
+
+JavaScript 对象分类
+
++ 宿主对象：由 JavaScript 宿主环境提供的对象，他们的行为完全由宿主环境决定。
+
+  比如浏览器环境宿主，有全局对象 window，上面的属性既有来自 JavaScript 的，也有来自浏览器环境的
+
++ 内置对象：由 JavaScript 语言提供的对象
+
+  + 固有对象：由标准规定，随着 JavaScript 运行时创建而自动创建的对象实例。
+
+  + 原生对象：可以由用户通过 Array、RegExp 等内置构造器或者特殊语法创建的对象。（能够通过语言本身的构造器创建的对象称作原生对象）这类构造器基本无法用纯 JavaScript 实现，也无法用 class/extend 来继承，他们创建的对象多数使用了私有字段，这种字段使得原型继承方法无法正常工作，因此这类原生对象都是为了特定能力而设计出来的
+
+    ![img](https://static001.geekbang.org/resource/image/6c/d0/6cb1df319bbc7c7f948acfdb9ffd99d0.png)
+
+  + 普通对象：由{}语法、Object 构造器或者 class 关键字定义类创建的对象，能够被原型继承
 
 **计时器**
 `setInterval(代码,交互时间)`  时间以毫秒计时
@@ -195,6 +221,26 @@ function example() {
   >3. 对象没有赋值的属性，该属性的值为undefined。
   >4. 函数没有返回值时，默认返回undefined。
 
+void 0 代替 undefined
+
+因为 JavaScript 的代码 undefined 是一个变量，并非一个关键字，使用这种方法可以避免无意中被篡改。
+
+```js
+function joke() {
+    var undefined = "hello world";
+    console.log(undefined); //会输出"hello world"
+}
+console.log(undefined); //输出undefined
+```
+
+其中 void 是 JavaScript 中的关键字，该操作符指定要计算一个表达式但是不返回值即始终返回 undefined。
+
+`href="#"与href="javascript:void(0)"`的区别
+
+**#** 包含了一个位置信息，默认的锚是**#top** 也就是网页的上端。
+
+而javascript:void(0), 仅仅表示一个死链接。
+
 
 
 原始值：存在栈（较小的内存区）中，即存在变量访问的位置
@@ -212,6 +258,12 @@ object
 3. 销毁这个实例
 
 使用 new 创建的实例在执行流离开当前作用域前一直保存在内存中，而上述自动创建的对象只存在于代码的执行瞬间，然后即被销毁。所以不能为基本类型的值添加属性与方法。
+
+
+
+**装箱转换**，正是把基本类型转换为对应的对象，它是类型转换中一种相当重要的种类。
+
+
 
 
 
@@ -260,6 +312,16 @@ typeof new Number(1) === 'object';
 ```
 
 判断 Array 使用 `Array.isArray(arr)`
+
+`Object.prototype.toString.call(arr) === '[object Array]'`
+
+私有的 Class 属性不会被任何方法改变，因此这种方法比 instanceof 更准确
+
+```js
+const toStr = Function.prototype.call.bind(Object.prototype.toString);
+//用 bind 可以让所有类型都使用一种方法来调用
+```
+
 判断 null 使用 `myVar === null`；
 
 
@@ -420,6 +482,8 @@ function withinErrorMargin (left, right) {
 }
 
 ```
+
+检查等式左右两边差的绝对值是否小于最小精度，才是正确的比较浮点数的方法
 
 
 
@@ -692,6 +756,12 @@ console.log(res);
 `'hello'`、`String('hello')`都是基本字符串
 `new String()`则是对象
 
+String 有最大长度是 2^53 - 1,String 的意义并非“字符串”，而是字符串的 UTF16编码。字符串的操作 charAt、charCodeAt、length等方法针对的都是 UTF16 编码。
+
+所以，字符串的最大长度，实际上是受字符串的编码长度影响的。
+
+
+
 当基本字符串需要调用一个字符串对象才有的方法或者查询值的时候(基本字符串是没有这些方法的)，JavaScript 会自动将基本字符串转化为字符串对象并且调用相应的方法或者执行查询。
 
 下标访问  同数组
@@ -916,6 +986,8 @@ for (var name in object) {
 
 
 
+**对象访问其属性**
+
 ####getters & setters
  getter 是一个获取某个特定属性的值的方法。
  setter 是一个设定某个属性的值的方法。
@@ -1001,7 +1073,10 @@ Object.defineProperty(o, "conflict", {
   } 
 });
 // throws a TypeError: value appears only in data descriptors, get appears only in accessor descriptors
-​```
+
+Object.getOwnPropertyDescriptor(o, 'a')
+//可以获取属性的数据属性
+
 ```
 
 
@@ -1073,6 +1148,8 @@ Object.defineProperty(o, "conflict", {
 `let s = Symbol`
 
 不能用`new`命名，因为 Symbol 是原始类型的值，不是对象，也不能添加属性
+
+但Symbol仍然是 Symbol 对象的构造器。
 
 
 
@@ -1760,7 +1837,7 @@ arguments是一个类数组对象，是说它有一个索引编号和Length属�
 
 **作用**
 
-> 保存自己的私有变量，通过提高的接口方法提供给外部使用，但外部不能直接访问该变量
+> 保存自己的私有变量，通过提供的接口方法提供给外部使用，但外部不能直接访问该变量
 
 **原理**
 
@@ -1844,6 +1921,12 @@ try-catch语句中的 catch 块和 with 语句可延长作用域链
 基于原型的语言（如JavaScript）并不存在这种区别：它只有对象。
 
 定义类时只需要定义构造函数来创建具有一组特定的初始属性和属性值的对象。任何 JavaScript 函数都可以用作构造器。 也可以使用 new 操作符和构造函数来创建一个新对象。
+
+new 运算接受一个构造器和一组调用参数
+
++ 以构造器的 prototype 属性为原型，创建新对象
++ 将 this 和调用参数传给构造器，执行；
++ 如果构造器返回的是对象，则返回，否则返回第一步创建的对象
 
 ```javascript
 var Student = function(name, height) {
@@ -1979,6 +2062,33 @@ new Foo(); // logs "Foo instantiated with new"
 `Function.prototype.bind(this[, arg1[, arg2[, ...]]])`
 
 `function.toString()`返回一个表示当前函数源代码的字符串。覆盖了 `Object.prototype.toString` 方法。
+
+
+
+### 函数对象与构造器对象
+
+函数对象的定义是：具有 [[call]] 私有字段的对象，构造器对象的定义是：具有私有字段 [[construct]]的对象。可以说，任何对象只需要实现[[call]],就是一个函数对象，可以作为函数被调用。若能实现[[construct]]，它就是一个构造器对象，可以作为构造器被调用。
+
+[[construct]]执行过程：
+
++ 以 Object.prototype 为原型创建一个新对象
++ 以新对象为 this，执行函数的[[call]]
++ 如果[[call]]的返回值是对象，那么返回这个对象，否则返回第一步创建的新对象
+
+比如内置对象 Date 在作为构造器调用时产生新的对象，作为函数时，则产生字符串
+
+```js
+var a = new Date;
+var b = Date()
+typeof a	//'object'
+typeof b //'string'
+```
+
+像箭头函数创建的函数仅仅是函数，无法被当做构造器使用
+
+
+
+
 
 ## Error
 
@@ -4248,6 +4358,42 @@ async function async1() {
 在设计应用程序的时候，往往需要考虑几个设计原则：可扩展性、易模块化、可重用性、可测性、易推理性。
 
 函数式编程使用函数来抽象作用在数据之上的控制流和操作，从而在系统中消除副作用并减少对状态的改变。
+
+
+
+### 函数柯里化
+
+> 一种将使用多个参数的函数转换成一系列使用一个参数的函数，并且返回一个接受余下参数并返回结果的新函数
+
+应用：
+
+1. 延迟计算
+
+   Function.bind本身就是一种延迟计算的柯里化
+
+2. 动态创建函数
+
+3. 参数复用
+
+
+
+### Js 的七种规范类型
+
+List 和 Record： 用于描述函数传参过程。 
+
+Set：主要用于解释字符集等。
+
+Completion Record：用于描述异常、跳出等语句执行过程
+
+Reference：用于描述对象属性访问、delete 等。
+
+Property Descriptor：用于描述对象的属性。
+
+Lexical Environment 和 Environment Record：用于描述变量和作用域
+
+Data Block：用于描述二进制数据。
+
+
 
 ##模块
 
