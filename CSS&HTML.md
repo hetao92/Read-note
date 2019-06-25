@@ -296,7 +296,7 @@ a.currentTime = 1
 以可变尺寸传递网页，利用css3的media query媒体查询功能
 `@media screen and (min-width: 320px) and (max-width : 479px)`
 
-
+[响应式图片布局-阮]([http://www.ruanyifeng.com/blog/2019/06/responsive-images.html](http://www.ruanyifeng.com/blog/2019/06/responsive-images.html))
 
 ##HTML5 拖放
 DataTransfer 对象：拖拽对象用来传递的媒介，使用一般为Event.dataTransfer。
@@ -452,9 +452,9 @@ css 顶层样式表由两种规则组成的规则列表组成，一个是at 规�
 
 at规则有：
 
-+ @chatset 提示 CSS 文件使用的字符编码方式，必须出现在最前面
++ @charset 提示 CSS 文件使用的字符编码方式，必须出现在最前面
 
-  `@chatset "utf-8"`
+  `@charset "utf-8"`
 
 + @import 引入一个 css 文件全部内容
 
@@ -471,6 +471,22 @@ at规则有：
 + @supports 检查环境特性，与 media 有点类似
 
 + @namespace 用于和 XML 命名空间配合的一个规则，表示内部 css 选择器全都带上特定命名空间
+
+
+
+普通规则由选择器和声明区块构成，声明区块由属性和值构成，
+
+值中有函数类型，`calc()/max()/min()/clamp()/toggle()/attr()`,
+
+`calc()`是表达式计算，
+
+`max()/min()/clamp()`则是比较大小，后者给定一个限定范围，超出范围则使用范围的最大或最小值。
+
+`toggle()`则在规则选中多于一个元素时生效，在几个值之间来回切换。比如列表项样式以圆点和方点间隔出现`ul { list-style-type: toggle(circle, square);}`
+
+`attr() `函数允许 CSS 接受属性值的控制。
+
+
 
 ## 选择器
 
@@ -581,7 +597,7 @@ position: static;fixed;relative;absolute
 非static属性均可用top、left来定位
 absolute 
 
-> 完全绝对定位：脱离其他标签顺序，相对于其最接近的一个具有定位属性的父包含块进行绝对定位。如果不存在这样的包含块，则相对于body元素，即相对于浏览器窗口。
+> 完全绝对定位：脱离其他标签顺序，相对于其最接近的一个具有定位属性的父包含块进行绝对定位。如果不存在这样的包含块，则相对于**body**元素，即相对于浏览器窗口。
 
 fixed 
 
@@ -1100,15 +1116,19 @@ text-outline
 
 word-wrap:break-word;(单词拆分)
 
-> word-wrap 属性用来标明是否允许浏览器在单词内进行断句，这是为了防止当一个字符串太长而找不到它的自然断句点时产生溢出现象。
+> word-wrap 属性用来标明是否允许浏览器在单词内进行断句，这是为了防止当一个字符串太长而找不到它的自然断句点时产生溢出现象。比如单词过长，超出包裹的元素长度
+
+![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101725418345.png)
+
+![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101725438081.png)
 
 word-break：break-all
 
->  word-break 属性用来标明怎么样进行单词内的断句。
+>  word-break 属性用来标明怎么样进行单词内的断句。比如一句话中某个单词过长，被直接另起一行，可以使用这个进行单词拆分
 
+![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101725587335.png)
 
-
-
+![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101726046184.png)
 
 **2D/3D 转换**
 2D：transform：方法
@@ -1693,6 +1713,26 @@ iconfont 三种形式
 ### 滚动吸顶
 
 [参考](https://mp.weixin.qq.com/s/hV-dWqOuhXBvU-69qoZGMw)
+
+
+
+### 最小字体 12px 限制
+
+Chrome 下中文网页字体不能小于 12px
+
+`-webkit-text-size-adjust`Chrome27之后无效
+
+`transform scale`不会改变文字所需占据的面积。
+
+1. 中文网页是用户在 Chrome 设置的默认语言有关，而不是和网页本身有关
+2. Chrome 对于最小字体的限制可以在 Chrome 手动更改最小字号的设置
+3. 对于'12px'限制的 px 实际上是指显示器的物理像素，不是css 逻辑像素，多数高清屏的设备像素比并不是 1，因此最小字号实际的逻辑像素值是 12px/像素比，是一个动态值。
+
+让 Chrome 的“最小字号”设置【对文字】生效的另一个前提是，元素本身和它一直到根节点的父级元素的 font-size **不能全都是例如 %、rem、em 等这样需要基于父元素font-size计算的单位**。例如父元素中有使用 px 作为单位的 font-size 就可以触发“最小字体设置”对其子元素的所有 font-size 生效。
+
+而对除了 font-size 之外的属性，例如在刚才这个例子中用 rem 作为单位的 width、height 等，“最小字体设置”对它们是**不会生效**的，它们会一直受 Chrome 默认最小字体 12px 的影响。
+
+
 
 # 浏览器
 
