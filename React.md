@@ -44,6 +44,12 @@ const element = React.createElement(
 在 JSX 代码的外面扩上一个小括号，这样可以防止 分号自动插入 的bug.
 
 
+
+`for`在JSX 中应该被写作`htmlFor`
+
+`<label htmlFor="namedInput">Name</label>`
+
+
 ##组件
 
 ```react
@@ -187,6 +193,27 @@ function ActionLink() {
 由于类class的方法默认是不会绑定`this`的，因此在 JSX 回调函数中应绑定`this`值，用 bind/箭头函数等
 
 ```react
+class Toggle extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {isToggleOn: true}
+    this.handleClick = this.handleClick.bind(this)
+  }
+  handleClick() {
+    this.setState(state => {
+      isToggleOn: !state.isToggleOn
+    })
+    console.log('click',this)
+  }
+  render() {
+    return (
+      <button onClick={this.handleClick}>
+      	{this.state.isToggleOn ? 'ON' : 'OFF'}
+      </button>
+    )
+  }
+}
+  
 class LoggingButton extends React.Component {
   // 实验性的 public class fields 语法。此语法确保 `handleClick` 内的 `this` 已被绑定。
   // 注意: 这是 *实验性* 语法。
@@ -240,6 +267,34 @@ class LoggingButton extends React.Component {
 
 因为 keys 可以在 DOM 中的某些元素被增加或删除时帮助 React 识别哪些元素发生了变化。
 
+但是元素的 key 只有放在**就近的数组上下文中**才有意义
+
+比如提取出一个`ListItem`组件，应该将 key 保留在数组中的`<ListItem />`元素上，而不是放在组件中具体的`<li`元素上
+
+```react
+function ListItem(props) {
+  // 不需要在这里指定 key
+	return <li>{props.value}</li>
+}
+function NumberList(props) {
+  const numbers = props.numbers;
+  const listItems = numbers.map((number) =>
+		//key 应该在数组的上下文中被指定
+ 		<ListItem key={number.toString()}
+      				value={number} />
+	)
+	return (
+		<ul>
+			{listItems}
+		</ul>
+	)
+}
+```
+
+
+
+`key`会传递信息给 react，但不会传递给组件，因此如何需要使用`key`属性的值，需要使用其他属性名来显式传递这个值
+
 
 
 ## 表单
@@ -261,5 +316,324 @@ var partialState = {};
 partialState[name] = value;
 this.setState(partialState);
 //setState 会自动将部分 state 合并到
+```
+
+**状态提升**
+
+
+
+## 组合与继承
+
+对于组件无法提前知晓子组件具体内容的情况，可以使用`children` prop 来将子组件传递进去；或者也可以使用其他prop 值
+
+```react
+function FancyBorder(props) {
+	return (
+  	<div className={'FancyBorder FancyBorder-' + props.color}>
+    	{props.children}
+    </div>
+  )
+}
+
+function WelcomeDialog() {
+  return (
+    //此时 <FancyBorder> JSX 标签中所有内容都会作为一个 children传递给组件，然后 FancyBorder 会将 {props.children} 渲染到一个 div 内
+  	<FancyBorder color="blue">
+    	<h1 className="Dialog-title">
+      	Welcome
+      </h1>
+      <p className="Dialog-message">
+      	Thank you!
+      </p>
+    </FancyBorder>
+  )
+}
+//其他 prop
+function TestA(props) {
+  return (
+    <div>
+      <div>
+      	{props.left}
+      </div>
+      <div>
+      	{props.right}
+      </div>
+    </div>
+  )
+}
+function App() {
+  return (
+  	<TestA 
+      left={
+        <Contacts />
+      }
+      right={
+        <Chat />
+      }
+    >
+  )
+}
+```
+
+
+
+##Fragment
+
+在项目中有语义化的 HTML 被破坏时，比如列表(`<ol>`,`<ul>`,`<dl>`),可以使用`React Fragments`来组合组件
+
+```react
+import React, {Fragment} from 'react'
+function ListItem({item}) {
+	return (
+  	<Fragment>
+    	<dt>{item.term}</dt>
+      <dd>{item.description}</dd>
+    </Fragment>
+  )
+}
+function Glossary(props) {
+  return (
+  	<dl>
+      {props.items.map(item => (
+      	<ListItem item={item} key={item.id} />
+      ))}
+    </dl>
+  )
+}
+```
+
+当你不需要在 fragment 标签中添加任何 prop 且你的工具支持的时候，你可以使用 **短语法**
+
+```react
+function ListItem({ item }) {
+  return (
+    <>
+      <dt>{item.term}</dt>
+      <dd>{item.description}</dd>
+    </>
+  );
+}
+```
+
+
+
+## Refs
+
+对于 React 典型的数据流中，props 是父子组件交互的唯一方式。但有时候需要可以进行强制修改子组件的操作。Refs 允许访问 DOM 元素或render里创建的元素。
+
+适用场景：
+
++ 管理焦点，文本选择或媒体播放
++ 出发强制动画
++ 继承第三方 DOM 库
+
+
+
+**创建 Refs**
+
+使用`React.createRef()`创建，并通过`ref`属性附加到相应的 React 元素中
+
+```react
+class MyComponent extends React.Component {
+	constructor(props) {
+    super(props)
+    this.myRef = React.createRef()
+	}
+  render() {
+    return <div ref={this.myRef} />
+  }
+}
+```
+
+
+
+**访问 Refs**
+
+当元素绑定 ref 后，对该节点的引用可以在 ref 的`current`属性中访问
+
+`const node = this.myRef.current`
+
+1. 当 `ref` 用于 HTML 元素时，构造函数中使用`React.createRef()`创建的 `ref` 接收底层 DOM 元素作为其 `current` 属性
+
+   ```react
+   class CustomTextInput extends React.Component {
+   	constructor(props) {
+       super(props)
+       this.textInput = React.createRef()
+       this.focusTextInput = this.focusTextInput.bind(this)
+     }
+     focuTextInput() {
+       //直接使用原生 API 使输入框获得焦点
+       this.textInput.current.focus()
+     }
+     render() {
+       return (
+       	<div>
+         	<input
+             type="text"
+             ref={this.textInput} />
+           <input
+             type="button"
+             value="Focus the text input"
+             onClick={this.focusTextInput}
+           />
+         </div>
+       )
+     }
+   }
+   ```
+
+   React会在组件挂载时给`current`属性传入 DOM 元素，并在组件卸载时传入 null。
+
+   **Ref 会在 componentDidMount 或 componentDidUpdate 生命周期钩子触发前更新**
+
+2. 当`ref`用于**自定义 class 组件**时，`ref`对象接收组件的挂载实力作为其`current`属性
+
+   ```react
+   class AutoFocusTextInput extends React.Component {
+     constructor(props) {
+       super(props)
+       this.textInput = React.createRef()
+     }
+     componentDidMount() {
+       this.textInput.current.focusTextInput()
+     }
+     render() {
+       return (
+       	<CustomTextInput ref={this.textInput} />
+       )
+     }
+   }
+   //通过获取整个组件并手动调用 focusTextInput 方法来模拟挂载后立即被点击的操作
+   ```
+
+   
+
+3. 不能在函数组件上使用`ref`属性，因为函数组件没有实例。但可以在函数组件内部使用 ref 属性
+
+   ```react
+   function MyComp() {
+   	return <input />
+   }
+   class Parent extends React.Component {
+     constructor(props) {
+       super(props)
+       this.textInput = React.createRef()
+     }
+     render() {
+   		return (
+         //错误
+       	<MyComp ref={this.textInput} />
+       )
+     }
+   }
+   //right
+   function CustomTextInput(props) {
+     // 这里必须声明 textInput，这样 ref 才可以引用它
+     let textInput = React.createRef();
+     function handleClick() {
+       textInput.current.focus();
+     }
+     return (
+       <div>
+         <input
+           type="text"
+           ref={textInput} />
+         <input
+           type="button"
+           value="Focus the text input"
+           onClick={handleClick}
+         />
+       </div>
+     );
+   }
+   ```
+
+
+
+**Refs 转发**
+
+当父组件需要引用到子组件中的 DOM 元素时，向子组件添加 ref 并不是一个最优方案，因为这样只能获取组件实例而不是 DOM 节点，而且还在函数组件上无效
+
+因此在 16.3 以后的版本可以使用 ref 转发（将 ref 自动地通过组件传递到其一子组件）
+
+```react
+const FancyButton = React.forwardRef((props, ref) => (
+  //第二个参数 ref 只在 react.forwardRef 定义组件时存在。常规函数和 class 组件不接收且 props 中也不存在 ref
+	<button ref={ref} className="FancyButton">
+  	{props.children}
+  </button>
+))
+//直接获取 DOM button 的 ref
+const ref = React.createRef();
+<FancyButton ref={ref}>Click me!</FancyButton>
+//FancyButon 使用 React.forwardRef 来获取传递给他的 ref，然后转发给它渲染的 DOM button 元素
+//然后使用 FancyButton 的组件可以获取到底层 DOM 节点 button 的 ref，并在必要时访问
+```
+
+
+
+**回调 Refs**
+
+回调 Refs 可以更精细地控制何时refs 被设置和解除,
+
+不同于 createRef()创建的 ref 属性，他是传递一个函数，**接收组件实例或 HTML DOM 元素作为参数**，在其他地方被存储和访问
+
+```react
+class CustomTextInput extends React.Component {
+	constructor(props) {
+		super(props)
+		this.textInput = null
+		this.setTextInputRef = element => {
+			this.textInput = element
+		}
+		this.focusTextInput = () => {
+			if(this.textInput) {
+				this.textInput.focus();
+			}
+		}
+	}
+	componentDidMount() {
+		this.focusTextInput()
+	}
+	render() {
+		//使用 ref 的回调函数将 text 输入框 DOM 节点的引用存储到 React
+		return (
+			<div>
+				<input
+					type="text"
+					ref={this.setTextInputRef}
+				/>
+				<input
+					type="button"
+					value="focus the text input"
+					onClick={this.focusTextInput}
+				/>
+			</div>
+		)
+	}
+}
+```
+
+```react
+function CustomTextInput(props) {
+  return (
+    <div>
+      <input ref={props.inputRef} />
+    </div>
+  );
+}
+
+class Parent extends React.Component {
+  render() {
+    return (
+      <CustomTextInput
+        inputRef={el => this.inputElement = el}
+      />
+    );
+  }
+}
+若以这种内联函数方式定义，在更新过程中会被执行两次，第一次传入参数 null，第二次会传入参数 DOM 元素。因为每次渲染时会创建一个新函数实例，所以会清空旧的 ref 并设置新的。
+通过将回调定义成class 的绑定函数的方式可以避免此问题
 ```
 

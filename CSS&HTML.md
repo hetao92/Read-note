@@ -65,6 +65,10 @@ type
 
 
 
+Accessibility(**a11y**)
+
+> 网络无障碍辅助功能，帮助所有人获得服务的设计和创造，支持帮助所有人访问网站，解读网站
+
 `<em>test</em>`  <em>斜体</em>
 `<strong>test</strong>`  <strong>加粗</strong>
 
@@ -417,6 +421,17 @@ transform() 变化矩阵
 `context.fillStyle = pattern`
 
 
+
+## tabIndex
+
+定义元素的顺序，这样用户可以通过键盘按照此顺序来获取焦点
+
+| `tabindex` 属性                 | 可用鼠标或者 用 JavaScript 语句 `element.focus()获取焦点`    | 可使用Tab 键导航获取焦点                                     |
+| :------------------------------ | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| not present（未设置）           | 遵循所在平台针对此元素的默认行为 (yes for form controls, links, etc.). | 遵循所在平台针对此元素的默认行为                             |
+| Negative (i.e. `tabindex="-1"`) | Yes                                                          | No; 必须通过  `focus()` 来聚焦该元素。可以在方向键或者其他键的响应里面做。 |
+| Zero (i.e. `tabindex="0"`)      | Yes                                                          | tab顺序对应于该元素在文档中的位置                            |
+| Positive (e.g. `tabindex="33"`) | Yes                                                          | `tabindex` 值决定了元素的tab顺序：通常这些带有正数值的tabindex元素会排在tabindex="0"和原生可以tabable的元素前面；特别指出的是值越小越排在前面（举个例子，`tabindex="7"` 会排在`tabindex="11"前面`) |
 
 # CSS
 
