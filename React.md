@@ -50,6 +50,12 @@ const element = React.createElement(
 `<label htmlFor="namedInput">Name</label>`
 
 
+
+JSX 会被编译为`React.createElement`形式，所以必须引用 React 库，包含在 JSX 作用于内
+
+`import React from 'react'`
+
+
 ##组件
 
 ```react
@@ -155,17 +161,127 @@ function App() {
 
 
 
-##React 生命周期
+react 将小写字母开头的元素视为 HTML 内置组件，大写字母开头的元素对应着 JavaScript 引入或自定义的组件
 
-```
-//生命周期钩子：
-componentDidMount() {
-//挂载组件到 DOM 上时
+对于运行时判定具体类型组件的情况`<components[props.storyType]>错误`，需要将这个类型赋值给一个大写字母开头的变量
+
+```react
+const components = {
+  photo: PhotoStory,
+  video: VideoStory
+};
+
+function Story(props) {
+  // 错误！JSX 类型不能是一个表达式。
+  return <components[props.storyType] story={props.story} />;
 }
-componentWillUnmount() {
-//卸载移除组件时
+function Story(props) {
+  // 正确！JSX 类型可以是大写字母开头的变量。
+  const SpecificStory = components[props.storyType];
+  return <SpecificStory story={props.story} />;
 }
 ```
+
+
+
+`false`, `null`, `undefined`, and `true` 是合法的子元素。但它们并不会被渲染。因此如果需要渲染的话，需要转换为字符串，如`String(true)`
+
+
+
+### Class 组件属性
+
+**defaultProps**
+
+为组件添加默认 props，props 传 null 的情况下则会取 null 而不是默认值
+
+`MyComponent.defaultProps = {}`
+
+**displayName**多用于调试信息
+
+
+
+### 实例属性
+
+**props**
+
+**state**
+
+
+
+##React 组件生命周期
+
+[速查](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
+
+**挂载**
+
++ `constructor()`
+
+  构造函数通常用于初始化内部 state；为事件处理函数绑定实例。此阶段**不要调用 setState()**
+
++ `static getDerivedStateFromProps(props, state)`
+
+  返回一个对象来更新 state
+
++ `render()`  这是 class 组件中**唯一必须实现**的方法
+
++ `componentDidMount()`
+
+  组件挂载（插入 DOM 树中）后立即调用
+
+**更新**
+
++ `static getDerivedStateFromProps()`
+
++ `shouldComponentUpdate(nextProps, nextState)`
+
+  首次渲染或使用 `forceUpdate()` 时不会调用该方法。此处返回值为 false 时则不会调用 `componentDidUpdate()`
+
++ `render()`
+
++ `getSnapshotBeforeUpdate()`
+
+  发生更改之前从 DOM 中获取信息如滚动位置，任何返回值都将作为参数传递到下一个阶段
+
++ `componentDidUpdate(prevProps, prevState, snapshot)`
+
+  更新后被立即调用。首次渲染并不会执行此方法。
+
+**卸载**
+
++ `componentWillUnmount()`
+
+**错误处理**
+
++ `static getDerivedStateFromError(error)`
++ `componentDidCatch(error, info)`
+
+
+
+过时将废弃的生命周期方法
+
+`componentWillMount` 
+
+在`render()`前调用，在此处调用 `setState()` 不会触发额外渲染
+
+`componentWillReceiveProps(nextProps)` 
+
+在已挂载的组件接收新的 props 之前被调用。可以在此处比较`this.props`和`nextProps`并使用 setState 来执行 state 转换
+
+`componentWillUpdate` 
+
+组件接收到新 props 或 state 时，会在渲染前调用此方法。初始渲染不会调用此方法
+
+
+
+`setState(stateChange[, callback])` 将组件 state 的更改排入队列。这是一个**请求**而不是立即更新的命令，他会批量推迟更新，因此在调用后立即读取`this.state`不一定有效。因此可以在`componentDidUpdate`生命周期内读取，或者使用回调函数
+
+
+
+`component.forceUpdate(callback)`强制组件调用 `render()` 重新渲染，他会跳过`shouldComponentUpdate()`阶段，但子组件会触发正常的生命周期方法
+
+
+
+
 
 
 ##事件处理
@@ -400,6 +516,17 @@ function Glossary(props) {
     </dl>
   )
 }
+
+class Columns extends React.Component {
+  render() {
+    return (
+      <React.Fragment>
+        <td>Hello</td>
+        <td>World</td>
+      </React.Fragment>
+    );
+  }
+}
 ```
 
 当你不需要在 fragment 标签中添加任何 prop 且你的工具支持的时候，你可以使用 **短语法**
@@ -414,6 +541,10 @@ function ListItem({ item }) {
   );
 }
 ```
+
+
+
+Fragment 目前有**唯一**的属性就是`key`
 
 
 
@@ -637,3 +768,190 @@ class Parent extends React.Component {
 通过将回调定义成class 的绑定函数的方式可以避免此问题
 ```
 
+
+
+##Context
+
+在组件间共享某类值的方式。因为某些值是很多组件都需要的，如果使用 props逐层传递那就相当繁琐，所以 context 可以帮助将值深入传递
+
+```react
+//比如传递一个主题
+const ThemeContext = React.createContext('light')	// light 为默认值
+class App extends React.Component {
+  render() {
+    return (
+      //使用 Provider 将当前的 theme 传递给后面无论多深的组件
+    	<ThemeContext.Provider value="dark">
+      	<Toolbar />
+      </ThemeContext.Provider>
+    )
+  }
+}
+
+//此时就不用传递 theme 了
+function Toolvar(props) {
+	return (
+  	<div>
+    	<ThemedButton />
+    </div>
+  )
+}
+
+class ThemedButton extends React.Component {
+  //指定 contextType 读取当前的 theme context
+  // React 会往上找到最近的 theme provider 并使用它的值
+	static contextType = ThemeContext
+	render() {
+    return <Button theme={this.context} />
+  }
+}
+```
+
+除了 context 方法，还可以**将底层组件作为属性直接传递**。这样可以减少要传递的 props 数量，但对高层组件来说会变更复杂，需要考量。
+
+
+
+**API**
+
+**创建 Context 对象**
+
+`const MyContext = React.createContext(defaultValue);`
+
+若没有匹配到 provider, defaultValue才会生效。
+将 `undefined` 传递给 provider, defaultValue 并不会生效
+
+
+
+**返回 Provider React组件允许子组件订阅 context 变化**
+
+`<MyContext.Provider value={/* 某个值 */}>`
+
+一个 provider 可以支持多个消费组件
+
+provider 也可以嵌套使用，内层覆盖外层
+
+provider value 值变化时新旧值得检测使用了与`Object.is`相同的算法
+
+
+
+**访问 context**
+
+`Class.contextType = MyContext`
+
+挂载在类组件 class 上的 contextType 属性会被重新赋值为一个由`React.createContext()`创建的 context 对象。然后可以通过`this.context`来消费最近的 Context 上的值，并在**任何生命周期**中访问。包括 render
+
+```react
+class MyClass extends React.Component {
+  //第二种方法
+  //实验性语法可以用 static 这个类属性来初始化 contextType
+  static contextType = MyContext;
+  render() {
+    let value = this.context;
+    /* 基于这个值进行渲染工作 */
+  }
+}
+MyClass.contextType = MyContext;
+```
+
+
+
+**订阅 context 变更**
+
+```react
+<MyContext.Consumer>
+  {value => /* 基于 context 值进行渲染*/}
+</MyContext.Consumer>
+```
+
+
+
+## 错误边界
+
+> 一个特殊的 React 组件，可以捕获并打印**子组件内**的 JavaScript 错误并渲染出备用 UI。
+>
+> 他会在渲染期间、生命周期方法和整个组件数的构造函数中捕获错误.
+>
+> 他无法捕获自身的错误
+
+[文档]{https://react.docschina.org/docs/error-boundaries.html}
+
+
+
+## 高阶组件 HOC
+
+> 以参数为组件并返回新组建的函数
+
+
+
+## Diffing 算法
+
+React 在对比两棵树时，会先比较两棵树的根节点
+
+1. 当根节点为**不同类型的元素**时，React 会拆卸原有树并建立起新的树
+2. 当根节点为想同类型的元素时，会保留 DOM 节点，仅**对比并更新**有改变的属性。组件更新时，实例保持不变，因此 state 在跨越不同的渲染时保持一致，react 会更新实例的 props 以和最新的元素保持一致
+3. 处理完当前节点后继续对子节点递归。此时 React 会同时遍历两个子元素的列表，产生差异时生成一个 mutation。
+
+
+
+## 类型检查 propTypes
+
+`import PropTypes from 'prop-types';`
+
+`PropTypes` 提供一系列验证器，可用于确保组件接收到的数据类型是有效的。
+
+```react
+class Greeting extends React.Component {}
+Greeting.propTypes = {
+  name: PropTypes.string
+};
+```
+
+**限制单个元素**
+
+可以通过 `PropTypes.element` 来确保传递给组件的 children 中只包含一个元素。
+
+**默认 prop 值**
+
+可以通过`defaultProps`来定义 props 的默认值
+
+```
+// 指定 props 的默认值：
+Greeting.defaultProps = {
+  name: 'Stranger'
+};
+```
+
+
+
+## 动态加载 | 代码分割
+
+`React.lazy()`可以定义一个动态加载的组件，有助于缩小 bundle 的体积，并延迟加载组件
+
+这一特性需要 JS 环境支持 promise
+
+```react
+// 这个组件是动态加载的
+const SomeComponent = React.lazy(() => import('./SomeComponent'));		
+```
+
+
+
+**React.Suspense**
+
+`React.Suspense` 可以指定加载指示器（loading indicator），以防其组件树中的某些子组件尚未具备渲染条件。目前，懒加载组件是 `<React.Suspense>` 支持的**唯一**用例：
+
+```react
+// 该组件是动态加载的
+const OtherComponent = React.lazy(() => import('./OtherComponent'));
+
+function MyComponent() {
+  return (
+    // 显示 <Spinner> 组件直至 OtherComponent 加载完成
+    <React.Suspense fallback={<Spinner />}>
+      <div>
+        <OtherComponent />
+      </div>
+    </React.Suspense>
+  );
+}
+```
