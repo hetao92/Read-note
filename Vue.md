@@ -1060,7 +1060,7 @@ Vue 提供了 `transition` 的封装组件，在下列情形中，可以给任�
 
 `v-leave-to`: **2.1.8版及以上** 定义离开过渡的结束状态。在离开过渡被触发之后下一帧生效 (与此同时 `v-leave` 被删除)，在过渡/动画完成之后移除。
 
-![transition](https://cn.vuejs.org/images/transition.png)
+![transition](/Users/hetaohua/Documents/Read-note/img/vueTransition.png)
 
 如果使用一个没有名字的 `<transition>`，则 `v-` 是这些类名的默认前缀。如果你使用了 `<transition name="my-transition">`，那么 `v-enter` 会替换为 `my-transition-enter`
 
@@ -1269,7 +1269,7 @@ Observer核心方法就是`Object.defineProperty`，vue会将实例的`data`选�
 
 compile解析模板指令，将模板中变量替换成数据，然后初始化渲染页面视图，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据变动，触发dep.notice()通知时，watcher 能调用自身的 update 方法，触发 compile 中的回调方法。收到通知，更新视图。
 
-![data](https://cn.vuejs.org/images/data.png)
+![data](/Users/hetaohua/Documents/Read-note/img/vueMVVM.png)
 
 
 

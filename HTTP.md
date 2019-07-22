@@ -682,7 +682,7 @@ CORS默认是不会发送cookie。`Access-Control-Allow-Credentials`的响应头
 
 重用已获取的资源，减少延迟与网络阻塞，减少显示资源所等待的时间，响应性更快
 
-![缓存分类](https://user-images.githubusercontent.com/25027560/38461517-c7f2f422-3b04-11e8-8e94-20bbeb2a32b8.png)
+![缓存分类](/Users/hetaohua/Documents/Read-note/img/cache.png)
 
 
 

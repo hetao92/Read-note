@@ -932,7 +932,7 @@ div {
 }
 ```
 
-![img](https://mmbiz.qpic.cn/mmbiz_png/iccXN8sGPLT4hFEAdGrN8C406yW3fS6Kx11VibqObrV7cKiaXJzVwx08gemBYK0QX1sdCicQUpNbQ5G6THUcWWPOfQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![img](/Users/hetaohua/Documents/Read-note/img/wordAlign.png)
 
 ## Flex布局
 
@@ -1133,17 +1133,17 @@ word-wrap:break-word;(单词拆分)
 
 > word-wrap 属性用来标明是否允许浏览器在单词内进行断句，这是为了防止当一个字符串太长而找不到它的自然断句点时产生溢出现象。比如单词过长，超出包裹的元素长度
 
-![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101725418345.png)
+![01](/Users/hetaohua/Documents/Read-note/img/wordwrap1.png)
 
-![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101725438081.png)
+![01](/Users/hetaohua/Documents/Read-note/img/wordwrap2.png)
 
 word-break：break-all
 
 >  word-break 属性用来标明怎么样进行单词内的断句。比如一句话中某个单词过长，被直接另起一行，可以使用这个进行单词拆分
 
-![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101725587335.png)
+![01](/Users/hetaohua/Documents/Read-note/img/wordbreak1.png)
 
-![01](https://images.cnblogs.com/cnblogs_com/2050/201208/201208101726046184.png)
+![01](/Users/hetaohua/Documents/Read-note/img/wordbreak2.png)
 
 **2D/3D 转换**
 2D：transform：方法
@@ -1454,9 +1454,9 @@ K 代表屏幕横向有几个 1024 个像素，2K 即横向像素超过 2048
 
   
 
-  ![img](http://imweb-io-1251594266.file.myqcloud.com/FmoyfwVMoVKbeRfuHAghzFPImwr5)
+  ![img](/Users/hetaohua/Documents/Read-note/img/windowHeight.png)
 
-![img](http://imweb-io-1251594266.file.myqcloud.com/Fi-h0tWFq6Nz79kgOdc4t3f0y5js)
+![img](/Users/hetaohua/Documents/Read-note/img/windowOffset.png)
 
 
 
@@ -1589,7 +1589,7 @@ color: red \0
 
 当 HTML 解析到 script 标签时，会暂停构建 DOM，完成后才会从暂停的地方重新开始。也就是说，如果你想首屏渲染的越快，就越不应该在首屏就加载 JS 文件。并且 CSS 也会影响 JS 的执行，只有当解析完样式表才会执行 JS，所以也可以认为这种情况下，CSS 也会暂停构建 DOM。
 
-![2019-01-03-0](https://image.fundebug.com/2019-01-03-0.png)
+![2019-01-03-0](/Users/hetaohua/Documents/Read-note/img/render.png)
 
 ### repaint/reflow
 
