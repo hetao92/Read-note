@@ -199,7 +199,7 @@ selector  ---  一个 `(state, ...args) => args` 的函数。为空时则取得�
 
 **all([...effects]) | all(effects)**
 
-创建一个 Effect 描述信息，用来命令 middleware 并行地运行多个 Effect，并等待它们全部完成。=
+创建一个 Effect 描述信息，用来命令 middleware 并行地运行多个 Effect，并等待它们全部完成。
 
 
 

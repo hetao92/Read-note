@@ -3643,6 +3643,73 @@ sleep(output,1000);
 
 
 
+### Decorator
+
+> 修饰器，一个函数，用来修改类的行为
+
+```js
+//定义一个函数，也就是定义一个Decorator，target参数就是传进来的Class。
+//这里是为类添加了一个静态属性
+function testable(target) {
+  target.isTestable = true;
+}
+
+//在Decorator后面跟着Class，Decorator是函数的话，怎么不是testable(MyTestableClass)这样写呢？
+//我只能这样理解：因为语法就这样，只要Decorator后面是Class，默认就已经把Class当成参数隐形传进Decorator了。
+@testable
+class MyTestableClass {}
+
+console.log(MyTestableClass.isTestable) // true
+
+//需要传额外的参数时可以嵌套函数，保证最后返回的是一个 decorator 即可
+function testable(isTestable) {
+  return function(target) {
+    target.isTestable = isTestable;
+  }
+}
+
+//注意这里，隐形传入了Class，语法类似于testable(true)(MyTestableClass)
+@testable(true)
+class MyTestableClass {}
+MyTestableClass.isTestable // true
+
+@testable(false)
+class MyClass {}
+MyClass.isTestable // false
+```
+
+
+
+除了修改 class，也可以在 class 内部方法上使用
+
+```js
+//定义一个Class并在其add上使用了修饰器
+class Math {
+  @log
+  add(a, b) {
+    return a + b;
+  }
+}
+
+//定义一个修饰器
+function log(target, name, descriptor) {
+  //这里是缓存旧的方法，也就是上面那个add()原始方法
+  var oldValue = descriptor.value;
+
+  //这里修改了方法，使其作用变成一个打印函数
+  //最后依旧返回旧的方法，真是巧妙
+  descriptor.value = function() {
+    console.log(`Calling "${name}" with`, arguments);
+    return oldValue.apply(null, arguments);
+  };
+
+  return descriptor;
+}
+
+const math = new Math();
+math.add(2, 4);
+```
+
 
 
 ##this 作用域
