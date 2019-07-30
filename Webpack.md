@@ -1,3 +1,5 @@
+[TOC]
+
 #Webpack
 
 > 模块打包器。分析你的项目结构，找到JavaScript模块以及其它的一些浏览器不能直接运行的拓展语言（Scss，TypeScript等），并将其转换和打包为合适的格式供浏览器使用。
@@ -9,6 +11,16 @@
 工作方式：
 
 > 把你的项目当做一个整体，通过一个给定的主文件（如：index.js），Webpack将递归地构建一个依赖关系图,从这个主文件开始找到你的项目的所有依赖文件，使用loaders处理它们，最后打包为一个（或多个）浏览器可识别的JavaScript文件。
+>
+> 初始化：读取 webpack 配置文件和 shell 脚本中参数，初始化 webpack 生成 Compiler 对象
+>
+> 开始编译：执行 Compiler 的run 方法开始执行编译
+>
+> 编译完成： 从入口文件开始，调用 loader 对模块进行编译，梳理出模块间的依赖关系直至所有模块编译完成
+>
+> 资源输出：根据依赖关系，将内容组装长一个个 chunk，再加入到等待输出的资源列表中
+>
+> 完成：根据执行的输出路径和文件名配置，将资源写入到磁盘文件系统中
 
 
 
@@ -50,10 +62,31 @@
 
 
 **四个核心概念：**
-入口(entry)：即从哪里开始逐步确定需要打包的内容
-输出(output)：将所有资源归拢，在哪里如何打包程序
-模块转换器(loader)：将文件转换为模块添加进依赖中，其中，`test`属性能识别出被对应 loader 转换的文件，`use`属性转换相应文件
-插件(plugins)：在打包模块的“compilation”、“chunk”生命周期执行操作和自定义功能
+**入口(entry)：**即从哪里开始逐步确定需要打包的内容
+
+```js
+entry: {    
+	pageOne: './src/pageOne/app.js',    
+	pageTwo: './src/pageTwo/app.js'  
+}
+```
+
+**输出(output)：**将所有资源归拢，在哪里如何打包程序
+
+```js
+output: {    
+  filename: 'bundle.js',    
+  path: './dist' 
+}
+```
+
+**模块转换器(loader)：**将文件转换为模块添加进依赖中，其中，`test`属性能识别出被对应 loader 转换的文件，`use`属性转换相应文件
+
+loader 有三种使用方式：配置在 config 文件中指定；内联在 `import`语句中线上指定；CLI 在 shell 命令中指定
+
+
+
+**插件(plugins)：**在打包模块的“compilation”、“chunk”生命周期执行操作和自定义功能
 
 
 
@@ -745,3 +778,25 @@ webpack默认使用UglifyJS压缩 js 代码，由于这是使用单线程代码�
 ParallelUglifyPlugin会开启多个子进程，分别去完成多个文件的压缩，但每个子进程都用 uglifyjs 来压缩，相当于并行处理压缩
 
 100923ms —> 97744ms
+
+
+
+**HtmlWebpackPlugin**自动生成入口文件，并将最新的资源注入到 HTML 中。
+
+**CommonsChunkPlugin**用以创建独立文件，常用来提取多个模块中的公共模块。
+
+**DefinePlugin**用以定义在编译时使用的全局常量。
+
+**ExtractTextWebpackPlugin**将文本从 bundle 中提取到单独的文件中。常见的场景是从 bundle 中将 CSS 提取到独立的 css 文件中。
+
+**HotModuleReplacementPlugin**在运行过程中替换、添加或删除模块，而无需重新加载整个页面。
+
+**UglifyjsWebpackPlugin**对 js 进行压缩，减小文件的体积。
+
+**CopyWebpackPlugin**将单个文件或整个目录复制到构建目录。一个常用的场景是将项目中的静态图片不经构建直接复制到构建后的目录。
+
+
+
+##Rollup
+
+Rollup 相比于 webpack，更多的用于打包库，支持 **tree sharking**，可以去掉没用的代码，使包的体积变小，它源于 ES6 的静态引入

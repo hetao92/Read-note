@@ -2,7 +2,9 @@
 
 #Babel
 
-> babel 是一个 JavaScript 编译器。 总共分为三个阶段： 解析，转换，生成
+> babel 是一个 JavaScript 编译器，将 ES6，ES7，ES8 转换成浏览器都支持的 ES5 语法，并提供一些插件来兼容浏览器 API 的工具。 总共分为三个阶段： **解析，转换，生成**。Babel 会将源码转换成 AST 之后，通过遍历，对抽象语法树做些修改，再转成 code
+
+Babel -> 巴比伦文明里的通天塔
 
 不过 babel 本身是不具备转化功能的，提供这些功能的是一个个 plugin。
 
@@ -47,6 +49,18 @@ plugins 和 presets 的执行顺序
 3. preset 配置项，按照声明**逆序**执行
 
 
+
+常用的 preset
+
+**@babel/preset-env**
+
+参数：
+
+`debug` 开启后可在控制台看到哪些语法做了转换以及 babel 的日志信息等
+
+`useBuiltIns` 配合`@babel/polyfill`，默认`false`即啥也不干，`entry`会把所有 polyfill 引入，`usage`则是按需引入
+
+`target`	用来指定转换需要支持哪些浏览器，若设置了`browserslist`则不需要 target
 
 **babel 相关模块**
 
