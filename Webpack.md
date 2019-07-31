@@ -78,6 +78,10 @@ output: {
   filename: 'bundle.js',    
   path: './dist' 
 }
+//其他配置
+chunkFilename //按需就在非入口 entry 的模块
+publicPath	//公共路径
+pathinfo 		//即保留相互依赖的包中的注释信息，这个基本不用主动设置它，它默认 development 模式时的默认值是 true，而在 production 模式时的默认值是 false，
 ```
 
 **模块转换器(loader)：**将文件转换为模块添加进依赖中，其中，`test`属性能识别出被对应 loader 转换的文件，`use`属性转换相应文件
@@ -173,14 +177,26 @@ package.json中的script可以通过模块名，来引用本地安装的 npm 包
 | contentBase         | 默认webpack-dev-server会为根文件夹提供本地服务器，如果想为另外一个目录下的文件提供本地服务器，应该在这里设置其所在目录（本例设置到“public"目录） |
 | port                | 设置默认监听端口，如果省略，默认为”8080“                     |
 | inline              | 设置为true，当源文件改变时会自动刷新页面                     |
-| historyApiFallback  | 在开发单页应用时非常有用，它依赖于HTML5 history API，如果设置为true，所有的跳转将指向index.html |
+| historyApiFallback  | 可以是 `boolean`、 `object`，在开发单页应用时非常有用，它依赖于HTML5 history API，如果设置为true，所有的跳转将指向index.html |
+| compress            | 启用 gzip 压缩                                               |
+| publicPath          | 其实就是 output.publicPath，当你改变了它，即会覆盖了 `output`的配置 |
+| stats               | 可以自定控制要显示的编译细节信息                             |
+| proxy               | 处理一些代理的请求                                           |
 
 在配置文件`config.js`内
 ```javascript
     devServer:{
         contentBase: "./public",//本地服务器所加载的页面所在的目录
         historyApiFallback: true,//不跳转
-        inline: true//实时刷新
+        inline: true,//实时刷新
+        compress: true,
+        stats: {
+          colors: true,
+          chunks: false
+        }
+      	proxy: {
+          '/mockApi': 'https://easy-mock.com/project/5a0aad39eace86040263d'
+        }
     }
 ```
 
@@ -226,7 +242,7 @@ Loader 可以理解为模块和资源的转换器，它本身是一个函数，�
 - CLI（命令行接口）：在 shell 命令中指定它们。
 
 **配置**
-```
+```js
  module: {
     rules: [
       {
@@ -266,9 +282,16 @@ Loader 可以理解为模块和资源的转换器，它本身是一个函数，�
 
 Loaders需要单独安装并且需要在webpack.config.js中的modules关键字下进行配置，Loaders的配置包括以下几方面：
 
-test：一个用以匹配loaders所处理文件的拓展名的正则表达式（必须）
-loader：loader的名称（必须）
-include/exclude:手动添加必须处理的文件（文件夹）或屏蔽不需要处理的文件（文件夹）（可选）；
+**test：**一个用以匹配loaders所处理文件的拓展名的正则表达式（必须）
+
+**include/exclude:**手动添加必须处理的文件（文件夹）或屏蔽不需要处理的文件（文件夹）（可选）；
+
+**use**
+
+​	**loader：**loader的名称（必须）
+
+​	**options:** 与loader配合使用，可以是一个字符串或对象，它的配置可以直接简写在loader内一起，它下面还有 `presets`、 `plugins`等属性；
+
 query：为loaders提供额外的设置选项（可选）
 
 按照惯例而言，一般 loader 以`xxx-loader`方式命名，xxx 即转换功能
@@ -374,7 +397,7 @@ Loaders 是用于打包构建过程中用来处理源文件的（Scss,Less,JSX�
 ```
 
 ##属性
-##entry
+###entry
 
 单入口语法`entry: string|Array<string>`
 ```
@@ -395,7 +418,7 @@ entry: {
 
 
 
-##output
+###output
 
 ```
 output:{
@@ -527,6 +550,21 @@ plugins:[
 //vendor 实例需在其他实例如'runtime' 之前引入
 ```
 ##缓存
+
+webpack 里缓存分为 3 种
+
++ hash	
+
+  项目中只要有文件发生更改，整个项目构建的 hash 值都会更改，并且全部文件都共用相同的 hash 值
+
++ chunkhash
+
+  hash 计算的话即使文件内容没变，也会受其他文件的改动影响，生成新的值，这样无法实现缓存效果。chunkhash 会根据不同的入口文件进行依赖解析，构建对应的 chunk，生成对应的哈希值。对于公共库和项目文件可以分开打包构建，这样公共库的哈希值就不会受影响
+
++ contenthash
+
+  chunkhash 也有问题，同一 chunk 下，某一 js 引用了 css文件，这样若 js 修改了，css 文件就算没有修改，由于模块变化，css 文件也会重复构建。所以 contenthash 就是根据文件自身是否改动来改变。
+
 缓存的存在，当需要更新文件新代码时就会棘手
 可以对`output.filename`进行文件名替换`[name].[hash].js`
 
@@ -667,10 +705,10 @@ module.exports = {
       "node_modules",
       path.resolve(__dirname, "app")
     ],
-    // 用于查找模块的目录
+    // 用于解析模块时查找模块的目录
 
     extensions: [".js", ".json", ".jsx", ".css"],
-    // 使用的扩展名
+    // 自动解析确定的扩展，引入组件时可以省略后缀
 
     alias: {
       // 模块别名列表
