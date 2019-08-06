@@ -2110,6 +2110,49 @@ typeof b //'string'
 
 
 
+### Thunk 函数
+
+函数的参数到底该在何时求值---求值策略
+
+传值调用：在进入函数前就计算参数的值。可能会存在性能损失，比如参数实际没有用到
+
+传名调用：直接将表达式传入函数体
+
+所以对于编译器，更倾向于传名调用，将参数放到一个临时函数，再将临时函数传入函数体，这个临时函数即为 thunk 函数
+
+而 JavaScript 是传值调用，它的 thunk 函数替换的不是表达式，而是**对多参数函数，将其替换成单参数的版本，且只接受回调函数作为参数**
+
+```javascript
+// 正常版本的readFile（多参数版本）
+fs.readFile(fileName, callback);
+
+// Thunk版本的readFile（单参数版本）
+var readFileThunk = Thunk(fileName);
+readFileThunk(callback);
+
+var Thunk = function (fileName){
+  return function (callback){
+    return fs.readFile(fileName, callback); 
+  };
+};
+```
+
+所以只要有参数有回调函数，就可以写成 thunk 函数形式。
+
+```javascript
+var Thunk = function(fn){
+  return function (){
+    var args = Array.prototype.slice.call(arguments);
+    return function (callback){
+      args.push(callback);
+      return fn.apply(this, args);
+    }
+  };
+};
+var readFileThunk = Thunk(fs.readFile);
+readFileThunk(fileA)(callback);
+```
+
 
 
 ## Error
@@ -5470,3 +5513,108 @@ Tree-shaking清理构建过程的方法通过只加载生产中实际使用的�
 
 
 可以在插件内使用闭包、立即执行函数
+
+
+
+## ESLint
+
+```bash
+$ npm install -g eslint
+$ cd 项目目录
+$ npm init -f //初始化 package.json
+$ eslint --lint	//初始化 ESLint 配置 生成.eslintrc.js 
+```
+
+`eslintrc.js`可以放在项目级目录或某一目录下配置多个，往往具体目录下的配置文件具有更高的优先级，除非它内部配置`root: true`
+
+```js
+{
+  // 解析器类型
+  // espima(默认), babel-eslint, @typescript-eslint/parse
+  "parse": "esprima",
+  // 解析器配置参数
+  "parseOptions": {
+    // 代码类型：script(默认), module
+    "sourceType": "script",
+    // es 版本号，默认为 5，也可以是用年份，比如 2015 (同 6)
+    "ecamVersion": 6,
+    // es 特性配置
+    "ecmaFeatures": {
+        "globalReturn": true, // 允许在全局作用域下使用 return 语句
+        "impliedStrict": true, // 启用全局 strict mode
+        "jsx": true // 启用 JSX
+   },
+}}
+```
+
+
+
+在检测未声明的变量时，对于环境和从库中引入的某些全局变量，可以配置 globals 或者 env
+
+```js
+{
+  "globals": {
+    // 声明 jQuery 对象为全局变量
+    "$": false // true表示该变量为 writeable，而 false 表示 readonly
+    //这样一个个配置过于繁琐
+  }
+}
+
+{
+  //指定环境，每个环境都有定义一组预定义的全局变量。每一组环境都不互斥
+  "env": {
+    "amd": true,
+    "commonjs": true,
+    "jquery": true
+  }
+}
+```
+
+
+
+规则 rule 配置下
+
+- `off` 或 0：关闭规则
+- `warn` 或 1：开启规则，warn 级别的错误 (不会导致程序退出)
+- `error` 或 2：开启规则，error级别的错误(当被触发的时候，程序会退出)
+
+需要配置选项 options 时
+
+```js
+{
+  "rules": {
+    // 使用数组形式，对规则进行配置
+    // 第一个参数为是否启用规则
+    // 后面的参数才是规则的配置项
+    "quotes": [
+      "error",
+      "single",
+      {
+        "avoidEscape": true 
+      }
+    ]
+}}
+```
+
+
+
+扩展配置
+
+扩展就是直接使用别人已经写好的 lint 规则，有三种类型
+
+```js
+{
+  "extends": [
+    "eslint:recommended",		//ESLint 官方的扩展，一共有两个：eslint:recommended 、eslint:all。
+    "plugin:react/recommended",	//插件类型，也可以直接在 plugins 属性中进行设置
+    "eslint-config-standard",	//npm 包，官方规定 npm 包的扩展必须以 eslint-config- 开头，使用时可以省略这个头。比如直接写 standard
+   ]
+}
+
+{
+  "plugins": [
+    "react", // eslint-plugin-react
+    "vue",   // eslint-plugin-vue
+  ]
+}
+```

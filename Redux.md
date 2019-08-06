@@ -146,9 +146,9 @@ let store = createStore(todoApp)
 
 返回一个函数用于后面注销
 
-`const ubsubscribe = store.subscrive(() => console.log(store.getState()))`
+`const unsubscribe = store.subscrive(() => console.log(store.getState()))`
 
-`ubsubscribe() //注销`
+`unsubscribe() //注销`
 
 
 
