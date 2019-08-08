@@ -173,3 +173,73 @@ let store = createStore(todoApp)
 + 通知 reducer 请求失败的 action
 
   reducer 会重置 `isFetching`， 或许还会保存失败信息并显示在 UI
+
+
+
+##middleware & enhancer
+
+middleware 为 redux 的 dispatch 方法添加额外的功能
+
+enhancer 给 redux store 提供额外的功能
+
+
+
+**API**
+
+导出类 exports
+
+**createStore(reducer, [preloadedState],[enhancer])**
+
+preloadedState 即 initial state
+
+enhancer 是一个高阶参数，参数是创建 store 的函数，返回值是一个可以创建更强大的 store 的函数
+
+```js
+function enhancerCreator() {
+  return createStore => (...args) => {
+    // do something based old store
+    // return a new enhanced store
+  }
+}
+//enhancerCreator 就是个创建 store enhancer 的函数，...args 就是创建 store 所需的参数，也就是(reducer,preloadedState,enhancer)
+export default function autoLogger() {
+  return createStore => (reducer, initialState, enhancer) => {
+    const store = createStore(reducer, initialState, enhancer)
+    function dispatch(action) {
+      console.log(`dispatch an action: ${JSON.stringify(action)}`);
+      const res = store.dispatch(action);
+      const newState = store.getState();
+      console.log(`current state: ${JSON.stringify(newState)}`);
+      return res;
+    }
+    return {...store, dispatch}
+  }
+}
+
+```
+
+其实 applyMiddleware 本质也是一个 store enhancer，他最终返回的结构也是`{...store, dispatch}`，所以说中间件主要是用来修改 dispatch 的方法。所以当 applyMiddleware 和 enhancer 一起使用时，可以使用 compose 将两者进行组合
+
+一般来说会通过 middleware 处理异步 action，为了保证其他 enhancer 接收到普通 action，因此需要将`applyMiddleware(...middlewares)`作为第一个参数传给 compose。
+
+**combineReducers(reducers)**
+
+**applyMiddleware(..middlewares)**
+
+**bindActionCreators(actionCreators, dispatch)**
+
+**compose(..functions)**
+
+compose 方向是从右往左
+
+
+
+**Store API**
+
+`getState()`
+
+`dispatch(action)`
+
+`subscribe(listener)`
+
+`replaceReducer(nextReducer)`
