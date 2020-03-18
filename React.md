@@ -4,7 +4,7 @@
 
 # React
 
-##JSX
+### JSX
 
 JSX是一个JavaScript语法扩展，可以很好地描述 UI 应该呈现出它应有交互的本质形式。react 考虑到渲染逻辑本质上与其他 UI 逻辑内在耦合，因此将标记与逻辑共同存放在'组件'的松散耦合单元之中
 
@@ -18,7 +18,7 @@ JSX 语法更接近 JavaScript 而不是 HTML，因此react dom 使用小驼峰�
 
 React DOM在渲染输入内容前会进行转义。因此可以有效地防止 XSS 攻击
 
-Babel会把 JSX 转译为`React.createElement()`
+Babel会把 JSX 转译为`React.createElement()`，或者说，JSX仅仅只是`React.createElement(component, props, ...children)`的语法糖
 
 ```react
 const element = (
@@ -56,7 +56,56 @@ JSX 会被编译为`React.createElement`形式，所以必须引用 React 库，
 `import React from 'react'`
 
 
-##组件
+
+JSX类型中可以使用点语法
+
+```react
+import React from 'react';
+
+const MyComponents = {
+  DatePicker: function DatePicker(props) {
+    return <div>Imagine a {props.color} datepicker here.</div>;
+  }
+}
+
+function BlueDatePicker() {
+  return <MyComponents.DatePicker color="blue" />;
+}
+```
+
+
+
+**在运行时选择类型**
+
+不能将通用表达式作为 React 元素类型, 如果想通过通用表达式动态决定元素类型，需要提前赋值给大写字母开头的变量
+
+```react
+import React from 'react';
+import { PhotoStory, VideoStory } from './stories';
+
+const components = {
+  photo: PhotoStory,
+  video: VideoStory
+};
+
+function Story(props) {
+  // 错误！JSX 类型不能是一个表达式。
+  return <components[props.storyType] story=		{props.story} />;
+    // 正确！JSX 类型可以是大写字母开头的变量。
+  const SpecificStory = components[props.storyType];
+  return <SpecificStory story={props.story} />;
+}
+```
+
+
+
+JSX标签内的字符串字面量，JSX会移除行首尾的空格以及空行，与标签相邻的空行均会被删除，文本字符串之间的新行会被压缩为一个空格
+
+
+
+布尔类型、Null 以及 undefined是合法的子元素，但并不会被渲染
+
+### 组件
 
 ```react
 //class 组件
@@ -192,13 +241,17 @@ function Story(props) {
 
 **defaultProps**
 
-为组件添加默认 props，props 传 null 的情况下则会取 null 而不是默认值
+函数组件或是class组件都可以设置默认props，props 传 null 的情况下则会取 null 而不是默认值
 
 `MyComponent.defaultProps = {}`
 
+对于非ES6 使用`createReactClass`方法创建的组件，需要在组件中定义`getDefaultProps()`函数
+
 **displayName**多用于调试信息
 
+**state**
 
+对于非ES6 使用`createReactClass`方法创建的组件，需要在组件中定义`getInitialState()`函数
 
 ### 实例属性
 
@@ -208,7 +261,25 @@ function Story(props) {
 
 
 
-##React 组件生命周期
+### PropTypes类型检查
+
+```react
+import PropTypes from 'prop-types'
+
+Class.propTypes = {} //具体类型可参考文档
+Class.defaultProps = {}
+
+//或在 class 内部声明
+class A extends React.Component {
+    static defaultProps = {}
+	static propTypes = {}
+}
+
+```
+
+
+
+## React 组件生命周期
 
 [速查](http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
 
@@ -493,7 +564,7 @@ function App() {
 
 
 
-##Fragment
+## Fragment
 
 在项目中有语义化的 HTML 被破坏时，比如列表(`<ol>`,`<ul>`,`<dl>`),可以使用`React Fragments`来组合组件
 
@@ -618,7 +689,7 @@ class MyComponent extends React.Component {
 
    **Ref 会在 componentDidMount 或 componentDidUpdate 生命周期钩子触发前更新**
 
-2. 当`ref`用于**自定义 class 组件**时，`ref`对象接收组件的挂载实力作为其`current`属性
+2. 当`ref`用于**自定义 class 组件**时，`ref`对象接收组件的挂载实例作为其`current`属性
 
    ```react
    class AutoFocusTextInput extends React.Component {
@@ -640,7 +711,7 @@ class MyComponent extends React.Component {
 
    
 
-3. 不能在函数组件上使用`ref`属性，因为函数组件没有实例。但可以在函数组件内部使用 ref 属性
+3. 不能在函数组件上使用 `ref` 属性，因为函数组件没有实例。但可以在函数组件内部使用 ref 属性，只要指向DOM元素或class组件
 
    ```react
    function MyComp() {
@@ -700,6 +771,37 @@ const ref = React.createRef();
 <FancyButton ref={ref}>Click me!</FancyButton>
 //FancyButon 使用 React.forwardRef 来获取传递给他的 ref，然后转发给它渲染的 DOM button 元素
 //然后使用 FancyButton 的组件可以获取到底层 DOM 节点 button 的 ref，并在必要时访问
+
+react.forwardRef 接收渲染函数，react devTools使用函数来决定为ref转发组件显示的内容
+组件在devTools默认显示为"ForwardRef"
+const WrappedComponent = React.forwardRef((props, ref) => {
+  return <LogProps {...props} forwardedRef={ref} />;
+})
+
+也可以命名渲染函数，则名称包含 "ForwardRef(myFunction)"
+const WrappedComponent = React.forwardRef(
+  function myFunction(props, ref) {
+    return <LogProps {...props} forwardedRef={ref} />;
+  }
+);
+
+或者设置函数的 diaplayName 来包含组件名称
+function logProps(Component) {
+  class LogProps extends React.Component {
+    // ...
+  }
+
+  function forwardRef(props, ref) {
+    return <LogProps {...props} forwardedRef={ref} />;
+  }
+
+  // 在 DevTools 中为该组件提供一个更有用的显示名。
+  // 例如 “ForwardRef(logProps(MyComponent))”
+  const name = Component.displayName || Component.name;
+  forwardRef.displayName = `logProps(${name})`;
+
+  return React.forwardRef(forwardRef);
+}
 ```
 
 
@@ -715,9 +817,6 @@ class CustomTextInput extends React.Component {
 	constructor(props) {
 		super(props)
 		this.textInput = null
-		this.setTextInputRef = element => {
-			this.textInput = element
-		}
 		this.focusTextInput = () => {
 			if(this.textInput) {
 				this.textInput.focus();
@@ -733,7 +832,7 @@ class CustomTextInput extends React.Component {
 			<div>
 				<input
 					type="text"
-					ref={this.setTextInputRef}
+					ref={ref => this.textInput = ref}
 				/>
 				<input
 					type="button"
@@ -764,13 +863,138 @@ class Parent extends React.Component {
     );
   }
 }
-若以这种内联函数方式定义，在更新过程中会被执行两次，第一次传入参数 null，第二次会传入参数 DOM 元素。因为每次渲染时会创建一个新函数实例，所以会清空旧的 ref 并设置新的。
-通过将回调定义成class 的绑定函数的方式可以避免此问题
+//若以这种内联函数方式定义，在更新过程中会被执行两次，第一次传入参数 null，第二次会传入参数 DOM 元素。因为每次渲染时会创建一个新函数实例，所以会清空旧的 ref 并设置新的。
+//通过将回调定义成 class 的绑定函数的方式可以避免此问题, 从而只输出1次
 ```
 
 
 
-##Context
+除了createRef 以及callback ref，老版本还有 string 类型的 ref 被废弃
+
+```js
+class MyComponent extends React.Component {
+  componentDidMount() {
+    this.refs.myRef.focus();
+  }
+  render() {
+    return <input ref="myRef" />;
+  }
+}
+```
+
+
+
+**废弃原因**[参考](https://zhuanlan.zhihu.com/p/40462264)
+
++ 因为当ref定义为 string 时，需要 React 追踪当前正在渲染的组件，在调和阶段， React Element 创建更新的过程中， ref 会被封装成一个闭包函数，等待 commit 阶段被执行，这对 React的性能产生一定影响
+
++ 当使用 render callback 模式时，使用 string ref 会造成 ref 挂载位置产生歧义
+
+  ```js
+  class MyComponent extends Component {
+    renderRow = (index) => {
+      // string ref 会挂载在 DataTable this 上
+      return <input ref={'input-' + index} />;
+  
+      // callback ref 会挂载在 MyComponent this 上
+      return <input ref={input => this['input-' + index] = input} />;
+    }
+   
+    render() {
+      return <DataTable data={this.props.data} renderRow={this.renderRow} />
+    }
+  }
+  ```
+
++ string ref 无法被组合，例如当一个第三方库的父组件已经给子组件传递 ref， 那么我们就无法再在子组件上添加 ref 了， 而callback ref 可解决此问题
+
+  ```js
+  /** string ref **/
+  class Parent extends React.Component {
+    componentDidMount() {
+      // 可获取到 this.refs.childRef
+      console.log(this.refs);
+    }
+    render() {
+      const { children } = this.props;
+      return React.cloneElement(children, {
+        ref: 'childRef',
+      });
+    }
+  }
+  
+  class App extends React.Component {
+    componentDidMount() {
+      // this.refs.child 无法获取到
+      console.log(this.refs);
+    }
+    render() {
+      return (
+        <Parent>
+          <Child ref="child" />
+        </Parent>
+      );
+    }
+  }
+  
+  /** callback ref **/
+  class Parent extends React.Component {
+    componentDidMount() {
+      // 可以获取到 child ref
+      console.log(this.childRef);
+    }
+    render() {
+      const { children } = this.props;
+      return React.cloneElement(children, {
+        ref: (child) => {
+          this.childRef = child;
+          children.ref && children.ref(child);
+        }
+      });
+    }
+  }
+  
+  class App extends React.Component {
+    componentDidMount() {
+      // 可以获取到 child ref
+      console.log(this.child);
+    }
+    render() {
+      return (
+        <Parent>
+          <Child ref={(child) => {
+            this.child = child;
+          }} />
+        </Parent>
+      );
+    }
+  }
+  ```
+
++ 在根组件上使用无法生效
+
++ 对于静态类型较不友好，当使用 string ref 时， 必须显式声明 refs的类型，无法完成自动推导
+
++ 编译器无法将 string ref 与其refs 上对应的属性进行混淆， 而是用 callback ref 可被混淆
+
+  ```js
+  /** string ref，无法混淆 */
+  this.refs.myRef
+  <div ref="myRef"></div>
+  
+  /** callback ref, 可以混淆 */
+  this.myRef
+  <div ref={(dom) => { this.myRef = dom; }}></div>
+  
+  this.r
+  <div ref={(e) => { this.r = e; }}></div>
+  ```
+
+
+
+createRef 与 callback ref 相比，更加直观，性能上可能会有微小优势，同时对于上面讲的组合问题，createRef 也是没办法的
+
+## Context
 
 在组件间共享某类值的方式。因为某些值是很多组件都需要的，如果使用 props逐层传递那就相当繁琐，所以 context 可以帮助将值深入传递
 
@@ -800,14 +1024,14 @@ function Toolvar(props) {
 class ThemedButton extends React.Component {
   //指定 contextType 读取当前的 theme context
   // React 会往上找到最近的 theme provider 并使用它的值
-	static contextType = ThemeContext
-	render() {
+  static contextType = ThemeContext
+  render() {
     return <Button theme={this.context} />
   }
 }
 ```
 
-除了 context 方法，还可以**将底层组件作为属性直接传递**。这样可以减少要传递的 props 数量，但对高层组件来说会变更复杂，需要考量。
+除了 context 方法，还可以**将底层组件作为属性直接传递**。这样可以减少要传递的 props 数量，但对高层组件来说会变更复杂，因为将逻辑提升到组件数的最高层次来处理，需要考量。
 
 
 
@@ -832,7 +1056,7 @@ provider 也可以嵌套使用，内层覆盖外层
 
 provider value 值变化时新旧值得检测使用了与`Object.is`相同的算法
 
-
+Provider及内部的 consumer 组件不受制于 `shouldComponentUpdate`函数，因此当provider 的 value 值发生变化时，即使祖先组件退出更新， consumer组件也能更新
 
 **访问 context**
 
@@ -865,31 +1089,117 @@ MyClass.contextType = MyContext;
 
 
 
+## Render Props
+
+`render prop`是指在 React 组件之间使用一个值为函数的 prop 共享代码的技术， 也可以说是一个用于告知组件需要渲染什么内容的函数 prop
+
+```react
+<DataProvider render={data => (
+  <h1>Hello {data.target}</h1>
+)} />
+// 组件接收一个函数，返回一个 react 元素并调用它而不是实现自己的渲染逻辑
+
+// example
+class Cat extends React.Component {
+  render() {
+    const mouse = this.props.mouse;
+    return (
+      <img src="/cat.jpg" style={{ position: 'absolute', left: mouse.x, top: mouse.y }} />
+    );
+  }
+}
+
+class Mouse extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.state = { x: 0, y: 0 };
+  }
+
+  handleMouseMove(event) {
+    this.setState({
+      x: event.clientX,
+      y: event.clientY
+    });
+  }
+
+  render() {
+    return (
+      <div style={{ height: '100%' }} onMouseMove={this.handleMouseMove}>
+        {this.props.render(this.state)}
+      </div>
+    );
+  }
+}
+
+class MouseTracker extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>移动鼠标!</h1>
+        <Mouse render={mouse => (
+          <Cat mouse={mouse} />
+        )}/>
+      </div>
+    );
+  }
+}
+```
+
+
+
+并不一定要用名为`render`的prop来使用这种模式，**任何被用于告知组件需要渲染什么内容的函数 prop 在技术上都可以被称为 render prop
+
+```react
+<Mouse children={mouse => (
+  <p>鼠标的位置是 {mouse.x}，{mouse.y}</p>
+)}/>
+```
+
+
+
+
+
 ## 错误边界
 
 > 一个特殊的 React 组件，可以捕获并打印**子组件内**的 JavaScript 错误并渲染出备用 UI。
 >
 > 他会在渲染期间、生命周期方法和整个组件数的构造函数中捕获错误.
 >
-> 他无法捕获自身的错误
+> 他无法捕获自身的错误，如果一个错误边界无法渲染错误信息，则错误会冒泡至最近的上层错误边界
+>
+> 如果 class 组件中定义了`static getDerivedStateFromError()`或`componentDidCatch()` , 它也就变成一个错误边界
 
-[文档]{https://react.docschina.org/docs/error-boundaries.html}
+[文档](https://react.docschina.org/docs/error-boundaries.html)
 
-
++ 事件处理
++ 异步代码（如 setTimeout 或 requestAnimationFrame回调
++ 服务端渲染
++ 自身抛出来的错误
 
 ## 高阶组件 HOC
 
-> 以参数为组件并返回新组建的函数
+> 以参数为组件并返回新组件的函数
 
+避免在 render 方法中使用 HOC
 
+因为 diff 算法使用组件标识来确定他是应该更新现有子树还是将其丢弃并挂载新子树。如果从 render 返回的组件与前一个渲染中相同（===），则react通过将子树与新子树进行区分来递归更新子树，否则完全卸载前一个子树。在render中使用HOC则会在每次render时创建新的HOC，引起性能问题
 
 ## Diffing 算法
 
+O(n)启发式算法
+
 React 在对比两棵树时，会先比较两棵树的根节点
 
-1. 当根节点为**不同类型的元素**时，React 会拆卸原有树并建立起新的树
-2. 当根节点为想同类型的元素时，会保留 DOM 节点，仅**对比并更新**有改变的属性。组件更新时，实例保持不变，因此 state 在跨越不同的渲染时保持一致，react 会更新实例的 props 以和最新的元素保持一致
+1. 当根节点为**不同类型的元素**时，React 会拆卸原有树并建立起新的树，拆卸时对应的DOM节点被销毁，组件执行`componentWillUnmount()`方法，新树对应的DOM节点会被创建插入到DOM，组件执行`componentWillMount()`、`componentDidMount()`,跟之前树相关联的state也会被销毁
+2. 当根节点为相同类型的元素时，会保留 DOM 节点，仅**对比并更新**有改变的属性。组件更新时，实例保持不变，因此 state 在跨越不同的渲染时保持一致，组件执行`componentWillReceiveProps()`、`componentWillUpdate()`，react 会更新实例的 props 以和最新的元素保持一致
 3. 处理完当前节点后继续对子节点递归。此时 React 会同时遍历两个子元素的列表，产生差异时生成一个 mutation。
+
+当元素拥有`key`时，React通过key来匹配子元素，可以将之前的低效变得更加高效，数组下标作为key在元素不进行重新排序时比较合适，但顺序有修改时， diff 则会变得很慢，比如修改顺序时修改当前key，会导致非受控组件的state(比如输入框)可能相互篡改导致无法预期的变动
+
+
+
+`key`应该具有稳定、可预测以及列表内唯一的特点，不稳定会导致许多组件实例和DOM节点被不必要地重新创建，这可能导致性能下降和子组件中的状态丢失
 
 
 
@@ -929,10 +1239,21 @@ Greeting.defaultProps = {
 
 这一特性需要 JS 环境支持 promise
 
+lazy 接受一个函数，必须返回一个promise, resolve 一个 default export (默认导出) 的 react 组件，如果模块使用命名导出， 可以创建一个中间模块来重新导出为默认模块，以保证 tree shaking 不会出错，并且不必引入不需要的组件
+
 ```react
+// ManyComponents.js
+export const MyComponent = ...
+export const MyUnusedComponent = ..
+
+// SomeCompoent.js
+export { MyComponent as default } from './ManyComponents.js'
+
 // 这个组件是动态加载的
 const SomeComponent = React.lazy(() => import('./SomeComponent'));		
 ```
+
+但lazy和suspense暂不支持服务端渲染
 
 
 
@@ -954,4 +1275,148 @@ function MyComponent() {
     </React.Suspense>
   );
 }
+// fallback 属性接收任何在组件加载过程中想展示的 react 元素
 ```
+
+
+
+代码分割是由如webpack、rollup和browserify等打包器支持，能够创建多个包并在运行时动态加载，可以'懒加载'用户所需要的内容，显著提高应用性能，在初期加载时候减少所需加载的代码量
+
+
+
+react中的动态`import()`语法也是代码分割的一种方式
+
+
+
+## Portals
+
+Portal是一种将子节点渲染到存在于父组件以外的 DOM 节点的方案
+
+`React.createPortal(child, container)`
+
+child即任何可渲染的react子元素
+
+container即一个DOM元素
+
+典型用例是当父组件有`overflow: hidden`或`z-index`的样式时需要子组件跳出来
+
+```react
+render() {
+  // React 并*没有*创建一个新的 div。它只是把子元素渲染到 `domNode` 中。
+  // `domNode` 是一个可以在任何位置的有效 DOM 节点。
+  return ReactDOM.createPortal(
+    this.props.children,
+    domNode
+  );
+}
+```
+
+
+
+## Profiler 
+
+profiler 是用于测量渲染 react 组件多久渲染一次以及渲染一次的代价，识别出应用中渲染较慢的部分
+
+```react
+render(
+  <App>
+    <Profiler id="Navigation" onRender={callback}>
+      <Navigation {...props} />
+    </Profiler>
+    <Main {...props} />
+  </App>
+);
+//两个参数，一个是id (string)
+//一个是组件提交更新时候被调用的回调函数 onRender
+
+function onRenderCallback(
+  id, // 发生提交的 Profiler 树的 “id”
+  phase, // "mount" （如果组件树刚加载） 或者 "update" （如果它重渲染了）之一
+  actualDuration, // 本次更新在渲染Profiler和它子代上花费的
+  baseDuration, // 估计不使用 memoization 的情况下渲染整颗子树需要的时间
+  startTime, // 本次更新中 React 开始渲染的时间
+  commitTime, // 本次更新中 React committed 的时间
+  interactions // 属于本次更新的 interactions 的集合
+) {
+  // 合计或记录渲染时间。。。
+}
+```
+
+
+
+## 其他
+
+### 严格模式
+
+`<React.StrictMode></React.StrictMode>`
+
+会在开发模式中对子元素及所有后代元素都进行检查
+
++ 识别不安全的生命周期（包括使用的第三方库）
+
++ 使用过时字符串 ref API 的警告
+
++ 使用废弃 findDOMNode 的警告
+
++ 检测意外的副作用
+
+  react 有两个工作阶段
+
+  - 渲染阶段确定需要进行哪些更改，比如DOM，此时调用`render` 将结果与上次渲染结果比较
+
+  - 提交阶段发生在当应用变化时（ React 插入、更新及删除DOM 节点的时候，此阶段会调用一系列生命周期方法。
+
+    ```
+    constructor
+    componentWillMount
+    componentWillReceiveProps
+    componentWillUpdate
+    getDerivedStateFromProps
+    shouldComponentUpdate
+    render
+    setState
+    这些阶段会被多次调用，因此需要避免在内部编写副作用相关的代码
+    而严格模式虽然不能自动检测到副作用，但可以通过故意重复调用 
+    constructor
+    render
+    setState更新函数（第一个参数）
+    静态的getDerivedStateFromProps 生命周期方法
+    来帮助发现诸如一些非幂等的方法函数引起的问题
+    ```
+
+    
+
++ 检测过时的 context API
+
+
+
+### findDOMNode
+
+`findDOMNode` 可以在给定 class 实例情况下在树中搜索 DOM 节点，但通常使用 ref 绑定 DOM 节点即可
+
+理论上也可用于 class 组件，但违反抽象原则，使得父组件需单独渲染子组件时，会产生重构危险，我们不能更改组件的实现细节，因为父组件可能正在访问它的 DOM 节点。
+
+`findDOMNode` 只返回第一个子节点，但使用 Fragments 时组件可以渲染多个 DOM 节点
+
+`findDOMNode` 只读一次，调用后只返回第一次查询的结果，如果子组件渲染了不同的节点，则无法跟踪此更改，因此适用于组件返回单个且不可变的 DOM 节点时才有效
+
+
+
+### 虚拟化长列表
+
+参考虚拟滚动库 
+
+[react-window](https://react-window.now.sh/#/examples/list/fixed-size)
+
+[react-virtualized](https://bvaughn.github.io/react-virtualized/)
+
+
+
+### fiber
+
+
+
+### API
+
+`React.Component`
+
