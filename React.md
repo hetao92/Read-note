@@ -249,6 +249,8 @@ function Story(props) {
 
 **displayName**多用于调试信息
 
+
+
 **state**
 
 对于非ES6 使用`createReactClass`方法创建的组件，需要在组件中定义`getInitialState()`函数
@@ -287,13 +289,15 @@ class A extends React.Component {
 
 + `constructor()`
 
-  构造函数通常用于初始化内部 state；为事件处理函数绑定实例。此阶段**不要调用 setState()**
+  构造函数通常用于初始化内部 state；为事件处理函数绑定实例。如果不初始化 state 或不进行方法绑定，则不需要为组件实现构造函数。此阶段**不要调用 setState()**
 
 + `static getDerivedStateFromProps(props, state)`
 
   返回一个对象来更新 state
 
-+ `render()`  这是 class 组件中**唯一必须实现**的方法
++ `render()`  这是 class 组件中**唯一必须实现**的方法，应该是一个纯函数，即在不修改state情况下每次调用返回相同结果
+
+  返回 React 元素、数组或fragments、Portals、字符串或数值类型、布尔类型或 null
 
 + `componentDidMount()`
 
@@ -301,17 +305,25 @@ class A extends React.Component {
 
 **更新**
 
-+ `static getDerivedStateFromProps()`
++ `static getDerivedStateFromProps(props, state)`
+
+  在 render 之前调用，并在初始挂载及后续更新时都会被调用
+
+  函数返回一个对象来更新 state，如果返回 null 则不更新。
+
+  该方法适用于如state值在任何时候都取决于props的用例
 
 + `shouldComponentUpdate(nextProps, nextState)`
 
   首次渲染或使用 `forceUpdate()` 时不会调用该方法。此处返回值为 false 时则不会调用 `componentDidUpdate()`
 
+  此方法仅作为性能优化方式存在，不应该依靠此方法阻止渲染，可能会产生bug
+
 + `render()`
 
 + `getSnapshotBeforeUpdate()`
 
-  发生更改之前从 DOM 中获取信息如滚动位置，任何返回值都将作为参数传递到下一个阶段
+  在最近一次渲染输出（提交到DOM节点）之前调用，使得组件能在发生更改之前从 DOM 中获取信息如滚动位置，任何返回值都将作为参数传递到 `componentDidUpdate()`
 
 + `componentDidUpdate(prevProps, prevState, snapshot)`
 
@@ -324,38 +336,80 @@ class A extends React.Component {
 **错误处理**
 
 + `static getDerivedStateFromError(error)`
+
+  在后代组件抛出错误后被调用，将抛出的错误作为参数并返回一个值以更新 state
+
 + `componentDidCatch(error, info)`
 
+  在'提交'阶段被调用，因此允许执行副作用，通常用于记录错误之类的情况
 
+  
 
-过时将废弃的生命周期方法
+**过时将废弃的生命周期方法**
 
 `componentWillMount` 
 
 在`render()`前调用，在此处调用 `setState()` 不会触发额外渲染
 
+此方法是服务端渲染唯一会调用的生命周期函数
+
+
+
 `componentWillReceiveProps(nextProps)` 
 
 在已挂载的组件接收新的 props 之前被调用。可以在此处比较`this.props`和`nextProps`并使用 setState 来执行 state 转换
+
+
 
 `componentWillUpdate` 
 
 组件接收到新 props 或 state 时，会在渲染前调用此方法。初始渲染不会调用此方法
 
+不应在此方法中调用 setState以及任何其他操作触发对组件的更新，如果需要在此方法中读取DOM信息（如保存滚动位置）则可以移至`getSnapshotBeforeUpdate()`
+
 
 
 `setState(stateChange[, callback])` 将组件 state 的更改排入队列。这是一个**请求**而不是立即更新的命令，他会批量推迟更新，因此在调用后立即读取`this.state`不一定有效。因此可以在`componentDidUpdate`生命周期内读取，或者使用回调函数
 
-
-
-`component.forceUpdate(callback)`强制组件调用 `render()` 重新渲染，他会跳过`shouldComponentUpdate()`阶段，但子组件会触发正常的生命周期方法
-
+`(state, props) => stateChange`
 
 
 
+`component.forceUpdate(callback)`
+
+强制组件调用 `render()` 重新渲染，他会跳过`shouldComponentUpdate()`阶段，但子组件会触发正常的生命周期方法
 
 
-##事件处理
+
+过程：
+
+**Render 阶段**
+
+`constructor`
+
+`getDerivedStateFromProps`  new props -> setState -> forceUpdate
+
+`shouldComponentUpdate()`
+
+`render`
+
+**Pre-commit 阶段**
+
+`getSnapshotBeforeUpdate` 此阶段可以读取DOM
+
+**Commit 阶段**
+
+此阶段可以使用DOM， 运行副作用， 安排更新
+
+`componentDidMount`
+
+`componentDidUpdate`
+
+**卸载**
+
+`componentWillUnmount`
+
+## 事件处理
 1.React 绑定属性的命名采用驼峰式,`onClick`,在 HTML 里`onclick`
 2.需要传入一个函数作为事件处理函数，而非一个字符串
 3.React 不能使用返回 false 的方式阻止默认行为，必须明确使用`preventDefault`
@@ -1344,6 +1398,69 @@ function onRenderCallback(
 
 
 
+## Hook
+
+**引入 Hook 的原因**
+
+1. 组件之间复用状态逻辑很难，使用 `render props`和高阶组件往往需要重新组织组件结构
+2. 复杂组件难以理解， 而 Hook 可以将组件中相互关联的部分拆分成更小的函数，而非强制按照生命周期划分
+3. `class` 中的 `this` 工作方式、无法被很好的压缩等因素，需要一个更易于优化的 api
+
+
+
+Hook 是一种可以在函数组件里"钩入" React state 及生命周期等特性的**函数**，有 State Hook 的 `useState`  以及 Effect Hook `useEffect`，
+
+`useEffect`给函数组件增加了诸如数据获取、订阅、手动修改DOM等副作用的能力，与 class 组件中 `componentDidMount`/`componentDidUpdate`/`componentWillUnmount`具有相同的用途，不过合并成一个 API， React 会在每次渲染后调用副作用函数，包括第一次渲染时。而且副作用函数也可以通过返回一个函数来指定如何清除副作用。
+
+Hook 只能在函数最外层调用，不能在循环、条件判断或者子函数中调用
+
+Hook 只能在 React 的函数组件中调用 Hook，不能在其他 javascript 函数中调用
+
+对于自定义 Hook， 是一种复用状态逻辑的方式，而不复用 state 本身，因此每次调用时都拥有一个完全独立的 state，不论是不同组件里的同一 Hook, 还是单组件内的多次调用同一 Hook，都不是引用同一 state
+
+
+
+### stateHook
+
+以前的函数组件是一种“无状态组件”。通过 Hook 引入了使用 React state的能力，使得“函数组件”更为名副其实。
+
+`useState` 是允许你在 React 函数组件中添加 state 的 Hook。
+
+`useState` 的返回值是 当前 state 以及更新 state 的函数，而且更新 state 的函数不同于`this.setState`，他是**替换而不是合并**
+
+```react
+class Example extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      count: 0
+  };
+}
+    
+import React, { useState } from 'react';
+function Example() {
+  // 声明一个叫 “count” 的 state 变量
+  const [count, setCount] = useState(0);
+    return (
+     <div>
+       <p>You clicked {count} times</p>
+       <button onClick={() => setCount(count + 1)}>
+        Click me
+       </button>
+     </div>
+   );
+}
+// useState 与 this.state 提供的功能完全相同，定义一个 state 变量，名叫 count
+// useState 唯一的参数就是初始 state，且不一定是对象，可以是数字或字符串
+// 在读取时也不需要 this.state.count，而可以直接使用 count
+```
+
+
+
+### Effect Hook
+
+
+
 ## 其他
 
 ### 严格模式
@@ -1414,9 +1531,268 @@ function onRenderCallback(
 
 ### fiber
 
+在过去的 React 15中， 更新是同步的，调用各个组件的生命周期函数、计算对比Virtual DOM， 更新DOM等，而当组件数很大时，更新就会一层套一层逐渐深入，在更新完所有组件前不停止。
 
+```
+组件 A -> B -> C
+则在挂载阶段的渲染顺序是
+A - constructor 
+A - willMount
+A - render 
+B - constructor 
+B - willMount
+B - render 
+C - constructor 
+C - willMount
+C - render
+C - didMount
+B - didMount
+A - didMount
+```
+
+这可能引起性能问题，因为JS运算、页面布局和绘制等都是运行在浏览器的主线程中，而他们往往又是互斥的。
+
+这种同步操作时间过长的解决办法有-- 分片
+
+React Fiber 就是把更新过程碎片化，每执行完一段更新（增量渲染），就把控制权交还给 React 负责任务协调的模块，决定是继续更新还是执行紧急任务，这也叫合作式调度（cooperative scheduling）
+
+Fiber 实现了自己的组件调用栈，以链表的形式遍历组件树，可以灵活暂停、继续和丢弃执行的任务，从而释放浏览器主线程。实现方式是使用了浏览器的 `window.requestIdleCallback()`
+
+`requestIdleCallback` 会在浏览器空闲的时候依次调用函数，可以在主事件循环中执行后台或低优先级的任务，而且不会对像动画和用户交互这样关键的事件产生影响。
+
+
+
+Fiber 需要实现的有:
+
++ 把可中断的工作拆分成小任务
++ 对正在做的工作调整优先级、重做、复用上次成果
++ 在父子任务之间从容切换，以支持 React 执行时的布局刷新
++ 支持 render 返回多个元素
+
+
+
+React 运行时存在3种实例：
+
++ DOM  -- 真实的 DOM 节点
+
++ Instances -- React 维护的 vDOM tree node
+
++ Elements -- 描述 UI 长什么样子
+
+  Instances 根据 elements 创建，是对组件及DOM 节点的抽象展示， vDOM tree 维护组件状态以及组件与DOM树的关系
+
+  在新增fiber 的同时也新增了几个实例:
+
+  + effect 
+
+    每个 workInProgress tree 节点上有一个effect list，用来存放 diff 结果，当前节点更新完会向上 merge effect list
+
+  + workInProgress
+
+    workInProgress tree 是reconcile过程中从 fiber tree 简历的当前进度快照，用于断点恢复
+
+  + fiber
+
+    fiber tree 与 vDOM tree 类似，用来描述增量更新所需的上下文信息
+
+    
+
+React 内部的运作分为3层：
+
++ Virtual DOM 层，描述页面长什么样
++ Reconciler 层, 负责调用组件生命周期方法，运行Diff运算
++ Renderer 层，根据不同平台(如 ReactDOM 和 RN) 渲染相应的页面
+
+
+
+Fiber 主要属于 Reconciler 层，过去的 Reconciler  是一种 stack Reconciler，而 Fiber  Reconciler 每隔执行一段时间会将控制权交回给浏览器，分段执行，此时需要有一个调度器scheduler进行任务优先级分配
+
+优先级主要有六种，高优先级(如键盘输入)可以打断低优先级任务(如diff):
+
++ synchronous，与之前的Stack Reconciler操作一样，同步执行
+
++ task，在next tick之前执行
+
++ animation，下一帧之前执行，这是通过`requestAnimationFrame`来调度
+
++ high，在不久的将来立即执行
+
++ low，稍微延迟执行也没关系
+
++ offscreen，指的是当前隐藏的、屏幕外的（看不见的）元素,下一次render时或scroll时才执行
+
+  最后三个阶段都是由`requestIdleCallback`回调执行的
+
+  
+
+Fiber 本身是一种数据结构
+
+```js
+const fiber = {
+    stateNode,    // 节点实例
+    child,        // 子节点
+    sibling,      // 兄弟节点
+    return,       // 父节点
+}
+```
+
+![clipboard.png](F:\Read-note\img\fiber_1)
+
+
+
+Fiber Reconciler在执行的时候会分为两个阶段
+
++ render / reconciliation
+
+  ​	生成 Fiber 树，并以此为蓝本把每个fiber作为一个工作单元，自顶向下逐节点构造 *workInProgress tree*（构建中的新fiber tree）
+
+  1. 如果当前节点不需要更新，直接把子节点 clone 过来，跳到5，要更新的话打个 tag
+  2. 更新当前节点状态（props， state， context等）
+  3. 调用 `shouldComponentUpdate()` ，如为false则跳5
+  4. 调用 render 获得新子节点，复用现有fiber的基础上为子节点创建fiber
+  5. 如果没产生 child fiber， 该工作单元结束，把effect list 归并到 return，并把当前节点的 sibling 作为下一个工作单元，否则把 child 作为下一个工作单元
+  6. 如果没有剩余可用时间了，则等下一次主线程空闲时再开始下一个工作单元
+  7. 若没有下一个工作单元，则第一阶段结束，进入 pendingCommit 阶段。此时 workingProgress tree 根节点上的 effect list就是收集到的所有 side effect.
+
+  这是一个渐进的过程，可以被打断，让优先级更高的任务先执行，从而降低页面掉帧的概率
+
++ commit
+
+  将需要更新的节点批量更新，此过程不能被打断
+
+  处理 effect list，包括更新DOM树，调用组件生命周期函数以及更新ref等内部状态
+
+```js
+// 第1阶段 render/reconciliation
+componentWillMount
+componentWillReceiveProps
+shouldComponentUpdate
+componentWillUpdate
+
+// 第2阶段 commit
+componentDidMount
+componentDidUpdate
+componentWillUnmount
+```
+
+
+
+
+
+Fiber Reconciler 在阶段一进行Diff计算的时候会生成一颗 Fiber 树，树是在Virtual DOM 树的基础上增加额外的信息来生成的，本质上来说是一个**链表**。Fiber 树也会在首次渲染的时候一次生成，然后在后续需要 Diff 的时候在 workingProgressTree(不是VirtualDomTree)复用已有的 Fiber 数据通过`requestIdleCallback` 调度一组任务，构建新树，每颗新树每生成一个新节点，都会将控制权交回给主线程去检查是否有高优先级任务需要执行，然后等下一次 `requestIdleCallback` 回调继续构建。在构造的过程中， Fiber Reconciler 会将需要更新的节点信息保存在 Effect List 中，然后在阶段二执行时批量更新
+
+
+
+第一阶段： 
+
+如果不被打断，则在执行完后会直接进入 render 函数， 构建真实的 virtualDOMTree
+
+如果被打断，即组件只渲染到一半， react 会放弃当前组件所有干到一半的事情，去执行高优先级任务，在执行完后，通过 callback 回到之前的组件，从头开始渲染，这意味着所有阶段1的生命周期函数都可能被执行多次（这也说明其实fiber不是为了减少组件的渲染时间，而是为了提高用户体验减少卡顿）因此需要保证这里的生命周期函数每一次执行结果是一样的，最好是纯函数
+
+
+
+**fiber tree 与 workInProgress tree**
+
+这是一种双缓冲技术，前者为主，后者为辅，当 workInProgress tree 构造完毕，得到新的 fiber tree， 然后把current 指针指向 workInProgress tree，丢掉旧的 fiber tree。这样既能复用内部对象，又能节省内存分配、时间开销等
+
+每个 fiber 上都有 `alternate` 属性，指向一个 fiber，在创建 workInprogress 节点时会优先取 `alternate`，没有的话则会创建一个
 
 ### API
 
 `React.Component`
 
+定义 class 组件
+
+
+
+`React.PureComponent` 与前者区别在于，前者并未实现`shouldComponentUpdate()`， 而 PureComponent 以浅层对比 prop 和 state 的方法来实现了该函数
+
+而且比 `React.Component` 的性能有一定的提高
+
+
+
+`React.memo(function MyComponent(props) {}, areEqual)`
+
+适用于函数组件而不是 class 组件，与 PureComponent 相似 
+
+默认只会对复杂对象做浅层对比，因此可以使用自定义比较函数 `areEqual(prevProps, nextProps)` 来控制对比过程，但返回值和 class 组件中的 `shouldComponentUpdate()`相反，props相等返回true
+
+
+
+`React.createElement(type, [props], [...children])`
+
+`React.cloneElement(element, [props], [...children])`
+
+克隆返回新react元素，返回的 props 将是新props与原始元素的props浅合并后的结果，几乎等同于`<element.type {...element.props} {...props}>{children}</element.type>`
+
+
+
+`React.isValidElement(object)`验证对象是否是 React 元素
+
+`React.children`提供用于处理 `this.props.children`的方法
+
+​	`React.children.map()`
+
+​	`React.children.forEach()`
+
+​	`React.children.count(children)` 返回组件总数量
+
+​	`React.children.obly(children)` 验证children是否只有一个子节点
+
+​	`React.children.toArray(children) `返回扁平展开的数组形式,并为每个子节点分配key
+
+
+
+`React.createRef`
+
+`React.forwardRef`
+
+`React.lazy(()=> import('...'))` 定义动态加载的组件，有助于缩减 bundle 的体积，并延迟加载在初次渲染时未用到的组件
+
+`React.Suspence`指定加载指示器
+
+
+
+### ReactDOM
+
+ `import ReactDOM from 'react-dom'` 提供可在应用顶层使用的 DOM 方法
+
+`ReactDOM.render(element, container[, callback])`
+
+`ReactDOM.hydrate(element, container[, callback])`
+
+`ReactDOM.unmountComponentAtNode(container)`
+
+`ReactDOM.findDOMNode(component)`
+
+`ReactDOM.createPortal(child, container)`
+
+
+
+### 
+
+### 放弃 mixins 设计模式
+
++ mixins 引入了不清晰的依赖关系
+
+  组件采用 mixins 的 state 和方法，mixins 采用了组件的方法或是其他的 mixins，这使得组件和 mixins  有强耦合的关系
+
++ mixins 导致命名空间的冲突
+
+  mixins 的 state 和方法容易与组件或其他 mixins 发生冲突
+
++ mixins 导致更高的复杂度
+
+  由于强耦合性，当新需求出现的时候，代码的复杂度会上升
+
+
+
+### 栈调和（Stack reconciler)
+
+React 元素并不是真实的 DOM 节点或组件实例，而是为了向 React 描述元素的类型、拥有的属性以及子元素。元素共有两种类型，DOM元素和组件元素，当创建和实例化他们的时候并不会引起任何渲染发生，只有遍历结束DOM树真正的渲染才发生。
+
+当组件的 state 或 props 更改时， React 通过比较前后元素来决定是否需要更新实际的 DOM。当前后不相等时会找出最小变化集合再更新，这一过程叫做'调和'
+
+栈是一种后入先出的机制。而过去的渲染采用的调和算法就是一个纯粹的递归算法。容易导致丢帧。
+
+大多数设备刷新率是60FPS, 1/60=16.67ms。意味着每隔16ms 一帧。当 React 渲染的时间超过 16ms。浏览器就会丢帧，而实际上浏览器也有自己的工作，因此代码运行时间需要控制在10ms以内。
