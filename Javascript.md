@@ -4459,7 +4459,7 @@ setTimeout(function timeout() {
 
 
 ```js
-async function async1() {
+ async function async1() {
     console.log('async1 start');
     await async2();
     console.log('async1 end');
@@ -4507,6 +4507,65 @@ async function async1() {
 }
 //执行完一个宏任务之后，会去检查是否存在 Microtasks.当所有的 Microtasks 执行完毕之后，表示第一轮的循环就结束了。第二轮循环依旧从宏任务队列开始。此时宏任务中只有一个 setTimeout
 ```
+
+
+
+#### Node 事件循环
+
+Node 由 V8引擎解析javascript脚本，然后调用Node API, libuv库负责执行时将不同的任务分配给不同的县城，形成事件循环，再以异步方式将执行结果返回给V8
+
+事件循环分为6个阶段,每个阶段都会维持一个先进先出的可执行回调函数队列，执行这个阶段的任何操作，然后执行这个阶段队列中的回调函数直到队列为空，或者回调函数调用次数达到上限。当满足这两个条件后，事件循环会进入下一个阶段。
+
++ timers
+
+  执行通过`setTimeout()`和`setInterval()`安排的回调函数
+
+  timers 会指定一个时限，若提供的回调的等待时间超过用户期望运行的事件，会在到达时限后尽早执行，而且系统调度或正在运行的其他回调函数会延迟执行
+
++ I/O callbacks
+
+  执行关于close callback（如关闭socket调用的回调）， 定时器安排的回调，调用setImmediate()设置的回调中产生的异常后调用的回调函数
+
++ idle，prepare:
+
+  Node内部使用
+
++ poll
+
+  检索新的 I/O 事件;执行与 I/O 相关的回调，在这个阶段node会根据实际情况进行堵塞。
+
+  1. 为到达时限的定时器，执行脚本（不准确，其实是在poll队列中轮空时，检查定时器是否到达时限，如果到达了，则回到timers阶段执行定时器回调函数）
+  2. 执行poll队列中的事件回调函数
+
+  当事件循环进入poll阶段，并且此时没有设置定时器，将会发生下面两种情况：
+
+  1. 如果poll队列不是空的，事件循环将同步迭代执行队列中的回调函数，直到poll队列为空，或者达到执行上限。
+  2. 如果poll队列为空的，将会发生下面两种情况：
+      1）如果脚本通过setImmediate()设置，事件循环会结束poll阶段，然后进入check阶段来执行这些脚本。
+      2）如果此时没有通过setImmediate()设置的脚本，事件循环将停留在poll阶段，等待回调函数添加到队列中，然后立即执行。
+
+  一旦poll队列为空，事件循环将检查已经达到时限的定时器。如果一个或多个定时器已经准备就绪，时间循环将回到timers阶段，执行这些定时器回调函数。
+
++ check
+
+  执行由setImmediate()设置的回调函数。
+
++ close  callbacks
+
+  如socket.on('close', ...)设置的关闭回调
+
+
+
+setImmediate()和setTimeout()两者相似，但是调用时机不同。
+
+1. setImmediate()设计用来当当前poll阶段完成是执行脚本。
+2. setTimeout()经过给定时间后执行脚本
+
+在主模块中调用，两者执行顺序不确定，在I/O回调中，immediate总是先执行
+
+
+
+在一个特定阶段的任何时间调用`process.nextTick()`，所有传入process.nextTick()的回调函数将会在事件循环继续下一个阶段**之前**执行，也就是说在**同一个阶段执行**
 
 
 
