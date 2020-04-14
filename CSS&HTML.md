@@ -38,7 +38,6 @@ CSS                 `/*      */`
 文档模式
 标准模式(严格型)；混杂模式；准标准模式（过渡型(Transitional)；框架型(Frameset)
 
-
 `<head>` 头部元素：以下标签都可以添加到 head 部分：`<title>`、`<base>`、`<link>`、`<meta>`、`<script>` 以及 `<style>`
 meta 元素被用于规定页面的描述、关键词、文档的作者、最后 修改时间以及其他元数据。
 属性有 http-equiv ；name；scheme
@@ -122,6 +121,7 @@ Accessibility(**a11y**)
 
 
 **表格**(tbody表示表格全部加载完后才会显示，内容大时比较好用)
+
 ```css
 <table summary="表格简介文本">
     <caption>标题文本</caption>
@@ -166,7 +166,7 @@ below：下边框  ； hsides：上下边框； vsides：左右边框
 <input type="email" id="email" placeholder="Enter email">
 ```
 
-##常用语义元素
+## 常用语义元素
 
 | 标签    | 含义                         |
 | ------- | ---------------------------- |
@@ -189,7 +189,7 @@ Section会改变 h1-h6 的语义。section 的嵌套会使得其中的 h1-h6 下
 
 
 
-##新的表单元素
+## 新的表单元素
 
 | 标签         | 描述                             |
 | ------------ | -------------------------------- |
@@ -216,13 +216,13 @@ HTML5中新表单元素
 
 
 
-##新的输入类型
+##  新的输入类型
 
 color;date;datetime;datetime-local;email;month;number;range;search;tel;url;week
 
 
 
-##新的媒介元素
+## 新的媒介元素
 
 | 标签       | 描述                                 |
 | :--------- | :----------------------------------- |
@@ -295,14 +295,14 @@ a.currentTime = 1
 
 
 
-##响应式布局（responsive web design）
+## 响应式布局（responsive web design）
 确定需要兼容的设备类型尺寸-制作线框原型并测试-视觉设计前端实现
 以可变尺寸传递网页，利用css3的media query媒体查询功能
 `@media screen and (min-width: 320px) and (max-width : 479px)`
 
 [响应式图片布局-阮]([http://www.ruanyifeng.com/blog/2019/06/responsive-images.html](http://www.ruanyifeng.com/blog/2019/06/responsive-images.html))
 
-##HTML5 拖放
+## HTML5 拖放
 DataTransfer 对象：拖拽对象用来传递的媒介，使用一般为Event.dataTransfer。
 draggable 属性：就是标签元素要设置draggable=true，否则不会有效果。
 dragstart 事件：当拖拽元素开始被拖拽的时候触发的事件，此事件作用在被拖曳元素上
@@ -342,24 +342,24 @@ container.addEventListener('drop',function(event){
 
 
 
-##canvas
+## canvas
 
 ```javascript
 //创建Canvas元素
 <canvas id="myCanvas" width="200" height="100"></canvas>
 //通过 JavaScript 来绘制
-var c=document.getElementById("myCanvas");
+var c = document.getElementById("myCanvas");
 //取得绘图上下文对象的引用
-var cxt=c.getContext("2d"); 
+var cxt = c.getContext("2d"); 
 //绘制2D得到CanvasRenderingContext2D对象；绘制3D可用"webgl"代替'2d'
 ctx.clearRect(0, 0, 200, 200); //擦除，把该区域变为透明
-cxt.fillStyle="#FF0000";    // 设置颜色
+cxt.fillStyle = "#FF0000";    // 设置颜色
 cxt.fillRect(0,0,150,75); //绘制矩形
 ```
 
-##2D上下文
+## 2D上下文
 
-```
+```js
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext(contextType)
 返回 canvas 上下文
@@ -442,7 +442,7 @@ transform() 变化矩阵
 
 
 **样式优先级（从高到低）**
-`！important `> 内联样式 > 嵌入式`<style>` > 外部式`<link>`
+`!important `> 内联样式 > 嵌入式`<style>` > 外部式`<link>`
 嵌入式>外部式有一个前提：嵌入式css样式的位置一定在外部式的后面,否则采用就近原则
 `!important`要写在分号的前面
 
@@ -549,7 +549,7 @@ at规则有：
 
    `E[att~=val]`匹配所有att属性具有多个空格分隔的值、其中一个值等于"val"的E元素
 
-   `E[att|=val]`匹配所有att属性具有多个连字号分隔（hyphen-separated）的值、其中一个值以"val"开头的E元素，主要用于lang属性，比如"en"、"en-us"、"en-gb"等等
+   `E[att|=val]`匹配所有att属性具有多个连字号分隔（hyphen-separated）的值、其中一个值以"val"开头的E元素，主要用于lang属性，比如"en"、"en-us"、"en-gb"等等      
 
    `E[att^="val"]`属性 att 值以 val 开头的元素
 
@@ -606,13 +606,13 @@ at规则有：
 
 E ~ F	匹配任何在E元素之后的同级F元素
 
-##元素定位 Position
+## 元素定位 Position
 
 position: static;fixed;relative;absolute
 非static属性均可用top、left来定位
 absolute 
 
-> 完全绝对定位：脱离其他标签顺序，相对于其最接近的一个具有定位属性的父包含块进行绝对定位。如果不存在这样的包含块，则相对于**body**元素，即相对于浏览器窗口。
+> 完全绝对定位：脱离其他标签顺序，相对于其最接近的一个具有定位属性的父包含块进行绝对定位。如果不存在这样的包含块，则j相对于**body**元素，即相对于浏览器窗口。
 
 fixed 
 
@@ -661,7 +661,7 @@ Box-sizing: content-box; border-box
 
 
 
-##布局模型：
+## 布局模型：
 1、流动模型（Flow） 即普通的状态，块元素自上而下分布，各占一行；内联元素都会在所处的包含元素内从左到右水平分布
 
 2、浮动模型 (Float)
@@ -691,7 +691,7 @@ Box-sizing: content-box; border-box
 
 
 
-####BFC(会计格式化上下文)
+#### BFC(块级格式化上下文)
 
 BFC能清理浮动主要运用的是它的布局规则：
 
@@ -719,11 +719,11 @@ BFC能清理浮动主要运用的是它的布局规则：
 
 (在CSS当中，相邻的两个盒子（可能是兄弟关系也可能是祖先关系）的外边距可以结合成一个单独的外边距。这种合并外边距的方式被称为折叠)
 
-##伪类
+## 伪类
 
 引入伪类和伪元素概念是为了格式化文档树以外的信息。也就是说，伪类和伪元素是用来修饰不在文档树中的部分
 
-###锚伪类
+### 锚伪类
 :link | :visited | :hover | :active
 
 伪类用于当已有元素处于的某个状态时，为其添加对应的样式，这个状态是根据用户行为而动态变化的。
@@ -737,7 +737,7 @@ BFC能清理浮动主要运用的是它的布局规则：
  **:first-child 伪类**
  **:lang 伪类**
 
-###伪元素
+### 伪元素
 
 伪元素用于创建一些不在文档树中的元素，并为其添加样式。
 
@@ -949,17 +949,17 @@ div {
 
 父元素-容器的属性
 1.  flex-direction属性
-  flex-direction: row | row-reverse | column | column-reverse;
+    flex-direction: row | row-reverse | column | column-reverse;
 
 2.  flex-wrap属性
-  定义如果一条轴线排不下，如何换行
-  nowrap 不换行| wrap 换行，第一行在上方| wrap-reverse 换行，第一行在下方;
+    定义如果一条轴线排不下，如何换行
+    nowrap 不换行| wrap 换行，第一行在上方| wrap-reverse 换行，第一行在下方;
 
 3.  flex-flow
-  是flex-direction属性和flex-wrap属性的简写形式，默认值为row nowrap
+    是flex-direction属性和flex-wrap属性的简写形式，默认值为row nowrap
 
 4.  justify-content
-  定义了项目在主轴上的对齐方式。
+    定义了项目在主轴上的对齐方式。
     flex-start 左对齐
     flex-end 右对齐
     center 居中
@@ -967,37 +967,37 @@ div {
     space-around 每个项目两侧的间隔相等;
 
 5.  align-items
-  定义项目在交叉轴(y轴)上如何对齐。
-  flex-start  交叉轴的起点对齐。
-  flex-end    交叉轴的终点对齐。
-  center  交叉轴的中点对齐。
-  baseline    项目的第一行文字的基线对齐。
-  stretch 如果项目未设置高度或设为auto，将占满整个容器的高度。
+    定义项目在交叉轴(y轴)上如何对齐。
+    flex-start  交叉轴的起点对齐。
+    flex-end    交叉轴的终点对齐。
+    center  交叉轴的中点对齐。
+    baseline    项目的第一行文字的基线对齐。
+    stretch 如果项目未设置高度或设为auto，将占满整个容器的高度。
 
 6.  align-content
-  定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。
-  flex-start | flex-end | center | space-between | space-around | stretch;
+    定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。
+    flex-start | flex-end | center | space-between | space-around | stretch;
 
 
 
 子元素属性
 1.  order
-  定义项目的排列顺序。数值越小，排列越靠前，默认为0。
+    定义项目的排列顺序。数值越小，排列越靠前，默认为0。
 
 2.  flex-grow
-  定义项目的放大比例，默认为0，即如果存在剩余空间，也不放大。
+    定义项目的放大比例，默认为0，即如果存在剩余空间，也不放大。
 
 3.  flex-shrink
-  定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小。
+    定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小。
 
 4.  flex-basis
-  定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小。
+    定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小。
 
 5.  flex
-  flex属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto
+    flex属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto
 
 6.  align-self
-  align-self属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。
+    align-self属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。
 
 
 
@@ -1069,7 +1069,7 @@ text-indent、text-align
 
 1、a 标签的字体颜色不能被继承
 
-1、<h1>-<h6>标签字体的大下也是不能被继承的
+1、<h1>-<h6>标签字体的大小也是不能被继承的
 
 因为它们都有一个默认值
 
@@ -1125,7 +1125,7 @@ text-outline
 
 @font-face{}    -- 定义自己的字体
 
-###断句
+### 断句
 
 [参考](http://www.cnblogs.com/2050/archive/2012/08/10/2632256.html)
 
@@ -1181,6 +1181,7 @@ transition局限性
 因此有了animation
 动画：
 建立@keyframes 规则
+
 ```css
 @keyframes name{
     //用百分比来规定变化发生的时间，或用关键词 "from" 和 "to"，等同于 0% 和 100%。
@@ -1272,7 +1273,7 @@ DOM的appendChild()方法可以将一个选项框中的选项从父节点中移�
 
 ## 移动端
 
-###分辨率、像素
+### 分辨率、像素
 
 [参考](https://github.com/jawil/blog/issues/21)
 
@@ -1423,11 +1424,11 @@ K 代表屏幕横向有几个 1024 个像素，2K 即横向像素超过 2048
 
 - `window.outerHeight`：获取浏览器窗口外部的高度。表示整个浏览器窗口的高度，包括侧边栏、窗口镶边和调正窗口大小的边框。
 
-- `window.screen.Height`：获取获屏幕取理想视口高度，这个数值是固定的， `设备的分辨率/设备像素比`
+- `window.screen.Height`：获取屏幕理想视口高度，这个数值是固定的， `设备的分辨率/设备像素比`
 
 - `window.screen.availHeight`：浏览器窗口可用的高度。
 
-- `document.documentElement.clientHeight`：获取浏览器布局视口高度，包括内边距，但不包括垂直滚动条、边框和外边距。
+- `document.documentElement.clientHeight`：获取浏览器布局视口高度，包括内边距，但不包括滚动条、边框和外边距。
 
 - `document.documentElement.offsetHeight`：包括内边距、滚动条、边框和外边距。
 
@@ -1562,7 +1563,7 @@ color: red \0
 
 一种用来进行二维布局的技术。二维（two-dimesional）意味着你希望按照行和列来排布你的内容。
 
-##浏览器渲染机制
+## 浏览器渲染机制
 
 1. 处理 HTML 并构建 DOM 树。
 

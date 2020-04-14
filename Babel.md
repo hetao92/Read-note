@@ -1,6 +1,6 @@
 [TOC]
 
-#Babel
+# Babel
 
 > babel 是一个 JavaScript 编译器，将 ES6，ES7，ES8 转换成浏览器都支持的 ES5 语法，并提供一些插件来兼容浏览器 API 的工具。 总共分为三个阶段： **解析，转换，生成**。Babel 会将源码转换成 AST 之后，通过遍历，对抽象语法树做些修改，再转成 code
 
@@ -66,7 +66,7 @@ plugins 和 presets 的执行顺序
 
 **babel-core**
 
-> 核心模块，babel 的核心 api 都在这里，会把项目的 js 代码抽象成 AST 树，再将 plugins 转义号的内容解析成 js 代码
+> 核心模块，babel 的核心 api 都在这里，会把项目的 js 代码抽象成 AST 树，再将 plugins 转义好的内容解析成 js 代码
 
 
 

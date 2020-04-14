@@ -1202,7 +1202,7 @@ class MouseTracker extends React.Component {
 
 
 
-并不一定要用名为`render`的prop来使用这种模式，**任何被用于告知组件需要渲染什么内容的函数 prop 在技术上都可以被称为 render prop
+并不一定要用名为`render`的prop来使用这种模式，**任何被用于告知组件需要渲染什么内容的函数 prop 在技术上都可以被称为 render prop**
 
 ```react
 <Mouse children={mouse => (
@@ -1416,17 +1416,24 @@ Hook 只能在函数最外层调用，不能在循环、条件判断或者子函
 
 Hook 只能在 React 的函数组件中调用 Hook，不能在其他 javascript 函数中调用
 
-对于自定义 Hook， 是一种复用状态逻辑的方式，而不复用 state 本身，因此每次调用时都拥有一个完全独立的 state，不论是不同组件里的同一 Hook, 还是单组件内的多次调用同一 Hook，都不是引用同一 state
+对于自定义 Hook， 是一种复用状态逻辑的方式，而不复用 state 本身，因此每次调用时都拥有一个完全独立的 state，不论是不同组件里的同一 Hook, 还是单组件内的多次调用同一 Hook，都不是引用同一 state。它的原理是：React 组件内部都有一个'记忆单元格'列表，是用来存储一些数据的 javascript 对象。当用`useState()`调用 Hook 时，会读取当前单元格或在首次渲染时将其初始化，然后把指针移动到下一个，这就是多个`useState`调用得到各自独立的本地state的原因
 
 
 
-### stateHook
+### StateHook
 
 以前的函数组件是一种“无状态组件”。通过 Hook 引入了使用 React state的能力，使得“函数组件”更为名副其实。
 
-`useState` 是允许你在 React 函数组件中添加 state 的 Hook。
+`useState` 是允许你在 React 函数组件中添加 state 的 Hook, 可以接收先前的 state 返回新值。
 
-`useState` 的返回值是 当前 state 以及更新 state 的函数，而且更新 state 的函数不同于`this.setState`，他是**替换而不是合并**
+`useState` 的返回值是 当前 state 以及更新 state 的函数，而且更新 state 的函数不同于`this.setState`，他是**替换而不是合并**， 因此可以用运算符来合并
+
+```js
+setState(prevState => {
+  // 也可以使用 Object.assign
+  return {...prevState, ...updatedValues};
+})
+```
 
 ```react
 class Example extends React.Component {
@@ -1457,9 +1464,157 @@ function Example() {
 
 
 
+在调用 state hook 的更新函数并传入当前 state 时， React 将跳过子组件的渲染及 effect 的执行。同时 React 是使用 `Object.is` 来比较 state 的
+
+
+
 ### Effect Hook
 
+在函数组件中执行副作用操作，包括数据获取，设置订阅，手动更改   React组件中的 DOM，
 
+**执行时机**
+
+与生命周期不同的是，`useEffect`不会阻塞浏览器更新屏幕， React 会等待浏览器完成画面渲染之后才会延迟调用 `useEffect`
+
+
+
+```react
+useEffect(() => {
+    document.title = `You clicked ${count} times`;
+});
+// 可以看做 componentDidMount / componentDidUpdate / componentWillUnmount 这三个函数的组合
+// 副操作有两种， 需要清除的和不需要清除的
+```
+
+将`useEffect`放在组建内部，这样由于state变量已经保存在函数作用域，而且Hook采用了闭包机制，因此可以直接访问变量，而且变量始终是最新的值
+
+
+
+当`useEffect` 返回一个函数时，他代表一个清除函数，会在组件卸载的时候执行，或者说在**每次重新渲染时**也都会执行，每次调用新的 effect 时都会对前一个 effect 进行清除，因为在 class 组件中常常会因为没有正确地处理`componentDidUpdate`引起bug
+
+React 将按照 effect 声明的顺序依次调用组件中的*每一个* effect。
+
+**条件执行**
+
+React 也可以通过使用**第二个参数**跳过 Effect 进行性能优化。
+
+```react
+useEffect(() => {
+  document.title = `You clicked ${count} times`;
+}, [count])  
+//表示仅当 count 更改时更新，相当于 class 组件里在 componentDidUpdate 里进行条件判断是否更新
+```
+
+如果想执行只运行一次的 effect(仅在组件挂载和卸载时执行)， 可以传递一个空数组作为第二个参数，这表示 effect 不依赖于 props 或 state，所以不会船夫执行
+
+
+
+### 自定义 Hook
+
+自定义 Hook 函数名字一般以`use`开头，其内部可以调用其他 Hook
+
+
+
+### 规则
+
++ 只在最顶层使用 Hook，不在循环、条件或嵌套函数中调用Hook，可以把条件放在 Hook 内部，这要就能保证每次渲染中 Hook 都能按照同样的顺序调用
++ 只在 React 函数中调用，如函数组建或自定义 Hook，而不要在普通的 javascript 函数中调用
+
+### 其他API
+
+`useContext`
+
+```js
+const value = useContext(MyContext);
+```
+
+接收一个 context 对象（React.createContext 的返回值）并返回该context的当前值，该值由上层组件中距离该组件最近的`<MyContext.Provider>`的 value 值决定
+
+
+
+`useReducer`
+
+```js
+const [state, dispatch] = useReducer(reducer, initialArg, init)
+//接收如(state, action) => newState de reducer, 返回当前的 state以及配套的 dispatch 方法
+// init 是用来惰性创建初始 state 的函数，这样 state 将被设置为 init(initialArg)。可以将用于计算state的逻辑提取到reducer外部，为将来重置state的action提供便利
+```
+
+
+
+`useCallback`
+
+将内联回调函数及依赖项数组作为参数传入，返回该回调函数的 memoized 版本，使得只有在某个依赖项改变时才会更新
+
+`useCallback(fn, deps)` 相当于 `useMemo(() => fn, deps)`。
+
+```react
+const memoizedCallback = useCallback(
+  () => {
+    doSomething(a, b);
+  },
+  [a, b],
+)
+```
+
+
+
+`useMemo`
+
+把“创建”函数和依赖项数组作为参数传入 `useMemo`，它仅会在某个依赖项改变时才重新计算 memoized 值。这种优化有助于避免在每次渲染时都进行高开销的计算。
+
+```js
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+```
+
+
+
+`useRef`
+
+返回一个可变的 ref 对象，其 `.current` 属性被初始化为传入的参数（`initialValue`）。返回的 ref 对象在组件的整个生命周期内保持不变。
+
+当 ref 对象内容发生变化时，`useRef` 并*不会*通知你。变更 `.current` 属性不会引发组件重新渲染。如果想要在 React 绑定或解绑 DOM 节点的 ref 时运行某些代码，则需要使用**回调 ref**来实现。
+
+### 
+
+`useRef()` 不仅可以用于 DOM refs， ref 对象是一个 `current` 属性可变且可以容纳任意值的通用容器，类似 class 的实例属性
+
+
+
+```react
+const refContainer = useRef(initialValue);
+
+ const measuredRef = useCallback(node => {
+    if (node !== null) {
+      setHeight(node.getBoundingClientRect().height);
+    }
+  }, []);
+```
+
+
+
+`useLayoutEffect`
+
+类似`useEffect`，但会在所有的 DOM 变更后同步调用 effect，可以使用它来读取 DOM 布局并同步触发重渲染
+
+
+
+`useDebugValue(value, fn)`
+
+用于在 React 开发者工具中显示自定义 hook 的标签, fn 接收参数并做格式化处理
+
+
+
+**从 Class 迁移 Hook**
+
+生命周期对应
+
++ constructor： 通过 `useState` 初始化 state
++ getDerivedStateFromProps
++ shoudComponentUpdate： `React.memo`
++ render: 即函数组件本身
++ componentDidMount/componentDidUpdate/componentWillUnmount: 使用 `useEffect`
++ componentDidCatch/getDerivedStateFromError: 暂无
 
 ## 其他
 
@@ -1796,3 +1951,25 @@ React 元素并不是真实的 DOM 节点或组件实例，而是为了向 React
 栈是一种后入先出的机制。而过去的渲染采用的调和算法就是一个纯粹的递归算法。容易导致丢帧。
 
 大多数设备刷新率是60FPS, 1/60=16.67ms。意味着每隔16ms 一帧。当 React 渲染的时间超过 16ms。浏览器就会丢帧，而实际上浏览器也有自己的工作，因此代码运行时间需要控制在10ms以内。
+
+
+
+### 更新机制
+
+【React的更新机制】
+
+生命周期函数和合成事件中：
+
+1. 无论调用多少次setState，都不会立即执行更新。react根据一个变量isBatchingUpdates判断是直接更新this.state还是放到队列中回头再说，而isBatchingUpdates默认是false，也就表示setState会同步更新this.state。此时他为true，将要更新的state存入`_pendingStateQuene`,将要更新的组件存入`dirtyComponent`;
+2. 当根组件didMount后，批处理机制更新为false。此时再取出`_pendingStateQuene`和`dirtyComponent`中的state和组件进行合并更新；
+
+原生事件和异步代码中：
+
+1. 原生事件不会触发react的批处理机制，因而调用setState会直接更新；
+2. 异步代码中调用setState，由于js的异步处理机制，异步代码会暂存，等待同步代码执行完毕再执行，此时react的批处理机制已经结束，因而直接更新。
+
+总结：
+
+在React的setState函数实现中，会根据一个变量isBatchingUpdates判断是直接更新this.state还是放到队列中回头再说，而isBatchingUpdates默认是false，也就表示setState会同步更新this.state，但是，**有一个函数batchedUpdates，这个函数会把isBatchingUpdates修改为true，而当React在调用事件处理函数之前就会调用这个batchedUpdates，造成的后果，就是由React控制的事件处理过程setState不会同步更新this.state**
+
+react会表现出同步和异步的现象，但本质上是同步的，是其批处理机制造成了一种异步的假象。（其实完全可以在开发过程中，在合成事件和生命周期函数里，完全可以将其视为异步）

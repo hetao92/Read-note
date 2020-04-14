@@ -8,13 +8,12 @@
 import {IndexRoute} from 'react-router'
 React.render((
   <Router>
-  	<Router path="/" component={App}>
+  	<Route path="/" component={App}>
       <IndexRoute component={Dashboard} />
-    	<Router path="about" component={About} />
-      <Router path="inbox" component={Inbox}>
-      	<Route path="message/:id" component={Message} />
-      </Router>
-    </Router>
+      <Route path="about" component={About} />
+      <Route path="inbox" component={Inbox} />
+      <Route path="message/:id" component={Message} />
+    </Route>
   </Router>
 ), document.body)
 
@@ -23,11 +22,11 @@ React.render((
 
 **默认路由IndexRoute与IndexLink**
 
-上例当路由为'/'时，如果没有 indexRoute 则若组件 APP 内使用了 props.children，则是 undefined，现在将会是 Dashboard 元素。类似指定 index.html 的入口文件
+上例当路由为'/'时，如果没有 indexRoute 则若组件 APP 内使用了 props.children，则是 undefined，现在将会是有一个默认页面 Dashboard 元素。类似指定 index.html 的入口文件
 
 
 
-同样若在 APP 内使用`<Link to="/">Home</Link>`，则会一直处于激活状态，因为所有 URL 开头都匹配`/`，因此可以使用`<IndexLink to="/">Home</IndexRoute>`
+同样若在 APP 内使用`<Link to="/">Home</Link>`，则会一直处于激活状态，因为所有 URL 开头都匹配`/`，因此可以使用`<IndexLink to="/">Home</IndexRoute>`,那么只有在Home路由被渲染后才激活
 
 
 
