@@ -1658,6 +1658,31 @@ getBoundingClientRect()
 scrollTo()
 ```
 
+触发重布局
+
+```
+盒模型相关
+width	height	padding	margin
+display	border-width	border	min-height
+定位及浮动属性
+top		bottom	left	right
+position	float	clear
+节点内部文字结构属性
+text-align		overflow-y		font-weight
+overflow		font-family		line-height
+vertical-align	white-space		font-size
+```
+
+
+
+触发重绘
+
+```
+color	border-style	boder-radius	visibility
+text-decoration	background	background-image	background-position
+background-repeat	background-size	outline	outline-style	outline-width	box-shadow
+```
+
 
 
 JavaScript的加载、解析与执行会阻塞DOM的构建。想首屏渲染的越快，就越不应该在首屏就加载 JS 文件，这也是都建议将 script 标签放在 body 标签底部的原因。或者加 defer、async
@@ -1681,6 +1706,30 @@ defer 属性表示延迟执行引入的 JavaScript，即这段 JavaScript 加载
 硬件加速也会声明一个新复合图层，可以独立于普通文档流中，改动后可以避免整个页面重绘，提升性能
 
 在 GPU 中，各个复合图层是单独绘制的，所以互不影响
+
+浏览器在渲染页面时候，会将页面分为多个图层，每个图层上有一个或多个节点，在渲染DOM的过程中，浏览器的工作是
+
+1. 获取DOM后分割成多个图层
+2. 对每个图层的节点计算样式结果
+3. 为每个节点生成图形和位置（回流和重布局）
+4. 将每个节点绘制填充到图层位图中（重绘）
+5. 图层作为纹理上传至GPU
+6. 复合多个图层到页面上生成最终图像（图层重组）
+
+如果图层中某个元素需要重绘，那么整个图层都需要重绘。比如一个图层包含很多节点，其中有个gif图，gif图的每一帧，都会重回整个图层的其他节点，然后生成最终的图层位图。所以这需要通过特殊的方式来强制gif图属于自己一个图层 (如translateZ(0)`或者`translate3d(0,0,0))
+
+而Chrome会在以下条件下创建新图层：
+
++ 3D或透视变换css属性
++ 使用加速视频解码的`<video>`节点
++ 拥有3D（WebGL)上下文或加速的2D上下文的`<canvas>`节点
++ 混合插件 如Flash
++ 对自己的opacity做css动画或使用一个动画webkit变化的元素
++ 拥有加速css过滤器的元素
++ 元素有一个包含复合层的后代节点（一个元素拥有一个子元素，该子元素在自己的层里）
++ 元素有一个`z-index`较低且包含一个复合层的兄弟元素（换句话说就是该元素在复合层上面渲染）
+
+
 
 ## others
 

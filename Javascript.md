@@ -217,7 +217,7 @@ function example() {
 
 
 
-##数据类型
+## 数据类型
 
 1. 数字 Number
 2. 字符串 String

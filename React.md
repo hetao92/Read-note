@@ -237,6 +237,14 @@ function Story(props) {
 
 
 
+### 函数式组件与类组件区别
+
+抛开 HOOKS 之前的生命周期、state等
+
+函数式组件捕获了渲染所使用的值，因为类组件的复用性，导致this指向会发生变化，在一些异步操作里读取prop里的属性可能会出错
+
+
+
 ### Class 组件属性
 
 **defaultProps**
@@ -495,6 +503,30 @@ class LoggingButton extends React.Component {
 ```
 
 
+
+### React 如何处理事件
+
+React 的事件是合成事件，它在`mount`加载和`update`更新时，将事件通过`addEventListener`统一注册到`document`上，然后会有一个事件池存储了所有的事件，当事件触发的时候通过`dispatchEvent`进行分发，所以`this.handleClick`会作为一个回调函数调用
+
+如果react自动将bind集成到render中去，那render多次调用每次都bind会影响性能
+
+所以对比绑定方式
+
++ 在render里直接bind `onClick={this.handleClick.bind(this)}`
+
+  每次render进行bind，且多个元素绑定同个事件也需要bind多次
+
++ constuctor手动bind
+
+  相比前者由于构造函数只执行一次，所以只会bind一次，且即使多个元素都调用函数，也不需要重复绑定
+
++ render里使用箭头函数
+
+   每次render都会创建函数，性能差一点
+
++ public class fields 
+
+  好看性能好
 
 ## 条件渲染
 
@@ -1145,7 +1177,9 @@ MyClass.contextType = MyContext;
 
 ## Render Props
 
-`render prop`是指在 React 组件之间使用一个值为函数的 prop 共享代码的技术， 也可以说是一个用于告知组件需要渲染什么内容的函数 prop
+`render prop`是指在 React 组件之间使用一个值为函数的 prop 共享代码的技术， 通过使用prop来定义呈现的内容，组件只是注入功能，而不需要知道它是如何应用于UI，也可以说用户通过定义单独组件来传递prop方法，来指示共享组件应该返回的内容
+
+
 
 ```react
 <DataProvider render={data => (
@@ -1212,6 +1246,13 @@ class MouseTracker extends React.Component {
 
 
 
+相比HOC， render props 模式优点有
+
++ 支持ES6 
++ 不用担心props命名温差，在render中只取需要的state
++ 不会产生无用的组件加深层级
++ render props 模式的构建都是动态的，所有的改变都在render中触发，可以更好的利用组件内的生命周期
+
 
 
 ## 错误边界
@@ -1227,21 +1268,54 @@ class MouseTracker extends React.Component {
 [文档](https://react.docschina.org/docs/error-boundaries.html)
 
 + 事件处理
+
 + 异步代码（如 setTimeout 或 requestAnimationFrame回调
+
 + 服务端渲染
+
 + 自身抛出来的错误
+
+  
 
 ## 高阶组件 HOC
 
-> 以参数为组件并返回新组件的函数
+> 以参数为组件并返回新组件的函数，主要用于组件之间共享通用功能而不重复代码的模式
 
 避免在 render 方法中使用 HOC
 
 因为 diff 算法使用组件标识来确定他是应该更新现有子树还是将其丢弃并挂载新子树。如果从 render 返回的组件与前一个渲染中相同（===），则react通过将子树与新子树进行区分来递归更新子树，否则完全卸载前一个子树。在render中使用HOC则会在每次render时创建新的HOC，引起性能问题
 
+
+
+当多个HOC一起使用时，难以判断子组件中的props是由哪一个HOC传递的
+
+而且多个组件嵌套时容易产生重名props
+
+HOC也可能会产生许多无用组件，加深组件层级
+
+
+
 ## Diffing 算法
 
-O(n)启发式算法
+计算两棵树的常规算法是O(n*3), React diff 的算发是 O(n)启发式算法，分别对 tree diff，component diff 以及 element diff 进行了优化
+
++ tree diff
+
+  React 对 Virtual DOM 进行层级控制，即对同一父节点下的所有子节点进行比较，当同一层级的节点为**不同类型的元素**时，React 会拆卸原有树并建立起新的树，拆卸时对应的DOM节点被销毁，组件执行`componentWillUnmount()`方法，新树对应的DOM节点会被创建插入到DOM，组件执行`componentWillMount()`、`componentDidMount()`,跟之前树相关联的state也会被销毁
+
+  这样只需要对树进行一次遍历即可完成整个DOM树的比较
+
++ component diff
+
+  若是同一类型的组件，按照原策略继续比较
+
+  若不是，则将组件判断为 dirty component，从而替换整个组件下的所有子节点，同时允许通过`shouldComponentUpdate`来判断是否需要进行diff来节省时间
+
++ element diff
+
+  节点出于同一层级时，React  diff 提供三种节点操作，分别是 INSERT_MARKUP(插入)、MOVE_EXISTING(移动) 以及 REMOVE_NODE(删除)
+
+  
 
 React 在对比两棵树时，会先比较两棵树的根节点
 
@@ -1684,6 +1758,14 @@ const refContainer = useRef(initialValue);
 
 
 
+基本原理：
+
+用数组保存所有列表元素的位置，只渲染可视区内的列表元素，当可视区滚动时，根据滚动的offset大小以及所有列表元素的位置，计算在可视区应该渲染哪些元素
+
+
+
+
+
 ### fiber
 
 在过去的 React 15中， 更新是同步的，调用各个组件的生命周期函数、计算对比Virtual DOM， 更新DOM等，而当组件数很大时，更新就会一层套一层逐渐深入，在更新完所有组件前不停止。
@@ -1954,13 +2036,21 @@ React 元素并不是真实的 DOM 节点或组件实例，而是为了向 React
 
 
 
+### setState相关
+
+`setState`本身执行的过程和代码都是同步的，只是合成事件和钩子函数的调用顺序在更新之前，导致在合成事件和钩子函数中没法立马拿到更新后的值，形成所谓的‘异步’
+
+所以在合成事件和钩子函数等被React控制的函数里是异步的，在原生事件和`setTimeout/setInterval`等原生API中都是同步的
+
+而异步是为了做性能优化，将state的更新延缓到最后批量合并再去渲染
+
 ### 更新机制
 
 【React的更新机制】
 
 生命周期函数和合成事件中：
 
-1. 无论调用多少次setState，都不会立即执行更新。react根据一个变量isBatchingUpdates判断是直接更新this.state还是放到队列中回头再说，而isBatchingUpdates默认是false，也就表示setState会同步更新this.state。此时他为true，将要更新的state存入`_pendingStateQuene`,将要更新的组件存入`dirtyComponent`;
+1. 无论调用多少次setState，都不会立即执行更新。react的setState函数实现中会根据一个变量`isBatchingUpdates`判断是直接更新this.state还是放到队列中回头再说，而isBatchingUpdates默认是false，也就表示setState会同步更新this.state。此时他为true，将要更新的state存入`_pendingStateQuene`,将要更新的组件存入`dirtyComponent`;
 2. 当根组件didMount后，批处理机制更新为false。此时再取出`_pendingStateQuene`和`dirtyComponent`中的state和组件进行合并更新；
 
 原生事件和异步代码中：
@@ -1973,3 +2063,31 @@ React 元素并不是真实的 DOM 节点或组件实例，而是为了向 React
 在React的setState函数实现中，会根据一个变量isBatchingUpdates判断是直接更新this.state还是放到队列中回头再说，而isBatchingUpdates默认是false，也就表示setState会同步更新this.state，但是，**有一个函数batchedUpdates，这个函数会把isBatchingUpdates修改为true，而当React在调用事件处理函数之前就会调用这个batchedUpdates，造成的后果，就是由React控制的事件处理过程setState不会同步更新this.state**
 
 react会表现出同步和异步的现象，但本质上是同步的，是其批处理机制造成了一种异步的假象。（其实完全可以在开发过程中，在合成事件和生命周期函数里，完全可以将其视为异步）
+
+
+
+### react 性能优化
+即使状态没变化，只要调用setState就会触发render，父组件render后子组件肯定会被调用
+而hook只有在状态值改变时才会触发
+
+尽量将state分配到父组件下真正需要他的子组件中，避免其他组件因此diff
+合并状态更新
+使用pureComponent包裹class、memo包裹函数式来避免
+将传递的props的简单对象拆分成基本类型，
+箭头函数用bind代替，在render里用bind会在render时候重新执行一遍，用箭头函数则render时候会生成新的箭头函数
+shouldComponentUpdate
+在render外创建对象数组和函数等
+
+**函数式组件优化**
+
+在思路上主要是两个方向
+
++ 减少重新render的次数，因为react中花时间最长的即是reconction(或者说diff)
++ 减少计算量，避免重复计算
+
+
+
+1. 使用`React.memo`，也可以通过传入第二个参数比较函数来控制对比过程
+
+2. 对于一些 callback 方法，可能会引起重复渲染，可以使用`useCallback`来返回回调函数的memoized版本
+3. 使用`useMemo`提供空的依赖数组，可以缓存计算量比较大的函数结果

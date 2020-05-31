@@ -243,3 +243,19 @@ compose 方向是从右往左
 `subscribe(listener)`
 
 `replaceReducer(nextReducer)`
+
+
+
+
+
+## 源码分析
+
+![](F:\Read-note\img\reduxDic.jpg)
+
++ applyMiddleware.js  使用自定义的 middleware 扩展 redux
++ bindActionCreators.js 把 action creators 转成拥有同名keys的对象，使用时可以直接调用
++ combineReducers.js 大型应用下对 reducer 函数进行拆分，拆分后独立负责管理state的一部分
++ compose.js 从右到左组合多个函数，在函数编程中常用到
++ createStore.js 创建一个 redux store 来存放所有 state
++ utils/warning.js 控制台输出警告
+

@@ -165,6 +165,10 @@ URL只能使用ASCII，因此若有ASCII集合外的字符，会用 "%" 其后�
 + 306 已经被废弃的 HTTP 状态码
 + 307 临时重定向
 
+　302跳转是暂时的跳转，搜索引擎会抓取新的内容而保留旧的网址。因为服务器返回302代码，搜索引擎认为新的网址只是暂时的。
+
+　　301重定向是永久的重定向，搜索引擎在抓取新内容的同时也将旧的网址替换为重定向之后的网址。
+
 4** ：客户端错误，请求无法实现或者有语法错误
 
 + 401 未授权访问页面
@@ -558,7 +562,7 @@ DNS负载均衡(DNS重定向)：DNS服务器会返回一个跟用户最接近的
 
 
 
-##HTTPS
+## HTTPS
 
 [参考](https://mp.weixin.qq.com/s/3NKOCOeIUF2SGJnY7II9hA)
 
@@ -677,6 +681,69 @@ CORS默认是不会发送cookie。`Access-Control-Allow-Credentials`的响应头
 通过`script`标签发起的请求，携带回调函数。
 
 只支持`get`请求，兼容性非常好。
+
+
+
+CORS分为  **简单请求** 和 **复杂请求**
+
+**简单请求**
+
+> HTTP方法只能是：HEAD / GET / POST
+>
+> HTTP头信息不超过以下字段
+>
+> ```
+> Accept
+> Accept-Language
+> Content-Language
+> Last-Event-ID
+> Content-Type，但仅能是下列之一
+> 	application/x-www-form-urlencoded
+>     multipart/form-data
+>     text/plain
+> ```
+
+**简单请求**的发送从代码上来看和普通的XHR没太大区别，但是HTTP头当中要求总是包含一个域（Origin）的信息。该域包含协议名、地址以及一个可选的端口。不过这一项实际上由浏览器代为发送，并不是开发者代码可以触及到的。
+
+```
+简单请求的部分响应头
+
+Access-Control-Allow-Origin（必含）- 不可省略，否则请求按失败处理。该项控制数据的可见范围，如果希望数据对任何人都可见，可以填写"*"。
+Access-Control-Allow-Credentials（可选） – 该项标志着请求当中是否包含cookies信息，只有一个可选值：true（必为小写）。如果不包含cookies，请略去该项，而不是填写false。这一项与XmlHttpRequest2对象当中的withCredentials属性应保持一致，即withCredentials为true时该项也为true；withCredentials为false时，省略该项不写。反之则导致请求失败。
+Access-Control-Expose-Headers（可选） – 该项确定XmlHttpRequest2对象当中getResponseHeader()方法所能获得的额外信息。通常情况下，getResponseHeader()方法只能获得如下的信息：
+Cache-Control
+Content-Language
+Content-Type
+Expires
+Last-Modified
+Pragma
+当你需要访问额外的信息时，就需要在这一项当中填写并以逗号进行分隔
+```
+
+
+
+**复杂请求**
+
+不满足上述要求的请求即为复杂请求，比如说你需要发送PUT、DELETE等HTTP动作，或者发送Content-Type: application/json的内容。它不仅有包含通信内容的请求，同时也包括**预请求**
+
+**预请求**实际上是对服务端的一种权限请求，只有当预请求成功返回，实际请求才开始执行。
+
+预请求以OPTIONS形式发送，当中同样包含域，并且还包含了两项CORS特有的内容：
+
+Access-Control-Request-Method – 该项内容是实际请求的种类，可以是GET、POST之类的简单请求，也可以是PUT、DELETE等等。
+Access-Control-Request-Headers – 该项是一个以逗号分隔的列表，当中是复杂请求所使用的头部。
+
+```
+复杂请求的部分响应头
+
+Access-Control-Allow-Origin（必含） – 和简单请求一样的，必须包含一个域。
+Access-Control-Allow-Methods（必含） – 这是对预请求当中Access-Control-Request-Method的回复，这一回复将是一个以逗号分隔的列表。尽管客户端或许只请求某一方法，但服务端仍然可以返回所有允许的方法，以便客户端将其缓存。
+Access-Control-Allow-Headers（当预请求中包含Access-Control-Request-Headers时必须包含） – 这是对预请求当中Access-Control-Request-Headers的回复，和上面一样是以逗号分隔的列表，可以返回所有支持的头部。这里在实际使用中有遇到，所有支持的头部一时可能不能完全写出来，而又不想在这一层做过多的判断，没关系，事实上通过request的header可以直接取到Access-Control-Request-Headers，直接把对应的value设置到Access-Control-Allow-Headers即可。
+Access-Control-Allow-Credentials（可选） – 和简单请求当中作用相同。
+Access-Control-Max-Age（可选） – 以秒为单位的缓存时间。预请求的的发送并非免费午餐，允许时应当尽可能缓存。
+```
+
+
 
 
 
@@ -845,6 +912,8 @@ session是针对每一个用户的，变量的值保存在服务器上，用一�
 ### XSS
 
 > 跨网站指令码(Cross-site scripting)，属于代码注入的一种，允许恶意者将代码注入到网页上使其他用户受到影响
+>
+> 恶意攻击者往 Web 页面里插入恶意 Script 代码，当用户浏览该页之时，嵌入其中 Web 里面的 Script 代码会被执行，从而达到恶意攻击用户的目的。
 
 分类有
 
@@ -868,6 +937,8 @@ DOM-based:DOM XSS不需要服务端参与，可以认为是前端代码漏洞导
 ### CSRF攻击
 
 > 跨站请求伪造，挟制用户在当前已登录的 Web 应用程序上执行非本意的操作的攻击方法。XSS 利用的是用户对指定网站的信任，CSRF 利用的是网站对用户网页浏览器的信任。
+>
+> CSRF 攻击是攻击者借助受害者的 Cookie 骗取服务器的信任，可以在受害者毫不知情的情况下以受害者名义伪造请求发送给受攻击服务器，从而在并未授权的情况下执行在权限保护之下的操作。
 
 比如`<img src=“www.weibo.com/attention?userid=123” />`
 
