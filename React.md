@@ -4,7 +4,7 @@
 
 # React
 
-### JSX
+## JSX
 
 JSX是一个JavaScript语法扩展，可以很好地描述 UI 应该呈现出它应有交互的本质形式。react 考虑到渲染逻辑本质上与其他 UI 逻辑内在耦合，因此将标记与逻辑共同存放在'组件'的松散耦合单元之中
 
@@ -105,7 +105,9 @@ JSX标签内的字符串字面量，JSX会移除行首尾的空格以及空行�
 
 布尔类型、Null 以及 undefined是合法的子元素，但并不会被渲染
 
-### 组件
+
+
+## 组件
 
 ```react
 //class 组件
@@ -1249,7 +1251,7 @@ class MouseTracker extends React.Component {
 相比HOC， render props 模式优点有
 
 + 支持ES6 
-+ 不用担心props命名温差，在render中只取需要的state
++ 不用担心props命名混乱，在render中只取需要的state
 + 不会产生无用的组件加深层级
 + render props 模式的构建都是动态的，所有的改变都在render中触发，可以更好的利用组件内的生命周期
 
@@ -1281,9 +1283,87 @@ class MouseTracker extends React.Component {
 
 > 以参数为组件并返回新组件的函数，主要用于组件之间共享通用功能而不重复代码的模式
 
-避免在 render 方法中使用 HOC
 
-因为 diff 算法使用组件标识来确定他是应该更新现有子树还是将其丢弃并挂载新子树。如果从 render 返回的组件与前一个渲染中相同（===），则react通过将子树与新子树进行区分来递归更新子树，否则完全卸载前一个子树。在render中使用HOC则会在每次render时创建新的HOC，引起性能问题
+
+HOC 主要有两种形式
+
++ 属性代理
+
+  ```js
+  // 无状态
+  function HigherOrderComponent(WrappedComponent) {
+      return props => <WrappedComponent {...props} />;
+  }
+  // or
+  // 有状态
+  function HigherOrderComponent(WrappedComponent) {
+      return class extends React.Component {
+          render() {
+              return <WrappedComponent {...this.props} />;
+          }
+      };
+  }
+  //即一个函数接受一个组件作为参数传入，并返回一个继承了 React.Component 组件的类，且在该类的 render() 方法中返回被传入的组件
+  ```
+
+  在属性代理中可以操作 props 、抽离 state、通过 ref 访问到组件实例，或者用其他元素包裹传入的组件
+
++ 反向继承
+
+  ```js
+  function HigherOrderComponent(WrappedComponent) {
+      return class extends WrappedComponent {
+          render() {
+              return super.render();
+          }
+      };
+  }
+  // 即一个函数接受一个组件作为参数传入，并返回一个继承该传入组件的类，且在该类的 render()方法中返回 super.render()方法
+  //相比属性代理中继承的是 React.Component,反向继承继承的是传入的组件
+  ```
+
+  在反向基础中可以操作 state，渲染劫持
+
+
+
+**存在的问题**
+
++ 静态方法丢失
++ refs 属性不能透传
++ 反向继承不能保证完整的子组件数被解析
+
+
+
+**注意点**
+
++ props 保持一致
+
++ 不在函数式（无状态）组件上使用 ref 属性，因为它没有实例
+
++ 不要以任何方式改变原始组件
+
++ 不要传递不相关的 props 属性给被包裹的组件
+
++ 避免在 render 方法中使用 HOC
+
+  因为 diff 算法使用组件标识来确定他是应该更新现有子树还是将其丢弃并挂载新子树。如果从 render 返回的组件与前一个渲染中相同（===），则react通过将子树与新子树进行区分来递归更新子树，否则完全卸载前一个子树。在render中使用HOC则会在每次render时创建新的HOC，引起性能问题
+
++ 使用 compose 组合高阶组件
+
+  ```js
+  const EnhancedComponent = withRouter(connect(commentSelector)(WrappedComponent))
+  //如果多个函数的参数一样，都是同一个组件，那么可以通过 compose 方法来组合这些函数
+  // 可以显著提高代码的可读性和逻辑清晰度
+  const enhance = compose(withRouter, connect(commentSelector))
+  const EnhancedComponent = enhance(WrappedComponent)
+  
+  ```
+
+  
+
++ 包装显示名字以便于调试
+
+
 
 
 
@@ -1292,6 +1372,18 @@ class MouseTracker extends React.Component {
 而且多个组件嵌套时容易产生重名props
 
 HOC也可能会产生许多无用组件，加深组件层级
+
+
+
+实现场景：
+
+权限控制
+
+相似页面但接口不同
+
+日志性能打点等
+
+connect 装饰函数
 
 
 
@@ -1826,7 +1918,7 @@ React 运行时存在3种实例：
 
   + workInProgress
 
-    workInProgress tree 是reconcile过程中从 fiber tree 简历的当前进度快照，用于断点恢复
+    workInProgress tree 是reconcile过程中从 fiber tree 保存的当前进度快照，用于断点恢复
 
   + fiber
 
@@ -2005,8 +2097,6 @@ Fiber Reconciler 在阶段一进行Diff计算的时候会生成一颗 Fiber 树�
 `ReactDOM.createPortal(child, container)`
 
 
-
-### 
 
 ### 放弃 mixins 设计模式
 
