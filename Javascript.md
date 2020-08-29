@@ -81,28 +81,6 @@ b = ++a  //b=6 a=6
 
 
 
-**面向对象**
-
-将真实世界各种复杂关系抽象成一个个对象，对象之间分工合作。每个对象都能够接收处理数据并发送消息给其他对象。对象也可以复用。用面向对象编程易于维护和开发，具有灵活、代码可复用、模块化的特点
-
-对象有几个特点：
-
-对象具有唯一标识性：即使完全相同的两个对象，也并非同一个对象。
-
-对象有状态：对象具有状态，同一对象可能处于不同状态之下。
-
-对象具有行为：即对象的状态，可能因为它的行为产生变迁。
-
-状态和行为在别的语言可能叫属性和方法
-
-一种面向对象语言需要向开发者提供四种基本能力：
-封装 - 把相关的信息（无论数据或方法）存储在对象中的能力
-聚集 - 把一个对象存储在另一个对象内的能力
-继承 - 由另一个类（或多个类）得来类的属性和方法的能力
-多态 - 编写能以多种方法运行的函数或方法的能力
-
-
-
 JavaScript 对象分类
 
 + 宿主对象：由 JavaScript 宿主环境提供的对象，他们的行为完全由宿主环境决定。
@@ -1846,94 +1824,6 @@ arguments是一个类数组对象，是说它有一个索引编号和Length属�
 `arguments.callee`，是个指针，指向当前执行的（拥有这个arguments对象的）函数，可以避免与函数名耦合的问题，`arguments.callee()`可用于递归
 
 
-
-### 闭包
-
-[闭包&原型链 参考1](http://www.cnblogs.com/wangfupeng1988/p/3977924.html)
-
-[参考2](http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000/00143449934543461c9d5dfeeb848f5b72bd012e1113d15000)
-
-> JavaScript允许函数嵌套，并且内部函数可以访问定义在外部函数中的所有变量和函数，以及外部函数能访问的所有变量和函数。但是，外部函数却不能够访问定义在内部函数中的变量和函数。这给内部函数的变量提供了一定的安全性。而且，当内部函数生存周期大于外部函数时，由于内部函数可以访问外部函数的作用域，定义在外部函数的变量和函数的生存周期就会大于外部函数本身。当内部函数以某一种方式被任何一个外部函数作用域访问时，一个闭包就产生了。
-
-(内部函数会将外部函数的活动对象添加到它的作用域链中，当返回内部函数时，其作用域链包括外部函数的活动对象和全局变量对象，所以返回函数可以访问外部函数定义的变量，且外部函数执行后它执行环境中的作用域链已销毁，但其活动对象不会销毁，因为返回函数作用域链仍在引用这个活动对象)
-
-**作用**
-
-> 保存自己的私有变量，通过提供的接口方法提供给外部使用，但外部不能直接访问该变量
-
-**原理**
-
-作用域问题
-
-JS垃圾回收机制
-
-> Js 执行函数时会创建一个作用域对象（每次函数执行时都会创建新的特定的作用域对象，且无法被访问），用来保存函数所创建的局部变量。它和被传入的变量一起被初始化。那么当闭包返回一个内部函数时，Js 的垃圾回收器会回收外部函数所创建的作用域对象，但是返回的内部函数却保留一个指向该作用域对象的引用。所以该作用域对象不会被回收，直到指向的引用计数为零。作用域对象组成了一个名为作用域链。闭包就是一个函数和被创建的函数中的作用域对象的组合。
->
-> JavaScript的函数在查找变量时从自身函数定义开始，从“内”向“外”查找。如果内部函数定义了与外部函数重名的变量，则内部函数的变量将“屏蔽”外部函数的变量。
-
-
-
-内存泄露
-
-因为内部函数始终保存外部函数的活动对象的引用，只要内部函数不被销毁，就不会减少元素的引用数，则其内存永不回收。
-
-
-
-### 作用域链
-
-当某一环境执行时，会创建变量对象的作用域链，以保证对执行环境有权访问的所有变量和函数的有序访问。
-
-作用域链的前端始终是当前执行代码所在环境的变量对象，即 arguments 对象。作用域链中下一个变量对象来自包含环境(上一级外部)，在下一个则来自下一个外部，一直延伸到全局执行环境。
-
-try-catch语句中的 catch 块和 with 语句可延长作用域链
-
-### 原型链
-
-[参考](http://www.cnblogs.com/wyaocn/p/5815761.html)
-
-> arr -> Array.prototype -> Object.prototype -> null
-
-因为每个对象和原型都有原型，对象的原型指向原型对象，
-而父的原型又指向父的父，这种原型层层连接起来的就构成了原型链。
-
-原型对象用来继承。
-`Object.getPrototypeOf(object)`返回对象的原型
-`obj.hasOwnProperty(prop)`返回判断某个对象是否含有指定属性的 Boolean，此方法会忽略原型链上继承的属性，若obj 有 hasOwnProperty 属性，可以使用 call
-`Object.prototype.hasOwnProperty.call(object,name)`
-
-而`in`操作符只要通过对象能够访问到属性即会返回true，无论属性来自原型还是实例
-
-
-
-**原理**
-
-> 每个**函数**都有一个`prototype`对象属性，这个属性是一个指针，指向一个对象，而这个对象的用途是包含可以有特定类型的所有实例共享的属性与方法。
->
-> 当一个函数被用作构造函数来创建实例时，这个函数的`prototype` 属性值会被作为**原型**赋值给所有对象实例（也就是设置实例的`__proto__`属性），也就是说，所有实例的原型引用的是函数的`prototype` 属性。
->
-> 而对于所有的**对象**，都有`__proto__`属性，这个属性对应该对象的原型，即原型对象的`prototype` 属性值
-> `var p = new Person()` 即 `p.__proto__ = Person.prototype`
->
-> 函数的原型对象`constructor`默认指向构造函数本身，原型对象除了有原型属性外，为了实现继承，还有一个原型链指针`_proto_`，该指针指向上一层的原型对象，而上一层的原型对象的结构依然类似，这样利用proto一直指向Object的原型对象上，而Object的原型对象用Object.proto = null表示原型链的最顶端，如此变形成了javascript的原型链继承，同时也解释了为什么所有的javascript对象都具有Object的基本方法。
-
-1. 所有的对象都有`__proto__`属性，该属性 对应 该对象的原型
-2. 所有的函数对象都有`prototype`属性，该属性的值会被赋值给该函数创建的对象的`_proto_`属性
-3. 所有的原型对象都有`constructor`属性，该属性对应创建所有指向该原型的实例的构造函数
-4. 函数对象和原型对象通过`prototype`和`constructor`属性进行相互关联
-
-
-
-**原型继承**
-当一个构造函数A中调用了另一个构造函数B，并不等于A继承了B的属性，他的原型链中没有B
-
- `A -> Object.prototype -> null`
-需要插入B
-1.直接定义 `A.prototype = B.prototype`
-2.引入中间对象C(可以使空函数)指向B     
-`C.prototype = B.prototype`
-`A.prototype = new C()`
-再把A原型的构造函数修复为A
-`A.prototype.constructor = A;`
 
 
 
@@ -3703,6 +3593,23 @@ sleep(output,1000);
 
 
 
+**当 async/await 在 map/reduce 函数中**
+
+```js
+[1, 2, 3].map(async value => value * 2)
+// 由于 async 函数执行完会返回 promise 对象，所以 map 数组里就是三个 promise
+//所以需要进一步处理
+await Promise.all([1, 2, 3].map(async value => value * 2))
+
+await [1, 2, 3].reduce(async(previousValue, currentValue) => await previousValue + currentValue, 0) // 6
+```
+
+Promise 库 `bluebird/Rxjs`可供参考
+
+
+
+
+
 ### Decorator
 
 > 修饰器，一个函数，用来修改类的行为
@@ -4008,6 +3915,8 @@ Second Autoprefixer control comment was ignored. Autoprefixer applies control co
 
 
 
+## other
+
 ### 尾调用
 
 > 函数**最后一步**是调用另一个函数
@@ -4032,47 +3941,7 @@ function C {
 
 而尾调用由于是最后一步，所以不需要保留外层函数的调用帧，因为调用位置、内部变量均**不再用到**。因此只要用内部函数调用帧取代外层函数调用帧即可。这种做法可节省内存
 
-
-
-### 防抖&&节流
-
-作用都是防止函数多次调用
-
-防抖
-
-> 触发高频事件后n 秒内函数只会执行一次，若n秒内事件再次被触发，则重新计算时间
->
-> 即每次触发事件时都取消之前的延时调用方法
-
-常见情况：使用搜索引擎，在输入完最后一个字时才调用接口，那么可以使用**延迟执行**的防抖函数
-
-节流
-
-> 高频事件触发，但在n秒内只会执行一次，节流会稀释函数的执行频率
-
-
-
-某些代码不可以在没有间断的情况连接重复执行
-
-第一次调用函数时创建一个定时器，在指定时间间隔后运行代码。当第二次调用时，清除前一次的定时器，并设置另一个
-
-常见情况：可以防止 resize 事件高频发生更改
-
-```js
-var process = {
-  timeoutId: null,
-  function A: {},
-    function B: {
-      clearTimeout(this.timeoutId);
-      let that = this;
-      this.timeoutId = setTimeout(function() {
-        that.function A();
-      }, 100)
-    }
-}
-```
-
-
+ 
 
 ### 上下文
 
@@ -4084,7 +3953,7 @@ var process = {
 
 
 
-###协程、进程、线程
+### 协程、进程、线程
 
 对于操作系统来说，**一个任务就是一个进程**（Process），比如打开一个浏览器就是启动一个浏览器进程
 
@@ -4342,233 +4211,6 @@ setTimeout(fn,0)的含义是，指定某个任务在主线程最早可得的空�
 
 
 
-### Event loop(单线程)
-
-> Event Loop是一个程序结构，用于等待和发送消息和事件。ECMAScript没有 event loops，这是在HTML Standard 里定义浏览器何时进行渲染更新。
-
-JavaScript 是一门**单线程语言**。作为浏览器脚本语言，JavaScript的主要用途是与用户互动，以及操作DOM。这决定了它只能是单线程，否则会带来很复杂的同步问题。所以这个特性是 JavaScript 的核心特征。而HTML5里的 Web Worker标准虽然允许 JavaScript 脚本创建多个线程，但是子线程完全受主线程控制且不得操作DOM，但并没有改变 JavaScript 单线程的本质。
-
-而同步模式、堵塞模式或者说多线程的效率与资源占用都不合理
-
-而Event Loop 就是在程序中设置两个线程：一个负责程序本身的运行，称为"主线程"；另一个负责主线程与其他进程（主要是各种I/O操作）的通信，被称为"Event Loop线程"（可以译为"消息线程"）。
-
-![2013102004](http://www.ruanyifeng.com/blogimg/asset/201310/2013102004.png)
-
-
-
-绿色部分，还是表示运行时间，而橙色部分表示空闲时间。每当遇到I/O的时候，主线程就让Event Loop线程去通知相应的I/O程序，然后接着往后运行，所以不存在红色的等待时间。等到I/O程序完成操作，Event Loop线程再把结果返回主线程。主线程就调用事先设定的回调函数，完成整个任务。
-
-这种运行方式称为"异步模式"（asynchronous I/O）。
-
-#### 任务队列
-
-所有任务可以分成两种，一种是同步任务，另一种是异步任务。同步任务都在主线程上执行，形成一个执行栈；异步任务指的是，不进入主线程、而进入"任务队列"的任务，只有"任务队列"通知主线程，某个异步任务可以执行了，该任务才会进入主线程执行。
-
-1. 所有同步任务都在主线程上执行，形成一个执行栈。
-
-2. 主线程之外，还存在一个"任务队列"（task queue）。只要异步任务有了运行结果，就在"任务队列"之中放置一个事件。
-
-3. 一旦"执行栈"中的所有同步任务执行完毕，系统就会读取"任务队列"，看看里面有哪些事件。那些对应的异步任务，于是结束等待状态，进入执行栈，开始执行。
-
-4. 主线程不断重复上面的第三步。
-
-   
-
-回调函数就是那些会被主线程挂起来的代码。异步任务必须指定回调函数，当主线程开始执行异步任务，就是执行对应的回调函数。
-
-
-
-"任务队列"是一个先进先出的数据结构，排在前面的事件，优先被主线程读取。主线程的读取过程基本上是自动的，只要执行栈一清空，"任务队列"上第一位的事件就自动进入主线程。但是，由于存在后文提到的"定时器"功能，主线程首先要检查一下执行时间，某些事件只有到了规定的时间，才能返回主线程。
-
-**主线程从"任务队列"中读取事件，这个过程是循环不断的，所以整个的这种运行机制又称为Event Loop**
-
-
-
-Node.js还提供了两个与任务队列有关的方法。`process.nextTick`和`setImmediate`
-
-process.nextTick方法可以在当前"执行栈"的尾部----下一次Event Loop（主线程读取"任务队列"）之前----触发回调函数。也就是说，它指定的任务总是发生在所有异步任务之前。
-
-setImmediate方法则是在当前"任务队列"的尾部添加事件，也就是说，它指定的任务总是在下一次Event Loop时执行，这与setTimeout(fn, 0)很像。
-
-```js
-process.nextTick(function A() {
-  console.log(1);
-  process.nextTick(function B(){console.log(2);});
-});
-
-setTimeout(function timeout() {
-  console.log('TIMEOUT FIRED');
-}, 0)
-// 1
-// 2
-// TIMEOUT FIRED
-
-setImmediate(function A() {
-  console.log(1);
-  setImmediate(function B(){console.log(2);});
-});
-
-setTimeout(function timeout() {
-  console.log('TIMEOUT FIRED');
-}, 0);
-//运行结果可能是1--TIMEOUT FIRED--2，也可能是TIMEOUT FIRED--1--2。
-//setImmediate总是将事件注册到下一轮Event Loop，所以函数A和timeout是在同一轮Loop执行，而函数B在下一轮Loop执行。
-```
-
-一个event loop有一个或者多个task队列。
-
-每一个task都来源于指定的任务源，比如可以为鼠标、键盘事件提供一个task队列，其他事件又是一个单独的队列。
-
-一个event loop里只有一个microtask 队列。
-
-
-
-**微任务microtask**可以理解是在当前 macrotask 执行结束后立即执行的任务。也就是说，在当前task任务后，下一个task之前，在渲染之前。
-
-包括
-
-+ `process.nextTick` 
-
-+ `promise` 
-
-+ `Object.observe` (废弃)
-
-+ `MutationObserver`
-
-**宏任务macrotask**每次执行栈执行的代码就是一个宏任务（包括每次从事件队列中获取一个事件回调并放到执行栈中执行）。
-
-浏览器会在每一个 macrotask 执行结束后，下一个 macrotask 执行开始前对页面重新渲染
-
-包括 
-
-+ `script` 
-+  `setTimeout` 
-+ `setInterval` 
-+ `setImmediate` (Node环境)
-+ `MessageChannel`
-+ `postMessage`
-+ `I/O` 
-+ `UI rendering`
-
-1. 执行同步代码，这属于宏任务
-2. 执行栈为空，查询是否有微任务需要执行
-3. 执行所有微任务
-4. 必要的话渲染 UI
-5. 然后开始下一轮 Event loop，执行宏任务中的异步代码
-
-
-
-```js
- async function async1() {
-    console.log('async1 start');
-    await async2();
-    console.log('async1 end');
-}
-async function async2() {
-	console.log('async2');
-}
-
-console.log('script start');
-
-setTimeout(function() {
-    console.log('setTimeout');
-}, 0)
-
-async1();
-
-new Promise(function(resolve) {
-    console.log('promise1');
-    resolve();
-}).then(function() {
-    console.log('promise2');
-});
-console.log('script end');
-
-
-/*
-script start
-async1 start
-async2
-promise1
-script end
-async1 end
-promise2
-setTimeout
-*/
-
-//setTimeout作为宏任务，会放到下一个事件循环中去。
-//Promise中的异步体现在then和catch中，所以写在Promise中的代码是被当做同步任务立即执行的。而在async/await中，在出现await出现之前，其中的代码也是立即执行的。遇到 await，会将 await 后面的表达式执行一遍
-async1函数相当于
-async function async1() {
-	console.log('async1 start');
-	Promise.resolve(async2()).then(() => {
-    console.log('async1 end');
-  })
-}
-//执行完一个宏任务之后，会去检查是否存在 Microtasks.当所有的 Microtasks 执行完毕之后，表示第一轮的循环就结束了。第二轮循环依旧从宏任务队列开始。此时宏任务中只有一个 setTimeout
-```
-
-
-
-#### Node 事件循环
-
-Node 由 V8引擎解析javascript脚本，然后调用Node API, libuv库负责执行时将不同的任务分配给不同的县城，形成事件循环，再以异步方式将执行结果返回给V8
-
-事件循环分为6个阶段,每个阶段都会维持一个先进先出的可执行回调函数队列，执行这个阶段的任何操作，然后执行这个阶段队列中的回调函数直到队列为空，或者回调函数调用次数达到上限。当满足这两个条件后，事件循环会进入下一个阶段。
-
-+ timers
-
-  执行通过`setTimeout()`和`setInterval()`安排的回调函数
-
-  timers 会指定一个时限，若提供的回调的等待时间超过用户期望运行的事件，会在到达时限后尽早执行，而且系统调度或正在运行的其他回调函数会延迟执行
-
-+ I/O callbacks
-
-  执行关于close callback（如关闭socket调用的回调）， 定时器安排的回调，调用setImmediate()设置的回调中产生的异常后调用的回调函数
-
-+ idle，prepare:
-
-  Node内部使用
-
-+ poll
-
-  检索新的 I/O 事件;执行与 I/O 相关的回调，在这个阶段node会根据实际情况进行堵塞。
-
-  1. 为到达时限的定时器，执行脚本（不准确，其实是在poll队列中轮空时，检查定时器是否到达时限，如果到达了，则回到timers阶段执行定时器回调函数）
-  2. 执行poll队列中的事件回调函数
-
-  当事件循环进入poll阶段，并且此时没有设置定时器，将会发生下面两种情况：
-
-  1. 如果poll队列不是空的，事件循环将同步迭代执行队列中的回调函数，直到poll队列为空，或者达到执行上限。
-  2. 如果poll队列为空的，将会发生下面两种情况：
-      1）如果脚本通过setImmediate()设置，事件循环会结束poll阶段，然后进入check阶段来执行这些脚本。
-      2）如果此时没有通过setImmediate()设置的脚本，事件循环将停留在poll阶段，等待回调函数添加到队列中，然后立即执行。
-
-  一旦poll队列为空，事件循环将检查已经达到时限的定时器。如果一个或多个定时器已经准备就绪，时间循环将回到timers阶段，执行这些定时器回调函数。
-
-+ check
-
-  执行由setImmediate()设置的回调函数。
-
-+ close  callbacks
-
-  如socket.on('close', ...)设置的关闭回调
-
-
-
-setImmediate()和setTimeout()两者相似，但是调用时机不同。
-
-1. setImmediate()设计用来当当前poll阶段完成是执行脚本。
-2. setTimeout()经过给定时间后执行脚本
-
-在主模块中调用，两者执行顺序不确定，在I/O回调中，immediate总是先执行
-
-
-
-在一个特定阶段的任何时间调用`process.nextTick()`，所有传入process.nextTick()的回调函数将会在事件循环继续下一个阶段**之前**执行，也就是说在**同一个阶段执行**
-
-
-
 ### SEO优化
 
 + 合理的 title、description、keywords，高度概括，不过分堆砌
@@ -4577,15 +4219,7 @@ setImmediate()和setTimeout()两者相似，但是调用时机不同。
 + 重要内容不要用 js 输出，爬虫不会执行 js 获取内容(不一定)
 + 少用 iframe，搜索引擎不会抓取 iframe 中内容
 + 图片尽量加 alt
-+ 提高网站速度
-
-
-
-### 函数式编程
-
-在设计应用程序的时候，往往需要考虑几个设计原则：可扩展性、易模块化、可重用性、可测性、易推理性。
-
-函数式编程使用函数来抽象作用在数据之上的控制流和操作，从而在系统中消除副作用并减少对状态的改变。
++ 提高网站速度 
 
 
 
@@ -4637,7 +4271,7 @@ Data Block：用于描述二进制数据。
 
 
 
-##模块
+## 模块 
 
 **模块系统的演进**
 
@@ -4650,7 +4284,7 @@ Data Block：用于描述二进制数据。
 
 
 
-###CommonJS
+### CommonJS
 服务器端的 Node.js 遵循的 CommonJS 规范，是以在浏览器环境之外构建 JavaScript 生态系统为目标而产生的项目，比如在服务器和桌面环境中，后作为一套规范。这一规范是为了解决 JavaScript 的作用域问题而定义的模块形式，可以使每个模块它自身的命名空间中执行，模块必须通过`module.exports`导出对外的变量或接口，通过`require()`来导入其他模块的输出到当前模块作用域中。
 CommonJS 就是同步加载模块，在浏览器端是将所有模块都定义好并通过`id`索引
 
@@ -4666,7 +4300,7 @@ CommonJS 就是同步加载模块，在浏览器端是将所有模块都定义�
 `Browserify`浏览器端的 CommonJS实现，打包体积较大
 等等。。
 
-###AMD
+### AMD
 AMD（Asynchronous Module Definition）是异步模块定义，是为浏览器环境设计的，因为 CommonJs 模块是同步加载的，而浏览器环境还没有准备好同步加载模块的条件。AMD 定义一套 JavaScript 模块依赖异步加载标准，来解决同步加载问题。
 规范只有一个主要接口
 `define(id?: String, dependencies?: String[], factory: Function|Object)`。它要在声明模块的时候指定所有的依赖 dependencies，并且还要当做形参传到 factory 中，对于依赖的模块提前执行，依赖前置。
@@ -4685,7 +4319,7 @@ AMD（Asynchronous Module Definition）是异步模块定义，是为浏览器�
 RequireJS
 curl
 
-###CMD
+###  CMD
 Common Module Definition 和 AMD 相似，与 CommonJS 和 Node.js 的 Modules 规范保持了很大的兼容性。
 
 优点：
@@ -4697,10 +4331,11 @@ Common Module Definition 和 AMD 相似，与 CommonJS 和 Node.js 的 Modules �
 Sea.js
 coolie
 
-###UMD
+### UMD
+
 Universal Module Definition 规范类似于兼容 CommonJS 和 AMD 的语法糖，是模块定义的跨平台解决方案。
 
-###ES6 模块
+### ES6 模块
 
 ECMAScript6 标准增加了 JavaScript 语言层面的模块体系定义。ES6 模块的设计思想，是尽量的静态化，使得编译时就能确定模块的依赖关系，以及输入和输出的变量。CommonJS 和 AMD 模块，都只能在运行时确定这些东西。
 ```
@@ -4868,9 +4503,9 @@ Node有自己的 CommonJS 模块格式，与ES6模块格式不兼容。
 
 
 
-
-###CommonJS模块
+### CommonJS模块
 CommonJS 的输出都定义在`module.exports`属性上，Node 会自动将`module.exports`作为默认输出，等同于`export default xxx`,而`import`输入的实际上是`{ default: module.exports }`.
+
 ```javascript
 //取到 module.exports 的写法
 // 写法一
@@ -4941,228 +4576,9 @@ CommonJS 的一个模块，就是一个脚本文件。require命令第一次加�
 
 
 
-## 框架
 
-### MVVM
 
-View	视图
 
-Model	模型
-
-View Model	视图模型
-
-*视图模型*是暴露公共属性和命令的视图的抽象。MVVM没有MVC模式的控制器，也没有MVP模式的presenter，有的是一个*绑定器*。在视图模型中，绑定器在视图和[数据绑定器](https://zh.wikipedia.org/w/index.php?title=%E6%95%B0%E6%8D%AE%E7%BB%91%E5%AE%9A%E5%99%A8&action=edit&redlink=1)之间进行通信。
-
-### MVC
-
-View 视图
-
-Model 模型
-
-Controller 控制器
-
-###MCP
-
-View
-
-Model
-
-Presenter	
-
-包含着组件的事件处理，负责检索 Model 获取数据，和将获取的数据经过格式转换与 View 进行沟通。
-
-
-
-## Js设计模式
-
-单例模式
-
-> 产生一个类的唯一实例，用来划分命名空间并将属性、方法组织在一起的对象，用一个变量标识是否被实例化
-
-
-
-观察者模式(发布者-订阅者模式)
-
->对象间一对多的关系，让多个观察者可以同时监听某一个对象，当对象发生改变时，所有依赖于他的对象都可以得到通知
-
-
-
-模块模式
-
-> 为单体模式添加私有变量，私有方法来减少全局变量的使用
-
-
-
-代理模式
-
-> 本体注重自身代码的实现，而代理负责控制对本体对象的访问，控制以及实例化
-
-### 创建对象
-
-1. 工厂模式
-
-   根据接收的参数构建一个包含信息的对象，可创建多个相似对象，但无法识别对象类型
-
-   ```js
-   function createP(name, age, job) {
-     var o = new Object();
-     o.name = name;
-     o.job = job;
-     return o
-   }
-   ```
-
-2. 构造函数模式
-
-   ```js
-   function P(name) {
-     this.name = name;
-   }
-   let b = new P();
-   ```
-
-   缺点：构造函数中的每个方法，都需要在实例中重建一遍，则会产生不同的F unction 实例，导致不同作用域链与标识符解析
-
-3. 原型模式
-
-   由于 prototype 属性指向包含所有实例共享的属性与方法，因此直接将信息添加到原型对象中
-
-   ```js
-   function P() {
-     person.prototype.sayName = function() {...}
-   }
-     //this.name 与 prototype.name 不同
-     //前者是建立每个实例的 name 属性，后者使所有实例都访问同一个属性
-   ```
-
-   构造函数不等于原型对象
-
-   构造函数P	原型对象P.prototype	实例P1,P2
-
-   P.prototype指向原型对象 P.prototype，而原型对象的 constructor 指向P
-
-   而P1,P2内部属性均执行P.prototype，与P无直接关系
-
-   原型模式的缺点在于共享，在一个实例中修改属性也会影响另一个实例，而且当包含引用类型时也会有问题
-
-4. 组合使用构造函数与原型模式
-
-   构造函数用于定义实例属性，原型模式用于定义方法与共享属性
-
-5. 动态原型模式
-
-   将原型模式用if 语句应用到构造函数中
-
-   ```js
-   function P(name, job) {
-   	this.name = name;
-     ...
-     if(typeof this.sayName != 'function') {
-       P.prototype.sayName = function() {..};
-     }
-     //仅在初次调用构造函数时才会执行
-   }
-   ```
-
-6. 寄生构造函数模式
-
-   在构造函数中应用工厂模式，可用于创建一个具有额外方式的数组
-
-   此类返回的对象与构造函数及原型无关系
-
-   ```js
-   function P(name,..) {
-     let o = new Object();
-     o.name = name;
-     return o
-   }
-   ```
-
-7. 稳妥构造函数模式
-
-### 继承
-
-依据原型链
-
-1. 借用构造函数
-
-   在子类构造函数内部用 apply、call 调用超类构造函数
-
-   ```js
-   function sub() {
-     sup.call(this, val)
-   }
-   ```
-
-   缺点：超类方法对于子类未知，且方法均在构造函数中定义，函数无法复用
-
-2. 组合继承
-
-   原型链实现对原型属性、方法的继承，构造函数实现对实例属性的继承
-
-   ```js
-   function SuperType(name){
-       this.name = name;
-       this.colors = ['red','blue','green'];    
-   }
-   
-   SuperType.prototype.sayName = function(){
-       alert(this.name);
-   }
-   
-   function SubType(name,age){   
-       SuperType.call(this,name);     //第二次调用SuperType() 
-       this.age = age;
-   }
-   SubType.prototype = new SuperType();    //第一次调用SuperType()
-   SubType.prototype.constructor = SubType;  
-   SubType.prototype.sayAge=function(){
-        alert(this.age);
-   };
-   
-   var instance = new SubType('Greg',39);     //调用SubType构造函数，重写原型属性
-   instance.colors.push('black');      //重写原型属性
-   ```
-
-3. 原型式继承
-
-   创建临时性构造函数，将传入对象 o 作为原型，最后返回新实例，相当于对o的浅复制
-
-   ```js
-   function object(o) {
-     function F() {}
-     F.prototype = o;
-     return new F()
-   }
-   ```
-
-4. 寄生式继承
-
-   创建一个封装继承过程的函数。
-
-   ```js
-   function create(o) {
-     var clone = object(o);
-     clone.attr = function() {}
-     return clone
-   }
-   //基于 o 创建新对象，不仅有 o 的属性方法，也有自己的 attr 方法
-   ```
-
-5. 寄生组合式继承
-
-   借用构造函数继承属性，通过原型链的形式继承方法
-
-   ```js
-   function inheritPrototype(subType,superType){
-       var prototype = object(superType.prototype);    //创建对象
-       prototype.constructor = subType;    //增强对象
-       subType.prototype = prototype;    //指定对象
-   }
-   此函数接收两个参数，子类构造函数和超类构造函数。函数内部，第一步创建超类原型对象的一个副本，第二步为副本添加constructor属性，使其指向subType，弥补因为重写原型而失去默认的constructor属性。最后一步，将副本赋值给子类型的原型。整个过程说的简单点，就是将超类原型对象的一个副本复制给子类的原型对象。这样一来就可以避免继承超类的实例属性，也就是避免了在子类原型对象上创建多余的属性了。
-   ```
-
-   
 
 ## 编码相关
 
@@ -5171,365 +4587,6 @@ Presenter
 **Unicode**
 
 
-
-## 页面性能
-
-页面加载速度优化的核心包括三点： 减少资源文件的请求数量；减小每个资源文件的大小；提高每个资源的加载速度。
-
-像合并 API，压缩文件，支持 webp图片，资源 cdn 缓存等都是以此为出发点
-
-
-
-对于性能问题，首先需要对工作的任务做数据统计，将数据和指标记录下来。比如说 webpack 打包花费时间性能优化前后对比，脚本使用增加数量等
-
-对于数据统计往往可以使用埋点
-
-1. 添加埋点
-2. 收集埋点数据信息
-3. 展示埋点数据信息
-
-
-
-网络、热保护、缓存回收、第三方脚本、解析器阻塞模式、磁盘的读写、IPC jank、插件安装、CPU、硬件和内存限制、L2/L3缓存、RTTS、图像、Web字体加载行为的差异 —— JavaScript 的代价是最大的，web 字体阻塞默认渲染和图片的加载消耗了大量的内存。
-
-
-
-- 合并 js, css
-- 用 css sprites
-- 压缩文本图片等
-- 延迟显示可见区域外内容，懒加载
-- 让部分图片按钮等关键信息优先加载
-- 精简代码
-- ajax 异步更新
-- 缓存
-
-
-
-可以参考的度量
-
-- 首次有效渲染(主要内容出现在页面所需的时间)
-- 重要渲染时间(页面最重要部分渲染完成所需的时间)
-- 可交互时间(页面布局稳定，关键页面字体可见，主进程可以足够处理用户的输入即可在 UI 上点击交互)
-- 输入响应(接口响应用户操作所需的时间)
-- speed index，测量填充页面内容的速度
-- 其他
-
-
-
-测量实际环境的体验并设定适当的目标。一个好的目标是：第一次有意义的绘制 < 1 s，速度指数 < 1250，在慢速的 3G 网络上的交互 < 5s，对于重复访问，TTI < 2s。优化渲染开始时间和交互时间。
-
-为您的主模板准备关键的 CSS，并将其包含在页面的 `<head>` 中。（你的预算是 14 KB）。对于 CSS/JS，文件大小[不超过 170 KB gzipped](https://link.juejin.im?target=https%3A%2F%2Finfrequently.org%2F2017%2F10%2Fcan-you-afford-it-real-world-web-performance-budgets%2F)（解压后 0.8-1 MB）。
-
-延迟加载尽可能多的脚本，包括您自己的和第三方的脚本——特别是社交媒体按钮、视频播放器和耗时的 JavaScript 脚本。
-
-添加资源提示，使用 `dns-lookup`、`preconnect`、`prefetch` 和 `preload` 加速传输。
-
-分离 web 字体，并以异步方式加载它们（或切换到系统字体）。
-
-优化图像，并在重要页面（例如登录页面）中考虑使用 WebP。
-
-检查 HTTP 缓存头和安全头是否设置正确。
-
-在服务器上启用 Brotli 或 Zopfli 压缩。（如果做不到，不要忘记启用 Gzip 压缩。）
-
-如果 HTTP/2 可用，启用 HPACK 压缩并开启混合内容警告监控。如果您正在运行 LTS，也可以启用 OCSP stapling。
-
-在 service worker 缓存中尽可能多的缓存资产，如字体、样式、JavaScript 和图像。
-
-
-
-### Chrome performance
-
-缩略图中一共分为5行，从上到下依次是：
-
-1. FPS，表示每一秒的帧数，用来衡量页面动画的性能指标。fps图中绿色柱状越高表示体验越好。若出现红色长条则表示在该时间端出现长帧，可能影响用户体验。一般保持在 60 是很好的体验，每一帧动画应该要在 16 毫秒内完成，从而达到 60 帧每秒（1秒 ÷ 60 = 16.6 毫秒） —— 最好可以在 10 毫秒完成。因为浏览器需要时间将新框架绘制到屏幕上，你的代码应该在触发 16.6 毫秒以内完成。
-2. CPU，表示cpu的使用情况，其中颜色含义和底下的`Summary`模块中相同。从该行中颜色块的跨越时长可以分析哪类事件消耗的时间较长，从而找到性能瓶颈。
-3. NET，每一个颜色条表示加载一种文件。蓝色表示html文件、黄色表示js文件、紫色表示样式文件、绿色表示媒体文件、灰色表示其他资源。
-4. 缩略图，对应每一时刻页面的显示情况。通过勾选上方 `Screenshots` 来控制显示或隐藏。
-5. HEAP，表示堆内存使用情况。可通过勾选上访 `Menory` 来控制显示或隐藏。
-
-
-
-### window.performance
-
-```
-// 获取 performance 数据
-var performance = {  
-    // memory 是非标准属性，只在 Chrome 有
-    // 财富问题：我有多少内存
-    memory: {
-        usedJSHeapSize:  16100000, // JS 对象（包括V8引擎内部对象）占用的内存，一定小于 totalJSHeapSize
-        totalJSHeapSize: 35100000, // 可使用的内存
-        jsHeapSizeLimit: 793000000 // 内存大小限制
-    },
- 
-    //  哲学问题：我从哪里来？
-    navigation: {
-        redirectCount: 0, // 如果有重定向的话，页面通过几次重定向跳转而来
-        type: 0           // 0   即 TYPE_NAVIGATENEXT 正常进入的页面（非刷新、非重定向等）
-                          // 1   即 TYPE_RELOAD       通过 window.location.reload() 刷新的页面
-                          // 2   即 TYPE_BACK_FORWARD 通过浏览器的前进后退按钮进入的页面（历史记录）
-                          // 255 即 TYPE_UNDEFINED    非以上方式进入的页面
-    },
- 
-    timing: {
-        // 在同一个浏览器上下文中，前一个网页（与当前页面不一定同域）unload 的时间戳，如果无前一个网页 unload ，则与 fetchStart 值相等
-        navigationStart: 1441112691935,
- 
-        // 前一个网页（与当前页面同域）unload 的时间戳，如果无前一个网页 unload 或者前一个网页与当前页面不同域，则值为 0
-        unloadEventStart: 0,
- 
-        // 和 unloadEventStart 相对应，返回前一个网页 unload 事件绑定的回调函数执行完毕的时间戳
-        unloadEventEnd: 0,
- 
-        // 第一个 HTTP 重定向发生时的时间。有跳转且是同域名内的重定向才算，否则值为 0 
-        redirectStart: 0,
- 
-        // 最后一个 HTTP 重定向完成时的时间。有跳转且是同域名内部的重定向才算，否则值为 0 
-        redirectEnd: 0,
- 
-        // 浏览器准备好使用 HTTP 请求抓取文档的时间，这发生在检查本地缓存之前
-        fetchStart: 1441112692155,
- 
-        // DNS 域名查询开始的时间，如果使用了本地缓存（即无 DNS 查询）或持久连接，则与 fetchStart 值相等
-        domainLookupStart: 1441112692155,
- 
-        // DNS 域名查询完成的时间，如果使用了本地缓存（即无 DNS 查询）或持久连接，则与 fetchStart 值相等
-        domainLookupEnd: 1441112692155,
- 
-        // HTTP（TCP） 开始建立连接的时间，如果是持久连接，则与 fetchStart 值相等
-        // 注意如果在传输层发生了错误且重新建立连接，则这里显示的是新建立的连接开始的时间
-        connectStart: 1441112692155,
- 
-        // HTTP（TCP） 完成建立连接的时间（完成握手），如果是持久连接，则与 fetchStart 值相等
-        // 注意如果在传输层发生了错误且重新建立连接，则这里显示的是新建立的连接完成的时间
-        // 注意这里握手结束，包括安全连接建立完成、SOCKS 授权通过
-        connectEnd: 1441112692155,
- 
-        // HTTPS 连接开始的时间，如果不是安全连接，则值为 0
-        secureConnectionStart: 0,
- 
-        // HTTP 请求读取真实文档开始的时间（完成建立连接），包括从本地读取缓存
-        // 连接错误重连时，这里显示的也是新建立连接的时间
-        requestStart: 1441112692158,
- 
-        // HTTP 开始接收响应的时间（获取到第一个字节），包括从本地读取缓存
-        responseStart: 1441112692686,
- 
-        // HTTP 响应全部接收完成的时间（获取到最后一个字节），包括从本地读取缓存
-        responseEnd: 1441112692687,
- 
-        // 开始解析渲染 DOM 树的时间，此时 Document.readyState 变为 loading，并将抛出 readystatechange 相关事件
-        domLoading: 1441112692690,
- 
-        // 完成解析 DOM 树的时间，Document.readyState 变为 interactive，并将抛出 readystatechange 相关事件
-        // 注意只是 DOM 树解析完成，这时候并没有开始加载网页内的资源
-        domInteractive: 1441112693093,
- 
-        // DOM 解析完成后，网页内资源加载开始的时间
-        // 在 DOMContentLoaded 事件抛出前发生
-        domContentLoadedEventStart: 1441112693093,
- 
-        // DOM 解析完成后，网页内资源加载完成的时间（如 JS 脚本加载执行完毕）
-        domContentLoadedEventEnd: 1441112693101,
- 
-        // DOM 树解析完成，且资源也准备就绪的时间，Document.readyState 变为 complete，并将抛出 readystatechange 相关事件
-        domComplete: 1441112693214,
- 
-        // load 事件发送给文档，也即 load 回调函数开始执行的时间
-        // 注意如果没有绑定 load 事件，值为 0
-        loadEventStart: 1441112693214,
- 
-        // load 事件的回调函数执行完毕的时间
-        loadEventEnd: 1441112693215
- 
-        // 字母顺序
-        // connectEnd: 1441112692155,
-        // connectStart: 1441112692155,
-        // domComplete: 1441112693214,
-        // domContentLoadedEventEnd: 1441112693101,
-        // domContentLoadedEventStart: 1441112693093,
-        // domInteractive: 1441112693093,
-        // domLoading: 1441112692690,
-        // domainLookupEnd: 1441112692155,
-        // domainLookupStart: 1441112692155,
-        // fetchStart: 1441112692155,
-        // loadEventEnd: 1441112693215,
-        // loadEventStart: 1441112693214,
-        // navigationStart: 1441112691935,
-        // redirectEnd: 0,
-        // redirectStart: 0,
-        // requestStart: 1441112692158,
-        // responseEnd: 1441112692687,
-        // responseStart: 1441112692686,
-        // secureConnectionStart: 0,
-        // unloadEventEnd: 0,
-        // unloadEventStart: 0
-    }
-};
-// 计算加载时间
-function getPerformanceTiming () {  
-    var performance = window.performance;
- 
-    if (!performance) {
-        // 当前浏览器不支持
-        console.log('你的浏览器不支持 performance 接口');
-        return;
-    }
- 
-    var t = performance.timing;
-    var times = {};
- 
-    //【重要】页面加载完成的时间
-    //【原因】这几乎代表了用户等待页面可用的时间
-    times.loadPage = t.loadEventEnd - t.navigationStart;
- 
-    //【重要】解析 DOM 树结构的时间
-    //【原因】反省下你的 DOM 树嵌套是不是太多了！
-    times.domReady = t.domComplete - t.responseEnd;
- 
-    //【重要】重定向的时间
-    //【原因】拒绝重定向！比如，http://example.com/ 就不该写成 http://example.com
-    times.redirect = t.redirectEnd - t.redirectStart;
- 
-    //【重要】DNS 查询时间
-    //【原因】DNS 预加载做了么？页面内是不是使用了太多不同的域名导致域名查询的时间太长？
-    // 可使用 HTML5 Prefetch 预查询 DNS ，见：[HTML5 prefetch](http://segmentfault.com/a/1190000000633364)            
-    times.lookupDomain = t.domainLookupEnd - t.domainLookupStart;
- 
-    //【重要】读取页面第一个字节的时间
-    //【原因】这可以理解为用户拿到你的资源占用的时间，加异地机房了么，加CDN 处理了么？加带宽了么？加 CPU 运算速度了么？
-    // TTFB 即 Time To First Byte 的意思
-    // 维基百科：https://en.wikipedia.org/wiki/Time_To_First_Byte
-    times.ttfb = t.responseStart - t.navigationStart;
- 
-    //【重要】内容加载完成的时间
-    //【原因】页面内容经过 gzip 压缩了么，静态资源 css/js 等压缩了么？
-    times.request = t.responseEnd - t.requestStart;
- 
-    //【重要】执行 onload 回调函数的时间
-    //【原因】是否太多不必要的操作都放到 onload 回调函数里执行了，考虑过延迟加载、按需加载的策略么？
-    times.loadEvent = t.loadEventEnd - t.loadEventStart;
- 
-    // DNS 缓存时间
-    times.appcache = t.domainLookupStart - t.fetchStart;
- 
-    // 卸载页面的时间
-    times.unloadEvent = t.unloadEventEnd - t.unloadEventStart;
- 
-    // TCP 建立连接完成握手的时间
-    times.connect = t.connectEnd - t.connectStart;
- 
-    return times;
-}
-```
-
-
-
-`performance.getEntries()`获取所有资源请求的时间数据
-
-```
-var entry = {  
-    // 资源名称，也是资源的绝对路径
-    name: "http://cdn.xxx/style.css",
-    // 资源类型
-    entryType: "resource",
-    // 谁发起的请求
-    initiatorType: "link", // link 即 <link> 标签
-                           // script 即 <script>
-                           // redirect 即重定向
-    // 加载时间
-    duration: 18.13399999809917,
- 
-    redirectStart: 0,
-    redirectEnd: 0,
- 
-    fetchStart: 424.57699999795295,
- 
-    domainLookupStart: 0,
-    domainLookupEnd: 0,
- 
-    connectStart: 0,
-    connectEnd: 0,
- 
-    secureConnectionStart: 0,
- 
-    requestStart: 0,
- 
-    responseStart: 0,
-    responseEnd: 442.7109999960521,
- 
-    startTime: 424.57699999795295
-};
-```
-
-
-
-
-
-**DNS解析**
-
-**缓存**
-
-**预加载**
-
-Preload可以一定程度上降低首屏的加载时间，因为可以将一些不影响首屏但重要的文件延后加载，唯一缺点就是兼容性不好
-
-**预渲染**
-
-**懒加载**(资源延迟加载)
-
-**懒执行**(逻辑延迟加载)
-
-**图片加载优化**
-
-少用图片，用 css 代替
-
-CDN加载，根据屏幕宽度裁剪
-
-小图使用 base64（这并非一种图片格式，而是一种编码方式）
-
-（Base64编码是从二进制到字符的过程，可用于在 HTTP 环境下传递较长的标识信息，他的数据体积通常是原数据的体积4/3。64个字符。包括大小写拉丁字母各26个、数字10个、加号+和斜杠/，共64个字符。此外还有等号=用来作为后缀用途。它利用 6bit 字符来表达原本的 8bit 字符。6 和 8 的最小公倍数是 24，因此用 4 个 base64 字符来表示三个传统的 8bit 字符，因此编码结果会多 1/3的长度，这也解释了编码后的体积会大 1/3）
-
-雪碧图
-
-JPEG/JPG
-
-有损压缩、体积小、加载快、不支持透明
-
-PNG
-
-无损压缩、质量高、体积大、支持透明
-
-SVG
-
-文本文件、体积小、不失真、兼容性好，它相比其他图片种类本质不同：他对图像的处理不是基于像素点，而是基于对图像的形状描述
-
-WebP
-
-除了兼容性，其他都好。
-
-**文件优化**
-
-css放 head，script 放底部，用 defer、async
-
-webworker
-
-服务端开启文件压缩功能
-
-**webpack**
-
-压缩代码
-
-优化图片
-
-根据路由拆分代码，按需加载
-
-文件名添加哈希
-
-Tree-shaking清理构建过程的方法通过只加载生产中实际使用的代码并清除未使用的 import
-
-对于lodash,使用`babel-plugin-lodash`只加载你仅在源码中使用的模块。这可能会为你节省相当多的 JavaScript 负载。
 
 ## 前端工程化的理解
 
