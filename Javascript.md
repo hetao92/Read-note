@@ -3593,6 +3593,23 @@ sleep(output,1000);
 
 
 
+**当 async/await 在 map/reduce 函数中**
+
+```js
+[1, 2, 3].map(async value => value * 2)
+// 由于 async 函数执行完会返回 promise 对象，所以 map 数组里就是三个 promise
+//所以需要进一步处理
+await Promise.all([1, 2, 3].map(async value => value * 2))
+
+await [1, 2, 3].reduce(async(previousValue, currentValue) => await previousValue + currentValue, 0) // 6
+```
+
+Promise 库 `bluebird/Rxjs`可供参考
+
+
+
+
+
 ### Decorator
 
 > 修饰器，一个函数，用来修改类的行为

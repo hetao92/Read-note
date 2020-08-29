@@ -181,6 +181,8 @@ interface SquareConfig {
 
 ### 可选属性可能出现的问题
 
+#### 索引签名
+
 对于可选属性， 对象字面量会被 typescript 特殊对待，做额外的属性检查，当将它们赋值给变量或作为参数传递的时候，若对象字面量存在任何目标类型不包含的属性时将会报错
 
 ```ts
@@ -205,9 +207,19 @@ let mySquare = createSquare({ colour: "red", width: 100 });
    let mySquare = createSquare({ width: 100, opacity: 0.5 } as SquareConfig)
    ```
 
-2. 若能够确定对象具有一些作为特殊使用的额外属性，最佳方式是添加**字符串索引签名**
+   #### 
 
-   #### 索引签名
+2. 将对象赋值给另一个变量
+
+```ts
+let squareOptions = { colour: "red", width: 100 };
+let mySquare = createSquare(squareOptions);
+//因为 squareOptions不会经过额外属性检查，所以编译器不会报错。
+```
+
+3. 若能够确定对象具有一些作为特殊使用的额外属性，最佳方式是添加**字符串索引签名**
+
+#### 索引签名
 
 ```ts
 interface SquareConfig {
@@ -215,14 +227,6 @@ interface SquareConfig {
     width?: number;
     [propName: string]: any; //任意数量的随意类型的属性
 }
-```
-
-3. 将对象赋值给另一个变量
-
-```ts
-let squareOptions = { colour: "red", width: 100 };
-let mySquare = createSquare(squareOptions);
-//因为 squareOptions不会经过额外属性检查，所以编译器不会报错。
 ```
 
 

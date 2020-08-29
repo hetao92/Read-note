@@ -49,7 +49,7 @@ $ pwd  //显示当前目录路径
 `$ git status` 是否存在文件变化
 `$ git diff 文件名`查看具体文件修改内容
 
-##版本回退
+**版本回退**
 原理是 Git 仅将指向当前版本的 HEAD指针指向别的版本而已
 `$ git log` 查看提交的历史记录
 返回内容包括 commit id(版本号)、author、date
@@ -61,7 +61,7 @@ $ pwd  //显示当前目录路径
 
 利用reflog 可以查看最新版本的 commit id 以恢复到最新版本
 
-##撤销修改
+**撤销修改**
 `$ git checkout --file`将文件在工作区的修改全部撤销
 若修改并未放到暂存区（未被 add ），则会撤销到版本库的状态
 若修改已经添加到暂存区，则会撤销回到添加入暂存区的状态
@@ -82,7 +82,7 @@ $ pwd  //显示当前目录路径
 
 
 
-##添加远程库
+**添加远程库**
 
 先在 GitHub 上Create repository
 将本地库关联远程库
@@ -166,7 +166,8 @@ B -- C(dev) -- D(master)
 
 
 
-##stash
+**stash**
+
 当你在一个分支工作的时候需要改动一个 bug，而 bug 是在 master 主分支上的，手头的dev 分支工作还没做完。
 此时：
 1.`$ git stash`         把当前工作现场“储藏”起来
@@ -185,7 +186,7 @@ add、commit
 
 
 
-###拓展：
+**拓展：**
 
 Git存在工作区以及版本库
 
@@ -220,7 +221,7 @@ git add -u   // 仅监控已经被add的文件.添加修改和删除，但是不
 
 
 
-##标签管理
+**标签管理**
 
 无论是那个分支都会发生变化，所以可以对某个 commit 创建标签，就可以固定取那个点的版本，标签也是版本库的一个快照。
 
@@ -259,10 +260,31 @@ git add -u   // 仅监控已经被add的文件.添加修改和删除，但是不
 
 2.删除远程 `git push origin :refs/tags/<tagname>`
 
-`git rebase`：把分叉的提交历史“整理”成一条直线，看上去更直观。缺点是本地的分叉提交已经被修改过了。
 
 
-###忽略特殊文件
+**git rebase**
+
+将提交到某一分支上的所有修改都移至另一个分支上
+
+原理是首先找到两个分支(当前分支 experiment 和变基操作的目标基底分支 master)的最近共同祖先 C2，然后对比当前分支相对于该祖先的历次提交，提取相应的修改并存为临时文件，然后将当前分支指向目标基底C3，然后以此将之前另存为临时文件的修改依序应用，然后回到 master 分支，进行快进合并
+
+```
+git checkout experiment
+git rebase master
+git checkout master
+git merge experiment
+// 这种整合方法和 merge 的最终结果没有任何区别，但把分叉的提交历史“整理”成一条直线，看上去更直观。缺点是本地的分叉提交已经被修改过了。
+```
+
+
+
+`git rebase`还可以合并多次提交记录
+
+`git rebase -i HEAD~4`  即合并最近的 4 次提交记录。然后会进入`vi`编辑模式进行确认 commit 的一些操作...
+
+
+
+### 忽略特殊文件
 在Git工作区的根目录下创建一个特殊的`.gitignore`文件，然后把要忽略的文件名填进去，Git就会自动忽略这些文件。
 
 
@@ -270,3 +292,101 @@ git add -u   // 仅监控已经被add的文件.添加修改和删除，但是不
 给命令设置别名
 
 `git config --global alias.<aliasname> 'operationname'`
+
+
+
+**cherry-pick**
+
+多分支的情况下，如果一个分支需要另一个分支的所有代码变动可以采用`git merge`，若是只需要部分代码变动（某几个提交），那么可以采用`cherry pick`
+
+`git cherry-pick <commitHash>`
+
+将指定的提交`commitHash`，应用于当前分支。这会在当前分支产生一个新的提交，当然它们的哈希值会不一样。
+
+`<commitHash>`也可以用分支名代替，则会将分支的最新一次提交转移到当前分支
+
+
+
+同时也支持多个提交一起转移
+
+```bash
+git cherry-pick <HashA> <HashB>
+```
+
+支持一系列提交一起转移
+
+```bash
+git cherry-pick A..B
+可以转移从 A 到 B 的所有提交。它们必须按照正确的顺序放置：提交 A 必须早于提交 B，否则命令将失败，但不会报错。同时，提交 A 将不会包含在 Cherry pick 中。
+
+如果要包含提交 A
+git cherry-pick A^..B 
+```
+
+在`cherry pick`过程中发生代码冲突，可以采取以下操作
+
+1. `--continue`
+
+   用户在解决冲突后，将修改文件重新加入暂存区`git add .`，执行操作继续执行
+
+   `git cherry-pick --continue`
+
+2. `--abort`
+
+   发生代码冲突后，放弃合并，回到操作前的样子
+
+3. `--quit`
+
+   发生代码冲突后，退出 cherry pick，但是不回到操作前的样子
+
+
+
+除了转移分支，同时也支持转移另一个代码库的提交
+
+首先将该库加为远程仓库 target
+
+`git remote add target git://gitUrl`
+
+然后将远程代码抓取到本地
+
+`git fetch target`
+
+然后检查一下从远程仓库转移的提交，获取它的哈希值
+
+`git log target/master`
+
+最后使用命令转移提交
+
+`git cherry-pick <commitHash>`
+
+
+
+`git cherry-pick`指令后还可以跟一些常用配置项
+
++ `-e`, `--edit`		
+
+  打开外部编辑器编辑提交信息
+
++ `-n`, `--no-commit`
+
+  只更新工作区和暂存区，不产生新的提交
+
++ `-x`
+
+  在提交信息的末尾追加一行`(cherry picked from commit ...)`，方便以后查到这个提交是如何产生的。
+
++ `-s`, `--signoff`
+
+  在提交信息的末尾追加一行操作者的签名，表示是谁进行了这个操作。
+
++ `-m parent-number`, `--mainline parent-number`
+
+  如果原始提交是一个合并节点，来自于两个分支的合并，那么 Cherry pick 默认将失败，因为它不知道应该采用哪个分支的代码变动。
+
+  `-m`配置项告诉 Git，应该采用哪个分支的变动。它的参数`parent-number`是一个从`1`开始的整数，代表原始提交的父分支编号。
+
+  `git cherry-pick -m 1 <commitHash>`
+
+  Cherry pick 采用提交`commitHash`来自编号1的父分支的变动。
+
+  一般来说，1号父分支是接受变动的分支（the branch being merged into），2号父分支是作为变动来源的分支（the branch being merged from）。
