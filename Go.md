@@ -142,7 +142,7 @@ func main() {
 
 
 
-or 循环的 range 格式可以对 slice、map、数组、字符串等进行迭代循环。格式如下：
+for 循环的 range 格式可以对 slice、map、数组、字符串等进行迭代循环。格式如下：
 
 ```go
 for key, value := range oldMap {
@@ -160,3 +160,236 @@ for i, s := range strings {
 
 
 ## 函数
+
+**闭包**
+
+```go
+func getSequence() func() int {
+   i:=0
+   return func() int {
+      i+=1
+     return i  
+   }
+}
+
+func main(){
+   /* nextNumber 为一个函数，函数 i 为 0 */
+   nextNumber := getSequence()  
+
+   /* 调用 nextNumber 函数，i 变量自增 1 并返回 */
+   fmt.Println(nextNumber())
+   fmt.Println(nextNumber())
+   fmt.Println(nextNumber())
+   
+   /* 创建新的函数 nextNumber1，并查看结果 */
+   nextNumber1 := getSequence()  
+   fmt.Println(nextNumber1())
+   fmt.Println(nextNumber1())
+}
+```
+
+
+
+## 数组
+
+```go
+var variable_name [SIZE] variable_type
+// 初始化数组
+var balance = [5]float32{1000.0, 2.0, 3.4, 7.0, 50.0}
+// {} 中的元素个数不能大于 [] 中的数字
+//也可以不设置数组大小，用 [...]，go 会根据元素个数来设置
+var balance = [...]float32{1000.0, 2.0, 3.4, 7.0, 50.0}
+```
+
+
+
+## 指针
+
+指针变量指向一个值的内存地址
+
+取地址符是 `&`，放到一个变量前使用就会返回相应变量的内存地址。
+
+声明指针
+
+`var name *type` 
+
+type 即为指针类型，name 为指针变量名，`*`用于指定变量时作为一个指针
+
+
+
+## 结构体
+
+结构体中可以定义不同项的不同数据类型
+
+```go
+type struct_variable_type struct {
+   member definition
+   member definition
+   ...
+   member definition
+}
+
+// 声明
+variable_name := structure_variable_type {value1, value2...valuen}
+```
+
+
+
+## 切片
+
+切片是对数组的抽象，Go 数组的长度不可改变，相比之下切片的长度不固定，可以追加元素
+
+`var identifier []type`
+
+或使用`make()`来创建切片
+
+```go
+var slice1 []type = make([]type, len, capacity)
+// capacity 可选参数，指定容量
+// 也可以简写为
+slice1 := make([]type, len)
+
+s := arr[:] 
+// 初始化切片 s 是数组 arr 的引用
+s := arr[startIndex:endIndex] 
+// 将arr中从下标startIndex到endIndex-1 下的元素创建为一个新的切片, 两个 index 都可以省略
+
+```
+
+`len(s)` 获取切片s长度
+
+`cap(s)` 获取切片 s 最长容量
+
+
+
+切片在未初始化之前默认为 nil，长度为 0
+
+增加切片的容量必须创建一个新的更大的切片并把原分片的内容都拷贝过来，`append()` `copy()`
+
+```go
+var numbers []int
+   printSlice(numbers)
+
+   /* 允许追加空切片 */
+   numbers = append(numbers, 0)
+   printSlice(numbers)
+
+   /* 向切片添加一个元素 */
+   numbers = append(numbers, 1)
+   printSlice(numbers)
+ 	/* 同时添加多个元素 */
+   numbers = append(numbers, 2,3,4)
+   printSlice(numbers)
+
+   /* 创建切片 numbers1 是之前切片的两倍容量*/
+   numbers1 := make([]int, len(numbers), (cap(numbers))*2)
+
+   /* 拷贝 numbers 的内容到 numbers1 */
+   copy(numbers1,numbers)
+   printSlice(numbers1)  
+```
+
+
+
+## Range
+
+`range`用于`for`循环中迭代数组 array、切片 slice、通道 channel 或集合 map 的元素，返回对应的索引/索引值或 key/value 对
+
+```go
+nums := []int{2, 3, 4}
+sum := 0
+for _, num := range nums {
+  sum += num
+}
+fmt.Println("sum:", sum)
+    //在数组上使用range将传入index和值两个变量。上面那个例子我们不需要使用该元素的序号，所以我们使用空白符"_"省略了。有时侯我们确实需要知道它的索引。
+```
+
+
+
+## Map 集合
+
+Map 是一种**无序**的键值对的集合，可以迭代，但无法决定返回顺序
+
+```go
+/* 声明变量，默认 map 是 nil */
+var map_variable map[key_data_type]value_data_type
+
+/* 使用 make 函数 */
+map_variable := make(map[key_data_type]value_data_type)
+```
+
+​    **删除元素** delete(countryCapitalMap, key)
+
+
+
+## 接口
+
+接口数据类型将所有具有共性的方法定义在一起，任何其他类型只要实现了这些方法就是实现了这个接口
+
+```go
+/* 定义接口 */
+type interface_name interface {
+   method_name1 [return_type]
+   method_name2 [return_type]
+   method_name3 [return_type]
+   ...
+   method_namen [return_type]
+}
+
+/* 定义结构体 */
+type struct_name struct {
+   /* variables */
+}
+
+/* 实现接口方法 */
+func (struct_name_variable struct_name) method_name1() [return_type] {
+   /* 方法实现 */
+}
+...
+func (struct_name_variable struct_name) method_namen() [return_type] {
+   /* 方法实现*/
+}
+
+// example
+type Phone interface {
+    call()
+}
+
+type NokiaPhone struct {
+}
+
+func (nokiaPhone NokiaPhone) call() {
+    fmt.Println("I am Nokia, I can call you!")
+}
+
+type IPhone struct {
+}
+
+func (iPhone IPhone) call() {
+    fmt.Println("I am iPhone, I can call you!")
+}
+
+func main() {
+    var phone Phone
+
+    phone = new(NokiaPhone)
+    phone.call()
+
+    phone = new(IPhone)
+    phone.call()
+
+}
+```
+
+
+
+## 错误处理
+
+error 类型是一个接口类型
+
+```go
+type error interface {
+    Error() string
+}
+```
