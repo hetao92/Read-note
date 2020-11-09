@@ -186,6 +186,8 @@ func main(){
    fmt.Println(nextNumber1())
    fmt.Println(nextNumber1())
 }
+
+// 左括号不能单独一行
 ```
 
 
@@ -393,3 +395,8 @@ type error interface {
     Error() string
 }
 ```
+
+
+
+## Channel
+
