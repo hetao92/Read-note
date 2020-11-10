@@ -400,3 +400,29 @@ type error interface {
 
 ## Channel
 
+通过 channel 管道并发核心单元就可以发送或者接收数据进行通讯
+
+操作符为 `<-` 箭头的指向就是数据的流向
+
+channel 必须先创建再使用，可选容量 capacity 代表 channel 容纳的最多元素的数量，代表 channel 的缓存大小
+
+`ch := make(chan int[, capacity])`
+
+若capacity未设置或为 0 则说明 channel 没有缓存，只有 sender 和 receiver 都准备好了通讯才会发生，如果设置了缓存，则有可能不发生阻塞，只有 buffer 满了后再发送才会阻塞
+
+**类型**
+
+```go
+ChannelType = ( "chan" | "chan" "<-" | "<-" "chan" ) ElementType 
+// 若没有指定方向，那 channel 就是双向的，既可以接收数据，也可以发送数据
+chan T          // 可以接收和发送类型为 T 的数据
+chan<- float64  // 只可以用来发送 float64 类型的数据
+<-chan int      // 只可以用来接收 int 类型的数据
+```
+
+
+
+`v, ok := <-ch` 可以用来检查 channel 是否已经被关闭了
+
+
+
