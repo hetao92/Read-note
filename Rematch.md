@@ -198,3 +198,31 @@ getState() // { first: { count: 1 }, second: { count: 5 } }
 }
 ```
 
+
+
+重置 state 全部数据
+
+```react
+const store = init({
+  models,
+  redux: {
+    devtoolOptions: {},
+    rootReducers: { RESET_APP: () => undefined }
+  }
+});
+
+export default {
+  state: {
+    ...
+  },
+  reducers: {
+    ...
+  },
+  effects: (dispatch) => ({
+    logout(payload, state) {
+      ...
+      dispatch({ type: 'RESET_APP' });
+    }
+  })
+};
+```
